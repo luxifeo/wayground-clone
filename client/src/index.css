@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body { @apply bg-white text-slate-800 antialiased; }
+
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply btn bg-brand-500 text-white shadow-sm hover:bg-brand-600; }
+  .btn-violet { @apply btn bg-violet-450 text-white shadow-sm hover:brightness-110; }
+  .btn-outline { @apply btn border border-slate-300 bg-white text-slate-700 hover:bg-slate-50; }
+  .btn-brand-outline { @apply btn border border-brand-500 bg-white text-brand-600 hover:bg-brand-50; }
+  .btn-ghost { @apply btn text-slate-600 hover:bg-slate-100; }
+  .btn-sm { @apply px-2.5 py-1.5 text-xs; }
+  .input { @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-violet-450 focus:ring-2 focus:ring-violet-200; }
+  .label { @apply mb-1 block text-sm font-semibold text-slate-700; }
+  .card { @apply rounded-xl border border-slate-200 bg-white shadow-card; }
+  .chip { @apply inline-flex items-center gap-1 rounded-full border border-slate-300 bg-white px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50; }
+  .game-bg {
+    background: radial-gradient(ellipse at top, #7a1660 0%, #4f1446 45%, #2a0a24 100%);
+  }
+  .game-panel { @apply rounded-2xl bg-black/30 backdrop-blur-sm; }
+  .game-btn { @apply rounded-xl font-game font-bold shadow-[0_4px_0_rgba(0,0,0,.25)] transition active:translate-y-0.5 active:shadow-none; }
+}
+
+/* answer card colours used in editor + game */
+.opt-0 { background: linear-gradient(180deg, #c4b700 0%, #6d6a00 100%); }
+.opt-1 { background: linear-gradient(180deg, #c079f5 0%, #6c1fc0 100%); }
+.opt-2 { background: linear-gradient(180deg, #ff8a2a 0%, #dc4a00 100%); }
+.opt-3 { background: linear-gradient(180deg, #2ee0c9 0%, #00796a 100%); }
+.opt-4 { background: linear-gradient(180deg, #ff6b9a 0%, #c0144f 100%); }
+.edit-0 { background: #2c6fad; }
+.edit-1 { background: #2b9fa6; }
+.edit-2 { background: #efa82b; }
+.edit-3 { background: #d5546d; }
+.edit-4 { background: #9a4292; }
+
+.scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(120,120,140,.35); border-radius: 8px; }
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}

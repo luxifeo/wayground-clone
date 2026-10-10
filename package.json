@@ -1,0 +1,19 @@
+{
+  "name": "wayground-clone",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Wayground (formerly Quizizz) clone: assessments, live & homework games, reports, AI with Gemma",
+  "scripts": {
+    "setup": "npm install && npm --prefix server install && npm --prefix client install && node scripts/db.mjs ensure && npm --prefix server run seed",
+    "db:start": "node scripts/db.mjs ensure",
+    "db:stop": "node scripts/db.mjs stop",
+    "db:status": "node scripts/db.mjs status",
+    "seed": "npm --prefix server run seed",
+    "dev": "node scripts/db.mjs ensure && concurrently -k -n api,web -c magenta,cyan \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client run build",
+    "start": "node scripts/db.mjs ensure && npm --prefix client run build && npm --prefix server start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

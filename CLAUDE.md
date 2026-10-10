@@ -1,0 +1,1 @@
+Nếu cần test, tạo temp ở thư mục sau. Không được tạo ở thư mục khác H:\Code\2026\WayGroundClone\.temp

@@ -1,0 +1,9 @@
+node_modules/
+client/dist/
+server/uploads/
+database/Data/
+.temp/
+.env
+server/.env
+*.log
+database/App/
