@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
-  ArrowLeft, Download, Square, RotateCcw, Copy, Users, Target, Clock, Trophy, Sparkles, Check, X, Monitor, Link2, Trash2,
+  ArrowLeft, Download, Square, RotateCcw, Users, Target, Clock, Trophy, Sparkles, Check, X, Monitor, Trash2, Pencil, CalendarDays,
 } from 'lucide-react';
-import { QRCodeSVG } from 'qrcode.react';
+import InvitePanel, { SettingsDrawer } from '../../components/InvitePanel.jsx';
 import AdminLayout from '../../components/AdminLayout.jsx';
 import { api, getToken, del } from '../../lib/api.js';
 import { useSocket } from '../../lib/socket.js';
@@ -28,13 +28,16 @@ function GradeButtons({ r, onGrade }) {
 
 export default function ReportDetail() {
   const { id } = useParams();
-  const [params, setParams] = useSearchParams();
+  const [params] = useSearchParams();
   const nav = useNavigate();
   const toast = useToast();
   const [d, setD] = useState(null);
   const [tab, setTab] = useState(params.get('tab') || 'participants');
   const [player, setPlayer] = useState(null);
   const [aiBusy, setAiBusy] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
 
   const load = useCallback(() => api(`/sessions/${id}/report`).then(setD).catch((e) => toast(e.message, 'error')), [id, toast]);
   useEffect(() => { load(); }, [load]);
@@ -42,7 +45,10 @@ export default function ReportDetail() {
 
   if (!d) return <AdminLayout compact><div className="grid h-full place-items-center"><Spinner className="h-8 w-8 text-slate-400" /></div></AdminLayout>;
   const s = d.session;
-  const joinLink = `${window.location.origin}/join/${s.code}`;
+  const rename = async () => {
+    setRenaming(false);
+    if (newTitle.trim() && newTitle.trim() !== s.title) { await api(`/sessions/${id}`, { method: 'PATCH', body: { title: newTitle.trim() } }); load(); }
+  };
   const avgScore = d.players.length ? Math.round(d.players.reduce((a, p) => a + p.score, 0) / d.players.length) : 0;
   const completion = d.players.length ? Math.round((d.players.filter((p) => p.finished_at).length / d.players.length) * 100) : 0;
 
@@ -66,16 +72,27 @@ export default function ReportDetail() {
         <button onClick={() => nav('/admin/reports')} className="mb-3 flex items-center gap-1 text-sm font-semibold text-slate-600"><ArrowLeft className="h-4 w-4" />Reports</button>
         <div className="flex flex-wrap items-start gap-3">
           <div className="min-w-0 flex-1">
-            <h1 className="text-2xl font-bold">{s.title}</h1>
-            <div className="mt-1 text-sm text-slate-500">
-              {s.kind === 'homework' ? 'Homework' : s.pace === 'teacher' ? 'Teacher led' : 'Student paced'}{s.game_type === 'test' && ' · Test mode'} · {new Date(s.created_at).toLocaleString()} · Code <b className="font-mono">{s.code}</b>
-              {s.deadline && <> · Deadline {new Date(s.deadline).toLocaleString()}</>}
-              {' · '}{s.status === 'ended' ? <span className="font-semibold">Completed</span> : <span className="font-semibold text-emerald-600">Running</span>}
+            <div className="flex items-center gap-2">
+              {renaming ? (
+                <input autoFocus className="input w-80 py-1 text-xl font-bold" value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
+                  onBlur={rename} onKeyDown={(e) => e.key === 'Enter' && rename()} />
+              ) : (
+                <h1 className="text-2xl font-bold">{s.title}</h1>
+              )}
+              {!renaming && <button title="Rename" onClick={() => { setNewTitle(s.title); setRenaming(true); }} className="rounded p-1 hover:bg-slate-100"><Pencil className="h-4 w-4" /></button>}
+              {s.status === 'ended'
+                ? <span className="rounded-md border border-slate-200 px-2 py-0.5 text-xs font-semibold text-slate-600">Completed</span>
+                : <span className="flex items-center gap-1.5 rounded-md border border-slate-200 px-2 py-0.5 text-xs font-semibold"><span className="h-2 w-2 rounded-full bg-emerald-500" />Running</span>}
+            </div>
+            <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
+              <CalendarDays className="h-4 w-4" />Started : {new Date(s.started_at || s.created_at).toLocaleString()}
+              <span className="text-slate-300">·</span>{s.kind === 'homework' ? 'Assigned quiz' : s.pace === 'teacher' ? 'Teacher led' : 'Student paced'}{s.game_type === 'test' && ' · Test mode'}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            {s.status !== 'ended' && <button className="btn-outline" onClick={() => { navigator.clipboard.writeText(joinLink); toast('Join link copied', 'success'); }}><Link2 className="h-4 w-4" />Copy join link</button>}
-            {s.status !== 'ended' && s.kind === 'live' && <Link to={`/host/${s.id}`} className="btn-outline"><Monitor className="h-4 w-4" />Host screen</Link>}
+            <Link to={`/admin/quiz/${s.quiz_id}/edit`} className="btn-outline">Edit Questions</Link>
+            {s.status !== 'ended' && <button className="btn-outline" onClick={() => setSettingsOpen(true)}>Edit Settings</button>}
+            {s.status !== 'ended' && s.kind === 'live' && <Link to={`/host/${s.id}`} className="btn-brand-outline"><Monitor className="h-4 w-4" />View live leaderboard</Link>}
             {hasOpen && <button className="btn-violet" disabled={!!aiBusy} onClick={() => aiGrade(null)}>{aiBusy === 'all' ? <Spinner className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}AI grade open answers</button>}
             <button className="btn-outline" onClick={exportCsv}><Download className="h-4 w-4" />Export</button>
             {s.status !== 'ended'
@@ -84,6 +101,8 @@ export default function ReportDetail() {
             <button className="btn-outline px-2.5" title="Delete report" onClick={async () => { if (confirm('Delete this report?')) { await del(`/sessions/${id}`); nav('/admin/reports'); } }}><Trash2 className="h-4 w-4" /></button>
           </div>
         </div>
+
+        {s.status !== 'ended' && <div className="mx-auto mt-5 max-w-4xl"><InvitePanel session={s} onChanged={load} /></div>}
 
         <div className="mt-5 grid gap-3 md:grid-cols-5">
           <div className="card col-span-2 p-4">
@@ -204,16 +223,7 @@ export default function ReportDetail() {
         )}
       </Modal>
 
-      <Modal open={params.get('assigned') === '1'} onClose={() => setParams({})} title="Assignment created 🎉">
-        <div className="flex items-center gap-4">
-          <div className="rounded-lg border border-slate-200 p-2"><QRCodeSVG value={joinLink} size={110} /></div>
-          <div className="space-y-2">
-            <div className="text-sm text-slate-600">Students go to <b>{window.location.host}/join</b> and enter</div>
-            <div className="font-mono text-4xl font-bold tracking-widest">{s.code}</div>
-            <button className="btn-outline btn-sm" onClick={() => { navigator.clipboard.writeText(joinLink); toast('Link copied', 'success'); }}><Copy className="h-3.5 w-3.5" />Copy join link</button>
-          </div>
-        </div>
-      </Modal>
+      <SettingsDrawer key={settingsOpen ? 'open' : 'closed'} session={s} open={settingsOpen} onClose={() => setSettingsOpen(false)} onSaved={load} />
     </AdminLayout>
   );
 }

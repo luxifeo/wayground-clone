@@ -62,6 +62,7 @@ export default function Game() {
   const [left, setLeft] = useState(null);
   const [kicked, setKicked] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [hall, setHall] = useState(false); // assignment waiting hall before the first question
   const qStart = useRef(Date.now());
   const sent = useRef(new Set());
   const offset = useRef(0);
@@ -75,6 +76,8 @@ export default function Game() {
       done.forEach((id) => sent.current.add(id));
       setQueue(d.questions.map((q) => q.id).filter((id) => !done.has(id)));
       setFinished(d.participant.finished);
+      setHall(d.session.kind === 'homework' && d.session.status === 'running' && !d.answered.length && !d.participant.finished);
+      setHall(d.session.kind === 'homework' && d.session.status === 'running' && !d.answered.length && !d.participant.finished);
       offset.current = new Date(d.state.serverNow).getTime() - Date.now();
       sfx.enabled = localStorage.getItem('wg_sound') !== '0';
     } catch (e) {
@@ -125,7 +128,7 @@ export default function Game() {
 
   // countdown
   useEffect(() => {
-    if (!current || !(timerOn || isTeacher)) { setLeft(null); return undefined; }
+    if (!current || hall || !(timerOn || isTeacher)) { setLeft(null); return undefined; }
     const tick = () => {
       const started = isTeacher && state?.questionStartedAt ? new Date(state.questionStartedAt).getTime() - offset.current : qStart.current;
       const l = Math.max(0, current.time_limit - (Date.now() - started) / 1000);
@@ -135,7 +138,7 @@ export default function Game() {
     tick();
     const t = setInterval(tick, 200);
     return () => clearInterval(t);
-  }, [current, timerOn, isTeacher, state?.questionStartedAt, submit]);
+  }, [current, hall, timerOn, isTeacher, state?.questionStartedAt, submit]);
 
   const next = useCallback(async () => {
     setResult(null);
@@ -233,6 +236,28 @@ export default function Game() {
         )}
         {reveal && <ResultBanner result={{ ...(my || { status: 'skipped', timeUp: true }), explanation: state.explanation }} memes={session.settings.memes && !serious} />}
         {timeUp && !reveal && <div className="fixed inset-x-0 bottom-0 bg-red-600 py-3 text-center font-game text-xl font-bold text-white">Time&apos;s up!</div>}
+      </div>
+    );
+  }
+
+  // ----- assignment hall: wait for the student to press Start
+  if (hall) {
+    return (
+      <div className="flex min-h-full flex-col game-bg">
+        {topBar}
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 pb-6">
+          <div className="text-center font-game text-xl font-bold text-white">{session.title}</div>
+          <div className="text-sm text-white/70">{total} question{total !== 1 && 's'}{session.settings.attempts ? ` · ${session.settings.attempts} attempt${session.settings.attempts > 1 ? 's' : ''} allowed` : ''}</div>
+          <div className="relative mt-6 flex flex-col items-center">
+            <div className="absolute -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+            <div className="relative animate-float"><Avatar avatar={data.participant.avatar} name={data.participant.name} size={130} /></div>
+            <div className="relative -mt-3 flex h-14 w-72 items-center justify-center rounded-[50%] bg-gradient-to-b from-pink-400 to-pink-700 font-game text-lg font-bold tracking-widest text-white/90 shadow-2xl">{data.participant.name}</div>
+          </div>
+        </div>
+        <div className="mx-auto mb-8 flex flex-col items-center gap-2">
+          <button onClick={() => { qStart.current = Date.now(); setHall(false); sfx.start(); }} className="game-btn bg-fuchsia-500 px-12 py-3.5 text-2xl text-white shadow-[0_5px_0_#86198f] hover:brightness-110">Start game</button>
+          {session.deadline && <div className="font-game text-sm font-bold text-white/80">Deadline: {new Date(session.deadline).toLocaleString(undefined, { hour: 'numeric', minute: '2-digit', month: 'short', day: 'numeric' })}</div>}
+        </div>
       </div>
     );
   }

@@ -198,6 +198,7 @@ export function sanitizeQuestion(q, { shuffleAnswers = false, seed = 0 } = {}) {
   const base = {
     id: q.id, type: q.type, text: q.text, image: q.image, points: q.points, time_limit: q.time_limit,
     passage: ex.passage || null,
+    imageCredit: q.image ? ex.imageCredit || null : null,
   };
   const opts = q.options || [];
   switch (q.type) {

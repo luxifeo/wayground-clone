@@ -11,6 +11,7 @@ import { authRouter, requireAuth } from './auth.js';
 import { quizRouter } from './routes/quizzes.js';
 import { sessionRouter } from './routes/sessions.js';
 import { aiRouter } from './routes/ai.js';
+import { imageRouter } from './routes/images.js';
 import { initRealtime } from './realtime.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -23,7 +24,7 @@ app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '15mb' }));
 
 // async error safety for express 4
-for (const r of [authRouter, quizRouter, sessionRouter, aiRouter]) {
+for (const r of [authRouter, quizRouter, sessionRouter, aiRouter, imageRouter]) {
   r.stack.forEach((layer) => layer.route?.stack.forEach((s) => {
     const h = s.handle;
     if (h.length <= 3) s.handle = (req, res, next) => Promise.resolve(h(req, res, next)).catch(next);
@@ -35,6 +36,7 @@ app.use('/api/auth', authRouter);
 app.use('/api', quizRouter);
 app.use('/api', sessionRouter);
 app.use('/api', aiRouter);
+app.use('/api', imageRouter);
 
 const imageUpload = multer({
   storage: multer.diskStorage({

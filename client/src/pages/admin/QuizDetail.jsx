@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Share2, Download, Eye, EllipsisVertical, Bookmark, Pencil, Clock, Play, ChevronDown, Rocket, Settings2, Copy, Trash2,
-  Sparkles, Languages, Lightbulb, ClipboardCheck, Link2, ChartPie, Archive,
+  Sparkles, Languages, Lightbulb, ClipboardCheck, Link2, ChartPie, Archive, Users, ImagePlus,
 } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout.jsx';
+import { shareWithStudents } from '../../components/InvitePanel.jsx';
 import { api, get, post, del, patch } from '../../lib/api.js';
 import { QTYPE_UPPER, QTYPES, fmtShortTime, UNGRADED, LANGUAGES } from '../../lib/constants.js';
 import { Menu, MenuItem, Modal, QuizThumb, Spinner, Toggle, Select, useToast } from '../../components/ui.jsx';
@@ -84,7 +85,8 @@ export default function QuizDetail() {
 
         <div className="mt-5 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-5">
           <Menu align="left" trigger={<button className="btn-outline"><Share2 className="h-4 w-4" />Share<ChevronDown className="h-4 w-4" /></button>}>
-            <MenuItem icon={Link2} onClick={() => { navigator.clipboard.writeText(shareLink); toast('Link copied', 'success'); }}>Copy link</MenuItem>
+            <MenuItem icon={Users} onClick={async () => { try { const s = await shareWithStudents(quiz.id); nav(`/admin/reports/${s.id}`); } catch (e) { toast(e.message, 'error'); } }}>Share with students</MenuItem>
+            <MenuItem icon={Link2} onClick={() => { navigator.clipboard.writeText(shareLink); toast('Link copied', 'success'); }}>Copy quiz link</MenuItem>
           </Menu>
           <Link to={`/admin/quiz/${quiz.id}/worksheet`} className="btn-outline"><Download className="h-4 w-4" />Worksheet</Link>
           <button className="btn-outline" onClick={() => openPreview(quiz.id).catch((e) => toast(e.message, 'error'))}><Eye className="h-4 w-4" />Preview</button>
@@ -122,6 +124,7 @@ export default function QuizDetail() {
                   {[
                     ['similar', 'Add similar questions', Sparkles, async () => { const d = await api(`/ai/quizzes/${quiz.id}/similar`, { method: 'POST', body: { count: 5 } }); setQuiz(d.quiz); toast(`Added ${d.added} questions`, 'success'); }],
                     ['expl', 'Add answer explanations', Lightbulb, async () => { const d = await api(`/ai/quizzes/${quiz.id}/explanations`, { method: 'POST', body: {} }); setQuiz(d.quiz); toast(`Wrote ${d.updated} explanations`, 'success'); }],
+                    ['images', 'Add illustration images', ImagePlus, async () => { const d = await api(`/ai/quizzes/${quiz.id}/images`, { method: 'POST', body: {} }); setQuiz(d.quiz); toast(d.illustrated ? `Added ${d.illustrated} images` : 'No new images found', 'success'); }],
                     ['translate', 'Translate quiz', Languages, async () => setTranslate(true)],
                   ].map(([k, label, I, fn]) => (
                     <button key={k} disabled={!!aiBusy} onClick={() => ai(k, fn)} className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold hover:bg-slate-50">

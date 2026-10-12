@@ -101,7 +101,7 @@ export function QuestionBody({ q, showAnswers = true, compact = false }) {
     <div className="space-y-2">
       {ex.passage && <div className="flex gap-2 rounded-lg bg-slate-50 p-2 text-xs text-slate-600"><FileText className="h-4 w-4 shrink-0" /><span className="line-clamp-3">{ex.passage}</span></div>}
       <div className="flex items-start gap-3">
-        {q.image && !['labeling', 'hotspot'].includes(q.type) && <img src={q.image} alt="" className="h-16 w-20 shrink-0 rounded-lg border border-slate-200 object-cover" />}
+        {q.image && !['labeling', 'hotspot'].includes(q.type) && <img src={q.image} alt="" title={q.extra?.imageCredit ? `${q.extra.imageCredit.title || ''} · ${q.extra.imageCredit.license || ''}` : undefined} className="h-16 w-20 shrink-0 rounded-lg border border-slate-200 object-cover" />}
         <div className="whitespace-pre-wrap text-[15px] font-semibold text-slate-800">{['dropdown', 'dragdrop'].includes(q.type) ? '' : q.text}</div>
       </div>
       {body}

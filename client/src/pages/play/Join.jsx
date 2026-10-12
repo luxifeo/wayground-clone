@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { RefreshCw, X, Volume2 } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { AVATARS } from '../../lib/constants.js';
@@ -10,7 +10,9 @@ const NOUN = ['Panda', 'Fox', 'Otter', 'Comet', 'Tiger', 'Koala', 'Falcon', 'Dol
 const randomName = () => `${ADJ[Math.floor(Math.random() * ADJ.length)]} ${NOUN[Math.floor(Math.random() * NOUN.length)]}`;
 
 export default function Join() {
-  const { code: urlCode } = useParams();
+  const { code: pathCode } = useParams();
+  const [search] = useSearchParams();
+  const urlCode = pathCode || search.get('gc') || '';
   const nav = useNavigate();
   const [code, setCode] = useState(urlCode || '');
   const [session, setSession] = useState(null);

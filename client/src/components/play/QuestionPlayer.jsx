@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { FileText } from 'lucide-react';
+import { ImageCredit } from '../ImageSearchModal.jsx';
 import {
   ChoiceAnswer, TextAnswer, ReorderAnswer, MatchAnswer, DropdownAnswer, DragDropAnswer, CategorizeAnswer, HotTextAnswer,
   MatchGridAnswer, TableFillAnswer, LabelingAnswer, HotspotAnswer, GraphingAnswer, DrawAnswer, RecordAnswer, Board,
@@ -39,7 +40,12 @@ export default function QuestionPlayer({ question: q, onSubmit, result, locked =
 
   const questionBox = !INLINE_TEXT.includes(q.type) && (
     <div className="game-panel mx-auto mb-4 flex w-full max-w-5xl flex-col items-center gap-3 p-5 md:flex-row md:p-6">
-      {q.image && !IMAGE_IN_ANSWER.includes(q.type) && <img src={q.image} alt="" className="max-h-56 rounded-xl" />}
+      {q.image && !IMAGE_IN_ANSWER.includes(q.type) && (
+        <figure className="flex max-w-xs flex-col items-center">
+          <img src={q.image} alt="" className="max-h-56 rounded-xl" />
+          <ImageCredit credit={q.imageCredit} dark className="mt-1 max-w-full" />
+        </figure>
+      )}
       <div className="flex-1 whitespace-pre-wrap break-words text-center font-game text-xl font-bold text-white md:text-2xl">{q.text}</div>
     </div>
   );

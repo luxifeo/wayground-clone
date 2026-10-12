@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sparkles, Upload, FileText, Link2, X, Image as ImageIcon, AlertTriangle } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { GRADES, LANGUAGES, QTYPES } from '../lib/constants.js';
-import { Modal, Select, useToast } from './ui.jsx';
+import { Modal, Select, Toggle, useToast } from './ui.jsx';
 
 const AI_TYPES = ['mcq', 'msq', 'tf', 'fill', 'open', 'reorder', 'match', 'dropdown', 'dragdrop', 'categorize', 'math', 'poll'];
 const LOADING_TIPS = [
@@ -26,6 +26,7 @@ export default function AIGenerateModal({ open, onClose, initialMode = 'prompt',
   const [grade, setGrade] = useState(null);
   const [language, setLanguage] = useState('English');
   const [difficulty, setDifficulty] = useState('medium');
+  const [withImages, setWithImages] = useState(true);
   const [busy, setBusy] = useState(false);
   const [tip, setTip] = useState(0);
   const [status, setStatus] = useState(null);
@@ -54,6 +55,7 @@ export default function AIGenerateModal({ open, onClose, initialMode = 'prompt',
     form.append('types', types.join(','));
     form.append('language', language);
     form.append('difficulty', difficulty);
+    form.append('images', withImages ? 'true' : 'false');
     if (grade) form.append('grade', grade);
     if (quizId) form.append('quizId', quizId);
     if (mode === 'upload') files.forEach((f) => form.append('files', f));
@@ -61,7 +63,7 @@ export default function AIGenerateModal({ open, onClose, initialMode = 'prompt',
     setBusy(true);
     try {
       const d = await api('/ai/generate', { method: 'POST', form });
-      toast(`Generated ${d.added} questions`, 'success');
+      toast(`Generated ${d.added} questions${d.illustrated ? ` · ${d.illustrated} images` : ''}`, 'success');
       onClose();
       if (onDone) onDone(d.quiz);
       else nav(`/admin/quiz/${d.quiz.id}/edit`);
@@ -158,6 +160,10 @@ export default function AIGenerateModal({ open, onClose, initialMode = 'prompt',
             <div><div className="label">Language</div><Select value={language} onChange={(v) => setLanguage(v || 'English')} options={LANGUAGES} /></div>
             <div><div className="label">Difficulty</div><Select value={difficulty} onChange={(v) => setDifficulty(v || 'medium')} options={[{ value: 'easy', label: 'Easy' }, { value: 'medium', label: 'Medium' }, { value: 'hard', label: 'Hard' }]} /></div>
           </div>
+          <label className="flex items-center gap-3 rounded-lg bg-violet-50 px-3 py-2 text-sm">
+            <Toggle checked={withImages} onChange={setWithImages} />
+            <span><b>Find illustration images</b> <span className="text-slate-500">— free photos &amp; diagrams (Wikimedia, Openverse…) are added to suitable questions</span></span>
+          </label>
           <div className="flex justify-end gap-2 pt-2">
             <button className="btn-outline" onClick={onClose}>Cancel</button>
             <button className="btn-violet" disabled={!canGo} onClick={generate}><Sparkles className="h-4 w-4" />Generate</button>

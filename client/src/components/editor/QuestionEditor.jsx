@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  ChevronLeft, Save, Clock, Check, Image as ImageIcon, Lightbulb, Sparkles, FileText, X, Eye, ChevronDown,
+  ChevronLeft, Save, Clock, Check, Image as ImageIcon, Lightbulb, Sparkles, FileText, X, Eye, ChevronDown, ImagePlus as ImageSearchIcon,
 } from 'lucide-react';
 import { api } from '../../lib/api.js';
 import { QTYPES, TIME_OPTIONS, fmtTime, blankQuestion, CHOICE_TYPES, splitBlanks } from '../../lib/constants.js';
@@ -10,6 +10,7 @@ import {
   HotTextBody, MatchGridBody, TableFillBody, LabelingBody, HotspotBody, GraphingBody, useUpload,
 } from './bodies.jsx';
 import QuestionPlayer from '../play/QuestionPlayer.jsx';
+import ImageSearchModal, { ImageCredit } from '../ImageSearchModal.jsx';
 
 const BODIES = {
   mcq: ChoiceBody, msq: ChoiceBody, tf: ChoiceBody, poll: ChoiceBody,
@@ -86,9 +87,15 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
   const [aiBusy, setAiBusy] = useState(false);
   const [showExpl, setShowExpl] = useState(!!question.explanation);
   const [preview, setPreview] = useState(false);
+  const [imgSearch, setImgSearch] = useState(false);
   const textRef = useRef(null);
   const { pick, busy: uploading } = useUpload();
   const set = (patch) => setQ((cur) => ({ ...cur, ...patch }));
+  const setImage = (url, credit) => setQ((cur) => {
+    const extra = { ...(cur.extra || {}) };
+    if (credit) extra.imageCredit = credit; else delete extra.imageCredit;
+    return { ...cur, image: url, extra };
+  });
   const T = QTYPES[q.type];
   const Body = BODIES[q.type];
   const problems = draftProblems(q);
@@ -200,13 +207,15 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
             <div className="rounded-2xl bg-[#461a42] p-3 shadow-xl">
               <div className="relative rounded-xl border border-white/10 bg-[#2b0f28] p-3">
                 <div className="flex gap-1.5">
-                  <button title="Add image" onClick={async () => { const url = await pick(); if (url) set({ image: url }); }} className="rounded bg-white/10 p-1.5 text-white hover:bg-white/20">{uploading ? <Spinner className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}</button>
+                  <button title="Upload image" onClick={async () => { const url = await pick(); if (url) setImage(url, null); }} className="rounded bg-white/10 p-1.5 text-white hover:bg-white/20">{uploading ? <Spinner className="h-4 w-4" /> : <ImageIcon className="h-4 w-4" />}</button>
+                  <button title="Search free images" onClick={() => setImgSearch(true)} className="flex items-center gap-1 rounded bg-white/10 px-2 py-1.5 text-xs font-semibold text-white hover:bg-white/20"><ImageSearchIcon className="h-4 w-4" />Search images</button>
                 </div>
                 <div className={`flex gap-3 ${q.image && !['labeling', 'hotspot', 'draw'].includes(q.type) ? 'flex-row items-center' : 'flex-col'}`}>
                   {q.image && !['labeling', 'hotspot'].includes(q.type) && (
                     <div className="relative mx-auto my-2 shrink-0">
                       <img src={q.image} alt="" className="max-h-44 rounded-lg" />
-                      <button onClick={() => set({ image: null })} className="absolute -right-2 -top-2 rounded-full bg-black/70 p-1 text-white"><X className="h-3.5 w-3.5" /></button>
+                      <ImageCredit credit={q.extra?.imageCredit} dark className="mt-1 max-w-[16rem]" />
+                      <button onClick={() => setImage(null, null)} className="absolute -right-2 -top-2 rounded-full bg-black/70 p-1 text-white"><X className="h-3.5 w-3.5" /></button>
                     </div>
                   )}
                   <textarea
@@ -230,6 +239,11 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
         </div>
       </div>
 
+      <ImageSearchModal
+        open={imgSearch} onClose={() => setImgSearch(false)}
+        initialQuery={q.text.replace(/\[\[[^\]]+\]\]/g, ' ').replace(/[?.!,:;"“”]/g, ' ').trim().split(/\s+/).slice(0, 6).join(' ')}
+        onPick={({ url, credit }) => setImage(url, credit)}
+      />
       {preview && (
         <div className="fixed inset-0 z-50 flex flex-col game-bg">
           <div className="flex justify-between p-3">
@@ -248,7 +262,7 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
 /** Local equivalent of the server's sanitize, for the in-editor preview. */
 function previewSanitize(q) {
   const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
-  const base = { id: q.id || 0, type: q.type, text: q.text, image: q.image, points: q.points, time_limit: q.time_limit, passage: q.extra?.passage || null };
+  const base = { id: q.id || 0, type: q.type, text: q.text, image: q.image, points: q.points, time_limit: q.time_limit, passage: q.extra?.passage || null, imageCredit: q.extra?.imageCredit || null };
   const o = q.options || [];
   switch (q.type) {
     case 'mcq': case 'msq': case 'tf': case 'poll': return { ...base, options: o, multi: q.type === 'msq', correctCount: (q.answer || []).length };

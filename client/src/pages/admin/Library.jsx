@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Search, Pencil, Play, Share2, EllipsisVertical, Plus, ChevronDown, Clock, Copy, Trash2, Archive, ArchiveRestore, ClipboardCheck, BookOpen, Link2 } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout.jsx';
+import { shareWithStudents } from '../../components/InvitePanel.jsx';
 import { get, post, patch, del } from '../../lib/api.js';
 import { timeAgo } from '../../lib/constants.js';
 import { Empty, Menu, MenuItem, QuizThumb, useToast } from '../../components/ui.jsx';
@@ -70,7 +71,7 @@ export default function Library() {
                   {qz.status === 'draft'
                     ? <Link to={`/admin/quiz/${qz.id}/edit`} className="btn-outline btn-sm"><Pencil className="h-3.5 w-3.5" />Edit</Link>
                     : <Link to={`/admin/quiz/${qz.id}`} className="btn-outline btn-sm"><Play className="h-3.5 w-3.5" />Play</Link>}
-                  <button title="Copy link" onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/admin/quiz/${qz.id}`); toast('Link copied', 'success'); }} className="btn-outline btn-sm px-2"><Share2 className="h-3.5 w-3.5" /></button>
+                  {qz.status !== 'draft' && <button title="Share with students" onClick={async () => { try { const s = await shareWithStudents(qz.id); nav(`/admin/reports/${s.id}`); } catch (e) { toast(e.message, 'error'); } }} className="btn-outline btn-sm px-2"><Share2 className="h-3.5 w-3.5" /></button>}
                   <Menu trigger={<button className="btn-outline btn-sm px-2"><EllipsisVertical className="h-3.5 w-3.5" /></button>}>
                     <MenuItem icon={Pencil} onClick={() => nav(`/admin/quiz/${qz.id}/edit`)}>Edit</MenuItem>
                     <MenuItem icon={Copy} onClick={async () => { await post(`/quizzes/${qz.id}/duplicate`); toast('Duplicated', 'success'); load(); }}>Duplicate</MenuItem>

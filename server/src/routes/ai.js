@@ -9,6 +9,7 @@ import { loadQuiz, insertQuestions } from './quizzes.js';
 import { applyGrade } from './sessions.js';
 import { computeScore, normalizeQuestion, questionProblems } from '../grading.js';
 import { broadcast } from '../realtime.js';
+import { searchImages, downloadImage, pool } from '../images.js';
 
 export const aiRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024, files: 10 } });
@@ -28,7 +29,8 @@ const QUESTION_SCHEMA = `Each question is a JSON object using ONE of these shape
 {"type":"dragdrop","text":"Sentence where each gap is written as [[1]], [[2]] ...","blanks":["word for gap 1","word for gap 2"],"distractors":["extra wrong word"],"time_limit":60}
 {"type":"categorize","text":"Sort the items into the right group","categories":["Group A","Group B"],"items":[{"text":"item","category":0}],"time_limit":60}
 {"type":"math","text":"Simplify 2(x+3)","accepted":["2x+6"],"explanation":"why","time_limit":60}
-Indexes in "correct" are 0-based. Options must be short, plausible and only one correct for mcq.`;
+Indexes in "correct" are 0-based. Options must be short, plausible and only one correct for mcq.
+Every question may also have "image_query": 2-5 ENGLISH keywords to search a free photo or diagram that illustrates the question (e.g. "water cycle diagram", "Eiffel Tower"). The image must show the context of the question, NEVER the correct option itself (for "Which animal changes colour?" use "rainforest canopy", not "chameleon"). Use null when no image would help.`;
 
 const SYSTEM = 'You are an expert teacher who writes high quality assessment questions. You always answer with valid JSON only, no markdown, no commentary.';
 
@@ -47,6 +49,7 @@ export function fromAI(raw) {
     type, text: String(raw.text || raw.question || '').trim(), explanation: raw.explanation || null,
     time_limit: parseInt(raw.time_limit, 10) || ({ open: 120, reorder: 60, match: 60, msq: 45, fill: 45, tf: 20, poll: 20 }[type] || 30),
     points: parseInt(raw.points, 10) || 1,
+    imageQuery: typeof raw.image_query === 'string' && raw.image_query.trim() ? raw.image_query.trim().slice(0, 80) : null,
   };
   const toIdx = (c, opts) => {
     if (typeof c === 'number') return c;
@@ -210,12 +213,13 @@ aiRouter.post('/ai/generate', requireAuth, upload.array('files', 10), wrap(async
   const wanted = list.filter((q) => types.includes(q.type) || (q.type === 'msq' && types.includes('mcq')));
   if (wanted.length) list = wanted;
   if (!list.length) return res.status(502).json({ error: 'The AI did not return any usable questions. Try again.' });
+  const illustrated = b.images === 'false' ? 0 : await attachImages(list);
 
   if (b.quizId) {
     const quiz = await one('SELECT * FROM quizzes WHERE id=$1 AND owner_id=$2', [b.quizId, req.user.id]);
     if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
     await tx((c) => insertQuestions(c, quiz.id, list));
-    return res.json({ quiz: await loadQuiz(quiz.id), added: list.length });
+    return res.json({ quiz: await loadQuiz(quiz.id), added: list.length, illustrated });
   }
   const quizId = await tx(async (c) => {
     const r = await c.query(
@@ -225,8 +229,47 @@ aiRouter.post('/ai/generate', requireAuth, upload.array('files', 10), wrap(async
     await insertQuestions(c, r.rows[0].id, list, 0);
     return r.rows[0].id;
   });
-  res.json({ quiz: await loadQuiz(quizId), added: list.length });
+  res.json({ quiz: await loadQuiz(quizId), added: list.length, illustrated });
 }));
+
+const NO_AUTO_IMAGE = ['labeling', 'hotspot', 'draw'];
+
+/** Look up an illustration for every question that has an image_query (in place). Returns how many got one. */
+async function attachImages(list) {
+  const targets = list.filter((q) => q.imageQuery && !q.image && !NO_AUTO_IMAGE.includes(q.type));
+  if (!targets.length) return 0;
+  const cands = await pool(targets, 4, (q) => searchImages(q.imageQuery, { limit: 6 }));
+  // let the model pick the most relevant candidate by its title (keyword search alone is noisy)
+  let picks = targets.map(() => 0);
+  try {
+    const out = await chatJson({
+      system: SYSTEM,
+      prompt: [
+        'Pick the best illustration for each quiz question from the candidate image titles. Choose an image that matches the topic of the question and does not reveal the answer. Use -1 when no candidate fits.',
+        JSON.stringify(targets.map((q, i) => ({ i, question: q.text, keywords: q.imageQuery, candidates: (cands[i] || []).map((c, k) => `${k}: ${c.title || 'untitled'} (${c.source})`) }))),
+        'Respond with JSON: {"picks":[{"i":<question index>,"pick":<candidate index or -1>}]}',
+      ].join('\n\n'),
+    });
+    picks = targets.map((_, i) => {
+      const p = (out.picks || []).find((x) => Number(x.i) === i);
+      return p ? Number(p.pick) : 0;
+    });
+  } catch { /* fall back to the first candidate */ }
+  const found = await pool(targets, 4, async (q, i) => {
+    const c = (cands[i] || [])[picks[i]];
+    if (!c) return null;
+    for (const src of [c.url, c.thumb].filter(Boolean)) {
+      try { return { url: await downloadImage(src), credit: { title: c.title, creator: c.creator, license: c.license, source: c.source, landing: c.landing } }; } catch { /* next */ }
+    }
+    return null;
+  });
+  let n = 0;
+  targets.forEach((q, i) => {
+    const f = found[i];
+    if (f) { q.image = f.url; q.extra = { ...(q.extra || {}), imageCredit: f.credit }; n++; }
+  });
+  return n;
+}
 
 async function myQuiz(req, res) {
   const quiz = await loadQuiz(req.params.id);
@@ -256,6 +299,7 @@ aiRouter.post('/ai/quizzes/:id/similar', requireAuth, wrap(async (req, res) => {
     pos = base[0].position + 1;
     await many('UPDATE questions SET position=position+$3 WHERE quiz_id=$1 AND position>=$2', [quiz.id, pos, list.length]);
   }
+  if (req.body.images !== false) await attachImages(list);
   await tx((c) => insertQuestions(c, quiz.id, list, pos));
   res.json({ quiz: await loadQuiz(quiz.id), added: list.length });
 }));
@@ -370,4 +414,23 @@ aiRouter.post('/ai/sessions/:id/grade', requireAuth, wrap(async (req, res) => {
   }
   broadcast(s.id);
   res.json({ graded });
+}));
+
+/** Find illustrations for questions that have no image yet. */
+aiRouter.post('/ai/quizzes/:id/images', requireAuth, wrap(async (req, res) => {
+  const quiz = await myQuiz(req, res); if (!quiz) return;
+  const targets = quiz.questions.filter((q) => !q.image && !NO_AUTO_IMAGE.includes(q.type));
+  if (!targets.length) return res.json({ quiz, illustrated: 0 });
+  const prompt = [
+    'For each question give 2-5 ENGLISH keywords to search a free photo or diagram that illustrates it without revealing the answer. Use null when no image would help.',
+    JSON.stringify(targets.map((q) => ({ id: q.id, text: q.text, type: q.type }))),
+    'Respond with JSON: {"queries":[{"id":<question id>,"image_query":"..." or null}]}',
+  ].join('\n\n');
+  const out = await chatJson({ system: SYSTEM, prompt });
+  const items = targets.map((q) => ({ q, imageQuery: (out.queries || []).find((x) => Number(x.id) === q.id)?.image_query || null, image: null, extra: q.extra }));
+  const n = await attachImages(items);
+  for (const it of items.filter((x) => x.image)) {
+    await one('UPDATE questions SET image=$2, extra=$3 WHERE id=$1 RETURNING id', [it.q.id, it.image, JSON.stringify(it.extra)]);
+  }
+  res.json({ quiz: await loadQuiz(quiz.id), illustrated: n });
 }));

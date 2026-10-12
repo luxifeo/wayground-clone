@@ -204,6 +204,7 @@ export default function QuizEditor() {
                 <button className="chip" disabled={!!aiBusy} onClick={() => runAI('expl', async () => { const d = await api(`/ai/quizzes/${quiz.id}/explanations`, { method: 'POST', body: {} }); setQuiz(d.quiz); toast(`Wrote ${d.updated} explanations`, 'success'); })}>{aiBusy === 'expl' && <Spinner className="h-3 w-3" />}<Lightbulb className="h-3 w-3" />Add answer explanations</button>
                 <button className="chip" disabled={!!aiBusy} onClick={() => setTranslate(true)}><Languages className="h-3 w-3" />Translate quiz</button>
                 <button className="chip" disabled={!!aiBusy} onClick={() => setAiGen(true)}><Sparkles className="h-3 w-3" />Generate more</button>
+                <button className="chip" disabled={!!aiBusy} onClick={() => runAI('images', async () => { const d = await api(`/ai/quizzes/${quiz.id}/images`, { method: 'POST', body: {} }); setQuiz(d.quiz); toast(d.illustrated ? `Added ${d.illustrated} images` : 'No new images found', d.illustrated ? 'success' : 'info'); })}>{aiBusy === 'images' ? <Spinner className="h-3 w-3" /> : <ImagePlus className="h-3 w-3" />}Add images</button>
               </div>
 
               <div className="space-y-3">
