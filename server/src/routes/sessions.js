@@ -5,7 +5,7 @@ import { requireAuth } from '../auth.js';
 import { loadQuiz } from './quizzes.js';
 import { grade, computeScore, sanitizeQuestion, revealFor, shuffle, UNGRADED_TYPES } from '../grading.js';
 import {
-  broadcast, hostState, playerState, loadSession, leaderboard, setQuestionTimer, clearQuestionTimer, emitToPlayer, getIO, anonymize,
+  broadcast, hostState, playerState, loadSession, leaderboard, setQuestionTimer, clearQuestionTimer, dropPlayer, getIO, anonymize,
 } from '../realtime.js';
 
 export const sessionRouter = Router();
@@ -186,9 +186,31 @@ sessionRouter.post('/sessions/:id/reopen', requireAuth, async (req, res) => {
 
 sessionRouter.post('/sessions/:id/kick', requireAuth, async (req, res) => {
   const s = await ownSession(req, res); if (!s) return;
-  await query('UPDATE participants SET kicked=true WHERE id=$1 AND session_id=$2', [req.body.participantId, s.id]);
-  emitToPlayer(req.body.participantId, 'kicked', {});
+  const r = await query('UPDATE participants SET kicked=true WHERE id=$1 AND session_id=$2', [req.body.participantId, s.id]);
+  if (r.rowCount) dropPlayer(req.body.participantId);
   broadcast(s.id);
+  res.json(await hostState(s.id));
+});
+
+/** Cut a player off: they cannot keep playing, their results stay in the report. */
+sessionRouter.post('/sessions/:id/participants/:pid/disconnect', requireAuth, async (req, res) => {
+  const s = await ownSession(req, res); if (!s) return;
+  const p = await one(
+    'UPDATE participants SET disconnected=true, finished_at=coalesce(finished_at, now()) WHERE id=$1 AND session_id=$2 RETURNING id',
+    [req.params.pid, s.id]);
+  if (!p) return res.status(404).json({ error: 'Participant not found' });
+  dropPlayer(p.id, { disconnected: true });
+  broadcast(s.id, { players: true });
+  res.json(await hostState(s.id));
+});
+
+/** Remove a player and all their answers from the session. */
+sessionRouter.delete('/sessions/:id/participants/:pid', requireAuth, async (req, res) => {
+  const s = await ownSession(req, res); if (!s) return;
+  const p = await one('DELETE FROM participants WHERE id=$1 AND session_id=$2 RETURNING id', [req.params.pid, s.id]);
+  if (!p) return res.status(404).json({ error: 'Participant not found' });
+  dropPlayer(p.id);
+  broadcast(s.id, { players: true });
   res.json(await hostState(s.id));
 });
 
@@ -279,6 +301,7 @@ async function loadPlayer(req, res) {
   const p = await one('SELECT * FROM participants WHERE token=$1', [req.params.token]);
   if (!p) { res.status(404).json({ error: 'Player not found' }); return null; }
   if (p.kicked) { res.status(403).json({ error: 'You were removed from this game', kicked: true }); return null; }
+  if (p.disconnected) { res.status(403).json({ error: 'The host disconnected you from this game', kicked: true, disconnected: true }); return null; }
   const s = await loadSession(p.session_id);
   return { p, s };
 }
@@ -345,7 +368,7 @@ sessionRouter.post('/play/:token/answer', async (req, res) => {
   // teacher-led: reveal automatically once everyone answered
   if (s.pace === 'teacher') {
     const all = await one(
-      `SELECT (SELECT count(*) FROM participants WHERE session_id=$1 AND NOT kicked)::int AS players,
+      `SELECT (SELECT count(*) FROM participants WHERE session_id=$1 AND NOT kicked AND NOT disconnected)::int AS players,
               (SELECT count(*) FROM responses WHERE session_id=$1 AND question_id=$2)::int AS answered`, [s.id, q.id]);
     if (all.answered >= all.players) setQuestionTimer(s.id, 800, () => revealQuestion(s.id));
   }

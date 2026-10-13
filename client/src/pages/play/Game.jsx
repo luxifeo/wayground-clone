@@ -81,7 +81,7 @@ export default function Game() {
       offset.current = new Date(d.state.serverNow).getTime() - Date.now();
       sfx.enabled = localStorage.getItem('wg_sound') !== '0';
     } catch (e) {
-      if (e.data?.kicked) setKicked(true); else setErr(e.message);
+      if (e.data?.kicked) setKicked(e.data.disconnected ? 'disconnected' : true); else setErr(e.message);
     }
   }, [token]);
   useEffect(() => { load(); }, [load]);
@@ -96,7 +96,7 @@ export default function Game() {
       });
       if (st.serverNow) offset.current = new Date(st.serverNow).getTime() - Date.now();
     },
-    kicked: () => setKicked(true),
+    kicked: (d) => setKicked(d?.disconnected ? 'disconnected' : true),
   });
 
   const session = data?.session;
@@ -152,7 +152,7 @@ export default function Game() {
 
   const skip = () => setQueue((q) => [...q.slice(1), q[0]]);
 
-  if (kicked) return <Center>You were removed from this game by the host.<button onClick={() => nav('/join')} className="mt-4 rounded-xl bg-white px-5 py-2 font-bold text-slate-800">Join another game</button></Center>;
+  if (kicked) return <Center>{kicked === 'disconnected' ? 'The host disconnected you from this game.' : 'You were removed from this game by the host.'}<button onClick={() => nav('/join')} className="mt-4 rounded-xl bg-white px-5 py-2 font-bold text-slate-800">Join another game</button></Center>;
   if (err) return <Center>{err}<button onClick={() => nav('/join')} className="mt-4 rounded-xl bg-white px-5 py-2 font-bold text-slate-800">Back</button></Center>;
   if (!data || !state) return <Center><Spinner className="h-10 w-10" /></Center>;
 

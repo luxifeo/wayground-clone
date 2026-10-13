@@ -57,7 +57,7 @@ app.post('/api/uploads', requireAuth, imageUpload.single('file'), (req, res) => 
 });
 // students upload drawings / recordings with their player token
 app.post('/api/play/:token/upload', async (req, res, next) => {
-  const p = await one('SELECT id FROM participants WHERE token=$1 AND NOT kicked', [req.params.token]);
+  const p = await one('SELECT id FROM participants WHERE token=$1 AND NOT kicked AND NOT disconnected', [req.params.token]);
   if (!p) return res.status(404).json({ error: 'Player not found' });
   next();
 }, playerUpload.single('file'), (req, res) => {

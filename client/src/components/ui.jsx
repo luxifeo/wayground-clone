@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, createContext, useContext, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, createContext, useContext, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronDown, Check, Loader2 } from 'lucide-react';
 import { avatarBg } from '../lib/constants.js';
 
@@ -76,23 +77,49 @@ export function Segmented({ value, onChange, options }) {
 }
 
 /** Dropdown menu anchored to its trigger. */
+/** Dropdown rendered in a portal so overflow-hidden / scrolling parents never clip it. */
 export function Menu({ trigger, children, align = 'right', className = '' }) {
   const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
   const ref = useRef(null);
+  const menuRef = useRef(null);
   useEffect(() => {
     if (!open) return undefined;
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const h = (e) => {
+      if (ref.current?.contains(e.target) || menuRef.current?.contains(e.target)) return;
+      setOpen(false);
+    };
+    const close = (e) => { if (!menuRef.current?.contains(e.target)) setOpen(false); };
     document.addEventListener('mousedown', h);
-    return () => document.removeEventListener('mousedown', h);
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      document.removeEventListener('mousedown', h);
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
   }, [open]);
+  // place under the trigger, or above it when there is no room below
+  useLayoutEffect(() => {
+    if (!open || !ref.current || !menuRef.current) { setPos(null); return; }
+    const t = ref.current.getBoundingClientRect();
+    const m = menuRef.current.getBoundingClientRect();
+    const below = t.bottom + 4 + m.height <= window.innerHeight - 8;
+    const top = below ? t.bottom + 4 : Math.max(8, t.top - 4 - m.height);
+    const left = align === 'right' ? Math.max(8, t.right - m.width) : Math.min(t.left, window.innerWidth - m.width - 8);
+    setPos({ top, left, up: !below });
+  }, [open, align]);
   return (
-    <div className={`relative ${className}`} ref={ref}>
+    <div className={`relative ${className}`} ref={ref} onClick={(e) => e.stopPropagation()}>
       <div onClick={() => setOpen((v) => !v)}>{trigger}</div>
-      {open && (
+      {open && createPortal(
         <div
-          className={`absolute z-40 mt-1 min-w-[180px] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 text-slate-700 shadow-xl animate-rise ${align === 'right' ? 'right-0' : 'left-0'}`}
-          onClick={() => setOpen(false)}
-        >{children}</div>
+          ref={menuRef}
+          style={{ position: 'fixed', top: pos?.top ?? 0, left: pos?.left ?? 0, visibility: pos ? 'visible' : 'hidden' }}
+          className={`z-[60] min-w-[180px] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 text-slate-700 shadow-xl ${pos?.up ? '' : 'animate-rise'}`}
+          onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+        >{children}</div>,
+        document.body,
       )}
     </div>
   );

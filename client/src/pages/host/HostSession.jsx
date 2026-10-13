@@ -12,6 +12,7 @@ import { CHOICE_TYPES, QTYPES } from '../../lib/constants.js';
 import { Avatar, Logo, Spinner, useToast } from '../../components/ui.jsx';
 import { QuestionBody } from '../../components/QuestionCard.jsx';
 import { WordCloud } from '../../components/play/answers.jsx';
+import ParticipantActions from '../../components/ParticipantActions.jsx';
 
 const STATUS_COLOR = { correct: 'bg-emerald-500', incorrect: 'bg-red-500', partial: 'bg-amber-400', ungraded: 'bg-blue-500', skipped: 'bg-slate-400' };
 
@@ -63,7 +64,7 @@ function Podium({ players, title }) {
   );
 }
 
-function OverviewTable({ data, onPlayer }) {
+function OverviewTable({ data, onPlayer, onChange }) {
   const [showTime, setShowTime] = useState(false);
   return (
     <div className="rounded-2xl bg-black/30 p-4 text-white">
@@ -77,18 +78,20 @@ function OverviewTable({ data, onPlayer }) {
             <tr className="text-left text-white/70">
               <th className="p-2">#</th><th className="p-2">Names</th><th className="p-2">Score</th><th className="p-2">Accuracy</th>
               {data.questions.map((q, i) => <th key={q.id} className="p-1 text-center text-xs">Q{i + 1}</th>)}
+              {onChange && <th className="w-10 p-1" />}
             </tr>
           </thead>
           <tbody>
             {data.players.map((p) => (
               <tr key={p.id} className="cursor-pointer border-t border-white/10 hover:bg-white/5" onClick={() => onPlayer?.(p)}>
                 <td className="p-2">{p.rank}</td>
-                <td className="p-2"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={24} />{p.name}{p.attempt > 1 && <span className="text-xs text-white/50">(attempt {p.attempt})</span>}</span></td>
+                <td className="p-2"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={24} />{p.name}{p.attempt > 1 && <span className="text-xs text-white/50">(attempt {p.attempt})</span>}{p.disconnected && <span className="rounded bg-white/10 px-1.5 text-[10px] font-bold text-white/60">DISCONNECTED</span>}</span></td>
                 <td className="p-2 font-bold">{p.score}</td>
                 <td className="p-2">{p.accuracy === null ? '–' : `${p.accuracy}%`}</td>
                 {p.statuses.map((st, i) => (
                   <td key={i} className="p-1 text-center"><span className={`mx-auto block h-6 w-6 rounded ${st ? STATUS_COLOR[st] : 'bg-white/10'}`} title={st || 'not attempted'} /></td>
                 ))}
+                {onChange && <td className="p-1"><ParticipantActions dark sessionId={data.session.id} player={p} onChange={onChange} /></td>}
               </tr>
             ))}
           </tbody>
@@ -363,7 +366,7 @@ export default function HostSession() {
           <span>Students can still join at <b>{joinUrl}</b> with code <b className="font-game tracking-widest">{s.code}</b></span>
           <button onClick={() => nav(`/admin/reports/${s.id}`)} className="flex items-center gap-1 text-sm font-semibold text-white/80 hover:text-white"><ChartPie className="h-4 w-4" />Detailed report</button>
         </div>
-        <div className="mt-4"><OverviewTable data={data} /></div>
+        <div className="mt-4"><OverviewTable data={data} onChange={setData} /></div>
       </div>
       {floating}
     </div>

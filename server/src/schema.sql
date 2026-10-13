@@ -83,6 +83,8 @@ CREATE TABLE IF NOT EXISTS participants (
   finished_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS participants_session_idx ON participants(session_id);
+-- host cut the player off: they cannot keep playing but their results stay in the report
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS disconnected BOOLEAN NOT NULL DEFAULT false;
 
 CREATE TABLE IF NOT EXISTS responses (
   id             SERIAL PRIMARY KEY,

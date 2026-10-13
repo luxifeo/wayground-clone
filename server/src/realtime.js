@@ -21,8 +21,9 @@ export function initRealtime(httpServer, corsOrigin) {
     });
 
     socket.on('player:watch', async ({ token }) => {
-      const p = await one('SELECT id, session_id FROM participants WHERE token=$1', [token]);
+      const p = await one('SELECT id, session_id, kicked, disconnected FROM participants WHERE token=$1', [token]);
       if (!p) return socket.emit('error:auth', 'Unknown player');
+      if (p.kicked || p.disconnected) return socket.emit('kicked', { disconnected: p.disconnected });
       socket.join(`play:${p.session_id}`);
       socket.join(`player:${p.id}`);
       socket.data.participantId = p.id;
@@ -62,7 +63,7 @@ export async function hostState(sessionId) {
   if (!session) return null;
   const questions = session.quiz_snapshot.questions || [];
   const participants = await many(
-    'SELECT id,name,avatar,score,streak,attempt,joined_at,finished_at FROM participants WHERE session_id=$1 AND NOT kicked ORDER BY score DESC, joined_at',
+    'SELECT id,name,avatar,score,streak,attempt,joined_at,finished_at,disconnected FROM participants WHERE session_id=$1 AND NOT kicked ORDER BY score DESC, joined_at',
     [sessionId]);
   const responses = await many(
     'SELECT participant_id, question_id, status, fraction, score, time_ms, answer FROM responses WHERE session_id=$1', [sessionId]);
@@ -169,6 +170,14 @@ export function clearQuestionTimer(sessionId) {
 
 export function emitToPlayer(participantId, event, data) {
   if (io) io.to(`player:${participantId}`).emit(event, data);
+}
+
+/** Tell the player they were removed, then close their sockets. */
+export function dropPlayer(participantId, data = {}) {
+  if (!io) return;
+  io.to(`player:${participantId}`).emit('kicked', data);
+  // give the event time to reach the client before closing
+  setTimeout(() => io.in(`player:${participantId}`).disconnectSockets(), 500);
 }
 
 const ANON_A = ['Happy', 'Brave', 'Clever', 'Swift', 'Sunny', 'Cosmic', 'Lucky', 'Mighty', 'Jolly', 'Witty', 'Bold', 'Calm'];

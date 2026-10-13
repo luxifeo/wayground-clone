@@ -10,6 +10,7 @@ import { useSocket } from '../../lib/socket.js';
 import { QTYPES, QTYPE_UPPER, UNGRADED, CHOICE_TYPES } from '../../lib/constants.js';
 import { Avatar, Modal, Spinner, useToast } from '../../components/ui.jsx';
 import { QuestionBody } from '../../components/QuestionCard.jsx';
+import ParticipantActions from '../../components/ParticipantActions.jsx';
 import { FormatAnswer } from '../../lib/formatAnswer.jsx';
 import { toCSV } from '../../lib/csv.js';
 import { WordCloud } from '../../components/play/answers.jsx';
@@ -127,16 +128,19 @@ export default function ReportDetail() {
           <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-slate-600">
-                <tr><th className="p-3">#</th><th className="p-3">Name</th><th className="p-3">Score</th><th className="p-3">Accuracy</th>{d.questions.map((q, i) => <th key={q.id} className="p-1 text-center text-xs">Q{i + 1}<div className="font-normal text-slate-400">{q.accuracy ?? '–'}%</div></th>)}</tr>
+                <tr><th className="p-3">#</th><th className="p-3">Name</th><th className="p-3">Score</th><th className="p-3">Accuracy</th>{d.questions.map((q, i) => <th key={q.id} className="p-1 text-center text-xs">Q{i + 1}<div className="font-normal text-slate-400">{q.accuracy ?? '–'}%</div></th>)}<th className="w-10 p-1" /></tr>
               </thead>
               <tbody>
                 {d.players.map((p) => (
                   <tr key={p.id} className="cursor-pointer border-t border-slate-100 hover:bg-slate-50" onClick={() => setPlayer(p)}>
                     <td className="p-3 text-slate-500">{p.rank}</td>
-                    <td className="p-3"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={26} /><span className="font-semibold">{p.name}</span>{p.attempt > 1 && <span className="text-xs text-slate-400">attempt {p.attempt}</span>}{!p.finished_at && s.status !== 'ended' && <span className="rounded bg-emerald-50 px-1.5 text-[10px] font-bold text-emerald-600">IN PROGRESS</span>}</span></td>
+                    <td className="p-3"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={26} /><span className="font-semibold">{p.name}</span>{p.attempt > 1 && <span className="text-xs text-slate-400">attempt {p.attempt}</span>}{p.disconnected
+                      ? <span className="rounded bg-slate-100 px-1.5 text-[10px] font-bold text-slate-500">DISCONNECTED</span>
+                      : !p.finished_at && s.status !== 'ended' && <span className="rounded bg-emerald-50 px-1.5 text-[10px] font-bold text-emerald-600">IN PROGRESS</span>}</span></td>
                     <td className="p-3 font-bold">{p.score}</td>
                     <td className="p-3">{p.accuracy === null ? '–' : `${p.accuracy}%`}</td>
                     {p.statuses.map((st, i) => <td key={i} className="p-1"><span className={`mx-auto block h-6 w-6 rounded ${st ? ST[st] : 'bg-slate-100'}`} title={st || 'Unattempted'} /></td>)}
+                    <td className="p-1"><ParticipantActions sessionId={s.id} player={p} onChange={() => load()} /></td>
                   </tr>
                 ))}
               </tbody>
