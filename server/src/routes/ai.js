@@ -30,7 +30,10 @@ const QUESTION_SCHEMA = `Each question is a JSON object using ONE of these shape
 {"type":"categorize","text":"Sort the items into the right group","categories":["Group A","Group B"],"items":[{"text":"item","category":0}],"time_limit":60}
 {"type":"math","text":"Simplify 2(x+3)","accepted":["2x+6"],"explanation":"why","time_limit":60}
 Indexes in "correct" are 0-based. Options must be short, plausible and only one correct for mcq.
-Every question may also have "image_query": 2-5 ENGLISH keywords to search a free photo or diagram that illustrates the question (e.g. "water cycle diagram", "Eiffel Tower"). The image must show the context of the question, NEVER the correct option itself (for "Which animal changes colour?" use "rainforest canopy", not "chameleon"). Use null when no image would help.`;
+Every question also has "illustration": a picture that shows the situation of the question, described as
+{"object":"main concrete thing (noun)","action":"what it is doing (verb-ing) or null","setting":"where, or null","avoid":["ENGLISH words of the correct answer"],"queries":["most specific","more general","most general"]}
+"queries" are 1-4 ENGLISH words each (nouns, adjectives, -ing verbs; no articles, no question words, no abstract words), built from object + action + setting; add "diagram" or "map" only when that fits better than a photo. The picture must NEVER show or name the correct answer (for "Which animal changes colour?" use "rainforest branch", not "chameleon"). Use "illustration": null when no real picture would help (pure arithmetic, grammar rules, abstract definitions).
+Example: "Nam đang đá bóng ở đâu?" (answer "sân trường") -> "illustration":{"object":"boy","action":"kicking football","setting":null,"avoid":["school","yard"],"queries":["boy kicking football","children playing football","football"]}`;
 
 const SYSTEM = 'You are an expert teacher who writes high quality assessment questions. You always answer with valid JSON only, no markdown, no commentary.';
 
@@ -49,7 +52,10 @@ export function fromAI(raw) {
     type, text: String(raw.text || raw.question || '').trim(), explanation: raw.explanation || null,
     time_limit: parseInt(raw.time_limit, 10) || ({ open: 120, reorder: 60, match: 60, msq: 45, fill: 45, tf: 20, poll: 20 }[type] || 30),
     points: parseInt(raw.points, 10) || 1,
-    imageQuery: typeof raw.image_query === 'string' && raw.image_query.trim() ? raw.image_query.trim().slice(0, 80) : null,
+    // raw illustration plan from the generator; parsed by toPlan() in attachImages
+    imagePlan: raw.illustration === null ? { queries: null }
+      : raw.illustration && typeof raw.illustration === 'object' ? raw.illustration
+        : typeof raw.image_query === 'string' ? { queries: [raw.image_query] } : null,
   };
   const toIdx = (c, opts) => {
     if (typeof c === 'number') return c;
@@ -213,7 +219,7 @@ aiRouter.post('/ai/generate', requireAuth, upload.array('files', 10), wrap(async
   const wanted = list.filter((q) => types.includes(q.type) || (q.type === 'msq' && types.includes('mcq')));
   if (wanted.length) list = wanted;
   if (!list.length) return res.status(502).json({ error: 'The AI did not return any usable questions. Try again.' });
-  const illustrated = b.images === 'false' ? 0 : await attachImages(list);
+  const illustrated = b.images === 'false' ? 0 : await attachImages(list, { subject: out.subject, topic });
 
   if (b.quizId) {
     const quiz = await one('SELECT * FROM quizzes WHERE id=$1 AND owner_id=$2', [b.quizId, req.user.id]);
@@ -234,19 +240,144 @@ aiRouter.post('/ai/generate', requireAuth, upload.array('files', 10), wrap(async
 
 const NO_AUTO_IMAGE = ['labeling', 'hotspot', 'draw'];
 
-/** Look up an illustration for every question that has an image_query (in place). Returns how many got one. */
-async function attachImages(list) {
-  const targets = list.filter((q) => q.imageQuery && !q.image && !NO_AUTO_IMAGE.includes(q.type));
+const IMAGE_SYSTEM = 'You turn quiz questions into short keyword queries for stock photo and Wikimedia image search engines. You always answer with valid JSON only.';
+const PLAN_BATCH = 12;
+const MAX_QUERIES = 3;
+
+/** Text of the correct answer(s), so the illustration never gives it away. */
+function answerTexts(q) {
+  const opts = q.options || [];
+  const ids = new Set(Array.isArray(q.answer) ? q.answer : []);
+  switch (q.type) {
+    case 'mcq': case 'msq': return opts.filter((o) => ids.has(o.id)).map((o) => o.text);
+    case 'fill': case 'math': return q.answer?.accepted || [];
+    case 'dropdown': return opts.map((b) => (b.choices || []).find((c) => c.id === b.correct)?.text);
+    case 'dragdrop': return opts.map((b) => b.answer);
+    default: return [];
+  }
+}
+
+const words = (s) => String(s || '').toLowerCase().split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 4);
+
+const STOP = new Set(['a', 'an', 'the', 'of', 'in', 'on', 'at', 'to', 'with', 'and', 'is', 'are', 'what', 'which', 'who', 'how', 'image', 'picture', 'photo']);
+
+/** Keep queries short and keyword-like: "girl watering plants", not a sentence. */
+function cleanQuery(s, avoid) {
+  const q = String(s || '').toLowerCase().replace(/[^\p{L}\p{N}\s-]+/gu, ' ').split(/\s+/)
+    .filter((w) => w && !STOP.has(w)).slice(0, 5).join(' ');
+  if (!q || words(q).some((w) => avoid.includes(w))) return null;
+  return q;
+}
+
+/** Compact view of a question for the query planner (no answer key). */
+function brief(q, i) {
+  const out = { i, type: q.type, question: String(q.text || '').replace(/\[\[[^\]]+\]\]/g, '___').slice(0, 400) };
+  if (['mcq', 'msq', 'poll'].includes(q.type)) out.options = (q.options || []).map((o) => o.text);
+  if (q.extra?.passage) out.passage = String(q.extra.passage).slice(0, 300);
+  const ans = answerTexts(q).filter(Boolean);
+  if (ans.length) out.answer = ans;
+  return out;
+}
+
+/**
+ * Turn a raw illustration plan ({object, action, setting, avoid, queries}) into search queries.
+ * Returns {queries: []} when the model said no picture helps, null when the plan is unusable.
+ */
+function toPlan(raw, q) {
+  if (!raw || typeof raw !== 'object') return null;
+  const avoid = [...new Set([...words(answerTexts(q).join(' ')), ...words((Array.isArray(raw.avoid) ? raw.avoid : []).join(' '))])];
+  if (raw.queries === null) return { queries: [], avoid, looking: null };
+  if (!Array.isArray(raw.queries)) return null;
+  const queries = [...new Set(raw.queries.map((s) => cleanQuery(s, avoid)).filter(Boolean))].slice(0, MAX_QUERIES);
+  if (!queries.length) return null;
+  const looking = [raw.object, raw.action, raw.setting && `in ${raw.setting}`].filter((x) => typeof x === 'string' && x.trim()).join(' ');
+  return { queries, avoid, looking: looking || queries[0] };
+}
+
+/**
+ * Ask the model what each question is about visually (object, action, setting) and turn that into
+ * 1-3 English search queries ordered from specific to general. Questions the model skips get no image.
+ */
+async function planImageQueries(targets, { subject, topic } = {}) {
+  const plans = targets.map(() => null);
+  const starts = [];
+  for (let k = 0; k < targets.length; k += PLAN_BATCH) starts.push(k);
+  await pool(starts, 2, async (start) => {
+    const batch = targets.slice(start, start + PLAN_BATCH).map((q, k) => brief(q, start + k));
+    const out = await chatJson({
+      system: IMAGE_SYSTEM,
+      temperature: 0.2,
+      prompt: [
+        subject || topic ? `Quiz context: ${[subject, topic].filter(Boolean).join(' - ')}` : '',
+        `For each question, imagine ONE picture that shows the situation of the question to a student, then describe it:
+- "object": the main concrete thing in the picture (a noun: person, animal, object, place, landmark, artwork ...)
+- "action": what the object is doing, as a verb ending in -ing, or null
+- "setting": where it happens, or null
+- "avoid": English words of the correct "answer" (the picture must NOT show or name the answer)
+- "queries": ${MAX_QUERIES} ENGLISH search queries of 1-4 words built from object + action + setting, ordered from most specific to most general. Only nouns, adjectives and -ing verbs. No question words, no articles, no abstract words like "concept", "question", "example". Add "diagram" or "map" only when a diagram or map fits better than a photo.
+Use "queries": null when no real picture would help (pure arithmetic, grammar rules, definitions of abstract words).
+Questions may be in any language; queries are always English.`,
+        `Examples:
+{"i":0,"question":"What is the boy doing in the park?","answer":["flying a kite"]} -> {"i":0,"object":"boy","action":null,"setting":"park","avoid":["kite","flying"],"queries":["boy standing park","child in park","city park"]}
+{"i":1,"question":"Nam đang đá bóng ở đâu?","answer":["sân trường"]} -> {"i":1,"object":"boy","action":"kicking football","setting":null,"avoid":["school","yard"],"queries":["boy kicking football","children playing football","football"]}
+{"i":2,"question":"Who painted the Mona Lisa?","answer":["Leonardo da Vinci"]} -> {"i":2,"object":"Mona Lisa painting","action":null,"setting":"museum","avoid":["leonardo","vinci"],"queries":["mona lisa painting","louvre museum gallery","renaissance portrait"]}
+{"i":3,"question":"Solve 2x + 3 = 7"} -> {"i":3,"queries":null}`,
+        JSON.stringify(batch),
+        'Respond with JSON: {"items":[{"i":<question index>,"object":"...","action":"... or null","setting":"... or null","avoid":["..."],"queries":["...","...","..."] or null}]}',
+      ].filter(Boolean).join('\n\n'),
+    });
+    for (const it of out.items || []) {
+      const i = Number(it.i);
+      if (i >= start && i < start + batch.length) plans[i] = toPlan(it, targets[i]);
+    }
+  });
+  return plans.map((p, i) => p || { queries: [], avoid: words(answerTexts(targets[i]).join(' ')), looking: null });
+}
+
+/** Search the planned queries in order (specific first) until there are enough candidates. */
+async function findCandidates(plan, want = 6) {
+  const seen = new Set(); const out = [];
+  for (const query of plan.queries) {
+    const results = await searchImages(query, { limit: want });
+    for (const r of results) {
+      // drop images whose title names the answer
+      if (seen.has(r.url) || words(r.title).some((w) => plan.avoid.includes(w))) continue;
+      seen.add(r.url); out.push({ ...r, query });
+    }
+    if (out.length >= want) break;
+  }
+  return out.slice(0, 8);
+}
+
+/** Find an illustration for every question that has none yet (in place). Returns how many got one. */
+async function attachImages(list, ctx = {}) {
+  const all = list.filter((q) => !q.image && !NO_AUTO_IMAGE.includes(q.type));
+  if (!all.length) return 0;
+  // use the plan the generator wrote; only ask the planner for questions without a usable one
+  const allPlans = all.map((q) => toPlan(q.imagePlan, q));
+  const missing = all.filter((_, i) => !allPlans[i]);
+  if (missing.length) {
+    const planned = await planImageQueries(missing, ctx);
+    missing.forEach((q, k) => { allPlans[all.indexOf(q)] = planned[k]; });
+  }
+  if (process.env.DEBUG_IMAGES) {
+    all.forEach((q, i) => console.log('[images]', missing.includes(q) ? 'planner ' : 'generator', JSON.stringify(String(q.text).slice(0, 60)), '->', allPlans[i].queries));
+  }
+  const targets = all.filter((_, i) => allPlans[i].queries.length);
+  const plans = allPlans.filter((p) => p.queries.length);
   if (!targets.length) return 0;
-  const cands = await pool(targets, 4, (q) => searchImages(q.imageQuery, { limit: 6 }));
+  const cands = await pool(plans, 4, (p) => findCandidates(p));
   // let the model pick the most relevant candidate by its title (keyword search alone is noisy)
   let picks = targets.map(() => 0);
   try {
     const out = await chatJson({
       system: SYSTEM,
       prompt: [
-        'Pick the best illustration for each quiz question from the candidate image titles. Choose an image that matches the topic of the question and does not reveal the answer. Use -1 when no candidate fits.',
-        JSON.stringify(targets.map((q, i) => ({ i, question: q.text, keywords: q.imageQuery, candidates: (cands[i] || []).map((c, k) => `${k}: ${c.title || 'untitled'} (${c.source})`) }))),
+        'Pick the best illustration for each quiz question from the candidate image titles. Choose the image whose title best matches "looking_for" and the question. It must not show or name the answer. Use -1 when no candidate fits.',
+        JSON.stringify(targets.map((q, i) => ({
+          i, question: q.text, looking_for: plans[i].looking,
+          candidates: (cands[i] || []).map((c, k) => `${k}: ${c.title || 'untitled'} (query "${c.query}", ${c.source})`),
+        }))),
         'Respond with JSON: {"picks":[{"i":<question index>,"pick":<candidate index or -1>}]}',
       ].join('\n\n'),
     });
@@ -299,7 +430,7 @@ aiRouter.post('/ai/quizzes/:id/similar', requireAuth, wrap(async (req, res) => {
     pos = base[0].position + 1;
     await many('UPDATE questions SET position=position+$3 WHERE quiz_id=$1 AND position>=$2', [quiz.id, pos, list.length]);
   }
-  if (req.body.images !== false) await attachImages(list);
+  if (req.body.images !== false) await attachImages(list, { subject: quiz.subject, topic: quiz.title });
   await tx((c) => insertQuestions(c, quiz.id, list, pos));
   res.json({ quiz: await loadQuiz(quiz.id), added: list.length });
 }));
@@ -421,16 +552,11 @@ aiRouter.post('/ai/quizzes/:id/images', requireAuth, wrap(async (req, res) => {
   const quiz = await myQuiz(req, res); if (!quiz) return;
   const targets = quiz.questions.filter((q) => !q.image && !NO_AUTO_IMAGE.includes(q.type));
   if (!targets.length) return res.json({ quiz, illustrated: 0 });
-  const prompt = [
-    'For each question give 2-5 ENGLISH keywords to search a free photo or diagram that illustrates it without revealing the answer. Use null when no image would help.',
-    JSON.stringify(targets.map((q) => ({ id: q.id, text: q.text, type: q.type }))),
-    'Respond with JSON: {"queries":[{"id":<question id>,"image_query":"..." or null}]}',
-  ].join('\n\n');
-  const out = await chatJson({ system: SYSTEM, prompt });
-  const items = targets.map((q) => ({ q, imageQuery: (out.queries || []).find((x) => Number(x.id) === q.id)?.image_query || null, image: null, extra: q.extra }));
-  const n = await attachImages(items);
+  // copies, so attachImages can set image / extra in place
+  const items = targets.map((q) => ({ ...q, extra: { ...(q.extra || {}) } }));
+  const n = await attachImages(items, { subject: quiz.subject, topic: quiz.title });
   for (const it of items.filter((x) => x.image)) {
-    await one('UPDATE questions SET image=$2, extra=$3 WHERE id=$1 RETURNING id', [it.q.id, it.image, JSON.stringify(it.extra)]);
+    await one('UPDATE questions SET image=$2, extra=$3 WHERE id=$1 RETURNING id', [it.id, it.image, JSON.stringify(it.extra)]);
   }
   res.json({ quiz: await loadQuiz(quiz.id), illustrated: n });
 }));
