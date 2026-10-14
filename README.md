@@ -23,6 +23,7 @@ Các lệnh khác:
 | `npm start` | Build client và chạy một server duy nhất ở http://localhost:4000 |
 | `npm run db:start` / `db:stop` / `db:status` | Quản lý PostgreSQL portable (dữ liệu ở `database/Data/data`) |
 | `npm run seed` | Thêm lại tài khoản demo và các quiz mẫu (không trùng lặp) |
+| `npm run app:start` / `app:stop` / `app:restart` / `app:status` | Chạy, tắt, restart, kiểm tra bản deploy chạy nền. Xem [RUNBOOK.md](RUNBOOK.md) |
 
 ## Cấu hình AI
 

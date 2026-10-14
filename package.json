@@ -11,7 +11,15 @@
     "seed": "npm --prefix server run seed",
     "dev": "node scripts/db.mjs ensure && concurrently -k -n api,web -c magenta,cyan \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
     "build": "npm --prefix client run build",
-    "start": "node scripts/db.mjs ensure && npm --prefix client run build && npm --prefix server start"
+    "start": "node scripts/db.mjs ensure && npm --prefix client run build && npm --prefix server start",
+    "app:start": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/app.ps1 start",
+    "app:stop": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/app.ps1 stop",
+    "app:restart": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/app.ps1 restart",
+    "app:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/app.ps1 status",
+    "app:logs": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/app.ps1 logs",
+    "autostart:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autostart.ps1 install",
+    "autostart:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autostart.ps1 uninstall",
+    "autostart:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autostart.ps1 status"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

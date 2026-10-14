@@ -1,1 +1,3 @@
 Nếu cần test, tạo temp ở thư mục sau. Không được tạo ở thư mục khác C:\Users\HoaBD5\Documents\Personal\WG\wayground-clone\.temp
+
+Chạy / tắt / restart / kiểm tra app đang deploy: đọc RUNBOOK.md. Tóm tắt: `npm run app:status`, `npm run app:start`, `npm run app:stop`, `npm run app:restart`, `npm run app:logs` (gọi scripts/app.ps1). App ở cổng 4000, PostgreSQL portable ở cổng 5433, public qua Tailscale Funnel (URL: xem `npm run app:status`; không ghi URL hay thông tin máy vào repo vì repo public). Tự khởi động khi bật máy: scripts/autostart.ps1 (Task Scheduler; cài/gỡ cần PowerShell Administrator, `npm run autostart:status` để xem).
