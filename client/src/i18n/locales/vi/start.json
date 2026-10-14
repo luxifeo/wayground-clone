@@ -1,10 +1,25 @@
 {
   "modes": {
-    "classic": { "title": "Cổ điển", "desc": "Học sinh trả lời theo tốc độ của mình và bạn theo dõi kết quả trên bảng xếp hạng trực tiếp" },
-    "mastery": { "title": "Đỉnh thành thạo", "desc": "Sắp ra mắt" },
-    "playground": { "title": "Sân chơi", "desc": "Sắp ra mắt" },
-    "test": { "title": "Chế độ kiểm tra", "desc": "Đánh giá nghiêm túc, tối giản. Không bảng xếp hạng, không áp lực thời gian" },
-    "team": { "title": "Chế độ đội", "desc": "Sắp ra mắt" }
+    "classic": {
+      "title": "Cổ điển",
+      "desc": "Học sinh trả lời theo tốc độ của mình và bạn theo dõi kết quả trên bảng xếp hạng trực tiếp"
+    },
+    "mastery": {
+      "title": "Đỉnh thành thạo",
+      "desc": "Sắp ra mắt"
+    },
+    "playground": {
+      "title": "Sân chơi",
+      "desc": "Sắp ra mắt"
+    },
+    "test": {
+      "title": "Chế độ kiểm tra",
+      "desc": "Đánh giá nghiêm túc, tối giản. Không bảng xếp hạng, không áp lực thời gian"
+    },
+    "team": {
+      "title": "Chế độ đội",
+      "desc": "Sắp ra mắt"
+    }
   },
   "selectMode": "Chọn chế độ phiên",
   "back": "Quay lại",
@@ -31,7 +46,9 @@
     "off": "Tắt",
     "unlimited": "Không giới hạn",
     "validate": "Chỉ báo đúng/sai",
-    "questionsOnly": "Chỉ câu hỏi"
+    "questionsOnly": "Chỉ câu hỏi",
+    "scoringClassic": "Điểm + thưởng tốc độ & chuỗi đúng",
+    "scoringPerQuestion": "1 điểm mỗi câu đúng"
   },
   "rows": {
     "attempts": "Số lần làm",
@@ -52,6 +69,8 @@
     "leaderboard": "Bảng xếp hạng",
     "memes": "Hiện meme",
     "memesSub": "Phản ứng vui nhộn sau mỗi câu trả lời",
-    "sound": "Hiệu ứng âm thanh"
+    "sound": "Hiệu ứng âm thanh",
+    "scoring": "Cách tính điểm",
+    "scoringSub": "Không đổi được sau khi bắt đầu phiên"
   }
 }

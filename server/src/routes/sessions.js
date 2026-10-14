@@ -3,7 +3,7 @@ import crypto from 'node:crypto';
 import { one, many, query } from '../db.js';
 import { requireAuth } from '../auth.js';
 import { loadQuiz } from './quizzes.js';
-import { grade, computeScore, sanitizeQuestion, revealFor, shuffle, UNGRADED_TYPES } from '../grading.js';
+import { grade, computeScore, sanitizeQuestion, revealFor, shuffle, UNGRADED_TYPES, SCORING_MODES } from '../grading.js';
 import {
   broadcast, hostState, playerState, loadSession, leaderboard, setQuestionTimer, clearQuestionTimer, dropPlayer, getIO, anonymize,
 } from '../realtime.js';
@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS = {
   anonymize: false,
   serious: false,
   redemption: false,
+  scoring: 'classic',       // classic (speed + streak bonus) | perQuestion (1 point per correct question)
 };
 
 async function uniqueCode() {
@@ -57,6 +58,7 @@ sessionRouter.post('/sessions', requireAuth, async (req, res) => {
   const pace = kind === 'live' && b.pace === 'teacher' ? 'teacher' : 'student';
   const gameType = b.gameType === 'test' ? 'test' : 'classic';
   const settings = { ...DEFAULT_SETTINGS, ...(b.settings || {}) };
+  if (!SCORING_MODES.includes(settings.scoring)) settings.scoring = 'classic';
   if (gameType === 'test') { settings.leaderboard = false; settings.memes = false; settings.showAnswers = settings.showAnswers === 'on' ? 'off' : settings.showAnswers; }
   if (kind === 'preview') { settings.shuffleQuestions = false; }
   const snapshot = {
@@ -103,7 +105,11 @@ sessionRouter.patch('/sessions/:id', requireAuth, async (req, res) => {
   const s = await ownSession(req, res); if (!s) return;
   if ('title' in req.body) await query('UPDATE sessions SET title=$2 WHERE id=$1', [s.id, req.body.title]);
   if ('deadline' in req.body) await query('UPDATE sessions SET deadline=$2 WHERE id=$1', [s.id, req.body.deadline]);
-  if (req.body.settings) await query('UPDATE sessions SET settings=settings || $2::jsonb WHERE id=$1', [s.id, JSON.stringify(req.body.settings)]);
+  if (req.body.settings) {
+    // scoring is fixed once the session exists: past scores cannot be recomputed (streaks are not stored)
+    const { scoring: _locked, ...settings } = req.body.settings;
+    await query('UPDATE sessions SET settings=settings || $2::jsonb WHERE id=$1', [s.id, JSON.stringify(settings)]);
+  }
   broadcast(s.id, { players: true });
   res.json(await hostState(s.id));
 });
@@ -238,13 +244,13 @@ sessionRouter.get('/sessions/:id/report', requireAuth, async (req, res) => {
 /** Manual grading of a response (open ended, overrides). */
 sessionRouter.patch('/responses/:rid', requireAuth, async (req, res) => {
   const r = await one(
-    `SELECT r.*, s.host_id, s.quiz_snapshot, s.game_type FROM responses r JOIN sessions s ON s.id=r.session_id WHERE r.id=$1`, [req.params.rid]);
+    `SELECT r.*, s.host_id, s.quiz_snapshot, s.game_type, s.settings FROM responses r JOIN sessions s ON s.id=r.session_id WHERE r.id=$1`, [req.params.rid]);
   if (!r) return res.status(404).json({ error: 'Response not found' });
   if (r.host_id !== req.user.id) return res.status(403).json({ error: 'Forbidden' });
   const fraction = Math.max(0, Math.min(1, Number(req.body.fraction)));
   const q = r.quiz_snapshot.questions.find((x) => x.id === r.question_id) || { points: 1 };
   const status = fraction >= 1 ? 'correct' : fraction > 0 ? 'partial' : 'incorrect';
-  const score = computeScore({ q, fraction, timeMs: 0, timerOn: false, streak: 0, gameType: r.game_type });
+  const score = computeScore({ q, fraction, timeMs: 0, timerOn: false, streak: 0, gameType: r.game_type, scoring: r.settings?.scoring });
   await applyGrade(r, { status, fraction, score, feedback: req.body.feedback ?? r.feedback });
   broadcast(r.session_id);
   res.json({ ok: true, status, fraction, score });
@@ -264,6 +270,7 @@ const sessionPublic = (s) => ({
     timer: s.pace === 'teacher' ? true : !!s.settings.timer, leaderboard: !!s.settings.leaderboard, memes: !!s.settings.memes,
     showAnswers: s.settings.showAnswers, showAnswersAfter: s.settings.showAnswersAfter, skipQuestions: !!s.settings.skipQuestions,
     serious: !!s.settings.serious, music: !!s.settings.music, attempts: s.settings.attempts || 0,
+    scoring: s.settings.scoring || 'classic',
   },
 });
 
@@ -348,7 +355,7 @@ sessionRouter.post('/play/:token/answer', async (req, res) => {
   const { status, fraction } = grade(q, req.body.answer);
   const ungraded = UNGRADED_TYPES.includes(q.type);
   const streak = ungraded ? p.streak : status === 'correct' ? p.streak + 1 : 0;
-  const score = computeScore({ q, fraction, timeMs, timerOn, streak, gameType: s.game_type });
+  const score = computeScore({ q, fraction, timeMs, timerOn, streak, gameType: s.game_type, scoring: s.settings.scoring });
   try {
     await query(
       `INSERT INTO responses(session_id,participant_id,question_id,answer,status,fraction,score,time_ms) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`,

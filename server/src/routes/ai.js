@@ -538,7 +538,7 @@ aiRouter.post('/ai/sessions/:id/grade', requireAuth, wrap(async (req, res) => {
       if (!r) continue;
       const fraction = Math.max(0, Math.min(1, Number(g.score) || 0));
       const status = fraction >= 1 ? 'correct' : fraction > 0 ? 'partial' : 'incorrect';
-      const score = computeScore({ q, fraction, timeMs: 0, timerOn: false, streak: 0, gameType: s.game_type });
+      const score = computeScore({ q, fraction, timeMs: 0, timerOn: false, streak: 0, gameType: s.game_type, scoring: s.settings?.scoring });
       await applyGrade(r, { status, fraction, score, feedback: g.feedback });
       graded++;
     }

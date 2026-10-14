@@ -50,5 +50,6 @@
     "correct": "Đáp án đúng",
     "time": "Thời gian (giây)",
     "explanation": "Giải thích"
-  }
+  },
+  "scoringPerQuestion": "1 điểm mỗi câu"
 }

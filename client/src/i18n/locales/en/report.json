@@ -54,5 +54,6 @@
     "correct": "Correct Answer",
     "time": "Time in seconds",
     "explanation": "Explanation"
-  }
+  },
+  "scoringPerQuestion": "1 point per question"
 }

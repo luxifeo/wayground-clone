@@ -1,10 +1,25 @@
 {
   "modes": {
-    "classic": { "title": "Classic", "desc": "Students answer at their own pace and you see results on a live leaderboard" },
-    "mastery": { "title": "Mastery Peak", "desc": "Coming soon" },
-    "playground": { "title": "Playground", "desc": "Coming soon" },
-    "test": { "title": "Test mode", "desc": "Serious, no-frills assessment. No leaderboard, no timer pressure" },
-    "team": { "title": "Team mode", "desc": "Coming soon" }
+    "classic": {
+      "title": "Classic",
+      "desc": "Students answer at their own pace and you see results on a live leaderboard"
+    },
+    "mastery": {
+      "title": "Mastery Peak",
+      "desc": "Coming soon"
+    },
+    "playground": {
+      "title": "Playground",
+      "desc": "Coming soon"
+    },
+    "test": {
+      "title": "Test mode",
+      "desc": "Serious, no-frills assessment. No leaderboard, no timer pressure"
+    },
+    "team": {
+      "title": "Team mode",
+      "desc": "Coming soon"
+    }
   },
   "selectMode": "Select a session mode",
   "back": "Back",
@@ -31,7 +46,9 @@
     "off": "Off",
     "unlimited": "Unlimited",
     "validate": "Validate only",
-    "questionsOnly": "Questions only"
+    "questionsOnly": "Questions only",
+    "scoringClassic": "Points + speed & streak bonus",
+    "scoringPerQuestion": "1 point per correct question"
   },
   "rows": {
     "attempts": "Session attempts",
@@ -52,6 +69,8 @@
     "leaderboard": "Leaderboard",
     "memes": "Show memes",
     "memesSub": "Fun reactions after each answer",
-    "sound": "Sound effects"
+    "sound": "Sound effects",
+    "scoring": "Scoring",
+    "scoringSub": "Fixed once the session starts"
   }
 }

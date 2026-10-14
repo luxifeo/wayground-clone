@@ -85,6 +85,7 @@ export const avatarBg = (a = '') => AVATAR_BG[[...a].reduce((s, c) => s + c.code
 export const DEFAULT_SETTINGS = {
   attempts: 0, timer: false, shuffleQuestions: true, shuffleAnswers: true, showAnswers: 'on', showAnswersAfter: 'on',
   leaderboard: true, memes: true, music: false, skipQuestions: false, anonymize: false, serious: false,
+  scoring: 'classic', // classic | perQuestion
 };
 
 export const rid = () => Math.random().toString(36).slice(2, 8);

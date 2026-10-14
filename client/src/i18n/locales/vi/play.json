@@ -18,7 +18,6 @@
     "joinAnother": "Tham gia game khác",
     "rank_ordinal_one": "Hạng {{count}}",
     "rank_ordinal_other": "Hạng {{count}}",
-    "pts": "{{score}} điểm",
     "fullscreen": "Toàn màn hình",
     "waitingHost": "Đang chờ giáo viên bắt đầu…",
     "leaderboard": "Bảng xếp hạng",
@@ -40,8 +39,22 @@
       "timeUp": "Hết giờ!",
       "almost": "👍 Gần đúng rồi!"
     },
-    "memesOk": ["🔥 Quá đỉnh!", "🚀 Bay lên nào!", "😎 Dễ ợt!", "🧠 Thông minh quá!", "🎯 Trúng phóc!", "💯 Chuẩn luôn!"],
-    "memesBad": ["😅 Ối!", "🙈 Suýt nữa thôi!", "🤔 Câu sau nhé!", "💪 Cố lên nào!", "🌱 Học thêm được điều mới!"]
+    "memesOk": [
+      "🔥 Quá đỉnh!",
+      "🚀 Bay lên nào!",
+      "😎 Dễ ợt!",
+      "🧠 Thông minh quá!",
+      "🎯 Trúng phóc!",
+      "💯 Chuẩn luôn!"
+    ],
+    "memesBad": [
+      "😅 Ối!",
+      "🙈 Suýt nữa thôi!",
+      "🤔 Câu sau nhé!",
+      "💪 Cố lên nào!",
+      "🌱 Học thêm được điều mới!"
+    ],
+    "pts_other": "{{score}} điểm"
   },
   "summary": {
     "partial": "Đúng một phần",

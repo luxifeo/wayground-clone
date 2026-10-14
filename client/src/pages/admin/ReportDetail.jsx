@@ -91,7 +91,7 @@ export default function ReportDetail() {
             </div>
             <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
               <CalendarDays className="h-4 w-4" />{t('started', { date: fmtDate(s.started_at || s.created_at) })}
-              <span className="text-slate-300">·</span>{s.kind === 'homework' ? t('assignedQuiz') : t(s.pace === 'teacher' ? 'common:session.teacherLed' : 'common:session.studentPaced')}{s.game_type === 'test' && ` · ${t('common:session.test')}`}
+              <span className="text-slate-300">·</span>{s.kind === 'homework' ? t('assignedQuiz') : t(s.pace === 'teacher' ? 'common:session.teacherLed' : 'common:session.studentPaced')}{s.game_type === 'test' && ` · ${t('common:session.test')}`}{s.settings?.scoring === 'perQuestion' && ` · ${t('scoringPerQuestion')}`}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">

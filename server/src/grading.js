@@ -176,8 +176,14 @@ export function grade(q, answer) {
   }
 }
 
-/** Points awarded for a graded answer. */
-export function computeScore({ q, fraction, timeMs, timerOn, streak, gameType }) {
+export const SCORING_MODES = ['classic', 'perQuestion'];
+
+/**
+ * Points awarded for a graded answer.
+ * scoring 'perQuestion': 1 point for a fully correct answer, otherwise 0 (no speed / streak bonus).
+ */
+export function computeScore({ q, fraction, timeMs, timerOn, streak, gameType, scoring = 'classic' }) {
+  if (scoring === 'perQuestion') return fraction >= 1 ? 1 : 0;
   if (fraction <= 0) return 0;
   const pts = q.points || 1;
   if (gameType === 'test') return Math.round(100 * pts * fraction);

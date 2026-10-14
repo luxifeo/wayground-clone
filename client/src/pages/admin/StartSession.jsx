@@ -124,6 +124,9 @@ export default function StartSession() {
               </Row>
             )}
             {pace === 'teacher' && <Row title={t('rows.timer')} sub={t('rows.timerTeacherSub')}>{on}</Row>}
+            <Row title={t('rows.scoring')} sub={t('rows.scoringSub')}>
+              <div className="flex max-w-xs justify-end"><Segmented value={s.scoring} onChange={set('scoring')} options={[{ value: 'classic', label: t('opt.scoringClassic') }, { value: 'perQuestion', label: t('opt.scoringPerQuestion') }]} /></div>
+            </Row>
           </div>
 
           <div className="mt-6 font-semibold text-slate-500">{t('more')}</div>

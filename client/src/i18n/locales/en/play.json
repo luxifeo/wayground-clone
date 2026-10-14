@@ -20,7 +20,6 @@
     "rank_ordinal_two": "{{count}}nd",
     "rank_ordinal_few": "{{count}}rd",
     "rank_ordinal_other": "{{count}}th",
-    "pts": "{{score}} pts",
     "fullscreen": "Full screen",
     "waitingHost": "Waiting for the host to start…",
     "leaderboard": "Leaderboard",
@@ -43,8 +42,23 @@
       "timeUp": "Time's up!",
       "almost": "👍 Almost there!"
     },
-    "memesOk": ["🔥 On fire!", "🚀 To the moon!", "😎 Too easy!", "🧠 Big brain!", "🎯 Bullseye!", "💯 Nailed it!"],
-    "memesBad": ["😅 Oops!", "🙈 So close!", "🤔 Next one!", "💪 Keep going!", "🌱 Learning moment!"]
+    "memesOk": [
+      "🔥 On fire!",
+      "🚀 To the moon!",
+      "😎 Too easy!",
+      "🧠 Big brain!",
+      "🎯 Bullseye!",
+      "💯 Nailed it!"
+    ],
+    "memesBad": [
+      "😅 Oops!",
+      "🙈 So close!",
+      "🤔 Next one!",
+      "💪 Keep going!",
+      "🌱 Learning moment!"
+    ],
+    "pts_one": "{{score}} pt",
+    "pts_other": "{{score}} pts"
   },
   "summary": {
     "partial": "Partial",
