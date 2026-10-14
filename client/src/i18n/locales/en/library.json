@@ -1,0 +1,29 @@
+{
+  "title": "Library",
+  "side": {
+    "created": "Created",
+    "recent": "Previously used",
+    "explore": "Explore public library"
+  },
+  "searchPlaceholder": "Search by activity name",
+  "createdByMe": "Created by me",
+  "addResource": "Add resource",
+  "assessment": "Assessment",
+  "tabs": {
+    "published": "Created ({{n}})",
+    "draft": "Draft ({{n}})",
+    "archived": "Archived ({{n}})"
+  },
+  "cols": {
+    "details": "Activity details",
+    "updated": "Last updated"
+  },
+  "empty": {
+    "title": "Nothing here yet",
+    "text": "Create an assessment to see it in your library."
+  },
+  "draftBadge": "DRAFT",
+  "shareWithStudents": "Share with students",
+  "duplicated": "Duplicated",
+  "confirmDelete": "Delete \"{{title}}\"?"
+}

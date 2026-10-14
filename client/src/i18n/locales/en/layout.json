@@ -1,0 +1,17 @@
+{
+  "nav": {
+    "home": "Home",
+    "library": "My library",
+    "reports": "Reports",
+    "explore": "Explore",
+    "join": "Join",
+    "joinGame": "Join a game"
+  },
+  "ai": {
+    "title": "AI powered by Gemma",
+    "text": "Generate quizzes from a topic, a document or a photo of a worksheet."
+  },
+  "user": {
+    "signedInAs": "Signed in as <b>{{email}}</b>"
+  }
+}

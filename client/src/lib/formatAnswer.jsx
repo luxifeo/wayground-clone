@@ -1,13 +1,16 @@
+import { useTranslation } from 'react-i18next';
+
 /** Render a student's raw answer in a human readable way, using the (full or sanitized) question. */
 export function FormatAnswer({ q, answer, dark = false }) {
-  if (answer === null || answer === undefined || answer === '') return <span className={dark ? 'text-white/50' : 'text-slate-400'}>No answer</span>;
+  const { t } = useTranslation('report');
+  if (answer === null || answer === undefined || answer === '') return <span className={dark ? 'text-white/50' : 'text-slate-400'}>{t('noAnswer')}</span>;
   const opts = q.options || [];
   const optText = (id) => opts.find((o) => o.id === id)?.text ?? id;
   const media = (a) => {
     if (!a?.url) return null;
     if (a.mime?.startsWith('audio')) return <audio src={a.url} controls className="h-9 max-w-full" />;
     if (a.mime?.startsWith('video')) return <video src={a.url} controls className="max-h-48 rounded" />;
-    return <a href={a.url} target="_blank" rel="noreferrer"><img src={a.url} alt="drawing" className="max-h-40 rounded border border-slate-200 bg-white" /></a>;
+    return <a href={a.url} target="_blank" rel="noreferrer"><img src={a.url} alt={t('drawing')} className="max-h-40 rounded border border-slate-200 bg-white" /></a>;
   };
   switch (q.type) {
     case 'mcq': case 'msq': case 'tf': case 'poll':
@@ -40,7 +43,7 @@ export function FormatAnswer({ q, answer, dark = false }) {
       return <span>{rows.map((r) => `${r.text}: ${(answer[r.id] || []).map((c) => cols.find((x) => x.id === c)?.text).join('/') || '–'}`).join('; ')}</span>;
     }
     case 'hotspot':
-      return <span>{(answer || []).length} area(s) selected</span>;
+      return <span>{t('areasSelected', { count: (answer || []).length })}</span>;
     case 'graphing':
       return <span>{(answer?.points || []).map((p) => `(${p[0]}, ${p[1]})`).join(', ')}</span>;
     case 'draw': case 'audio': case 'video':

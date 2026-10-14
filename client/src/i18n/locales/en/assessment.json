@@ -1,0 +1,37 @@
+{
+  "heading": "How would you like to get started?",
+  "upload": {
+    "text": "Upload lesson slides, worksheets or <u>any document</u>",
+    "hint": "PDF, DOCX, TXT or images · up to 50 MB · AI turns it into questions",
+    "device": "Device",
+    "linkPlaceholder": "Paste any link here…"
+  },
+  "import": {
+    "title": "Import your questions",
+    "sub": "Already have a question list? Bring it in exactly as you wrote it.",
+    "useTemplate": "Use template",
+    "searchLibrary": "Search library"
+  },
+  "prompt": {
+    "title": "Create with prompt or text",
+    "placeholder": "Enter a topic…"
+  },
+  "standards": {
+    "title": "Create with Standards or Curriculum",
+    "text": "Describe a standard (e.g. CCSS.MATH.5.NF.A.1) and let AI write aligned questions.",
+    "topic": "Create questions aligned to this curriculum standard: "
+  },
+  "scratch": "Start from scratch",
+  "modal": {
+    "title": "Import from spreadsheet",
+    "step1": "Download the template and fill it in with Excel or Google Sheets.",
+    "step2": "Supported types: Multiple Choice, Checkbox, True/False, Fill-in-the-Blank, Open-Ended, Poll, Reorder.",
+    "step3": "Correct answer: option number(s) like <code>2</code> or <code>1,3</code>; for fill-in-the-blank, separate alternatives with <code>|</code>.",
+    "step4": "Save as <b>CSV</b> and upload it here.",
+    "download": "Download template",
+    "upload": "Upload CSV"
+  },
+  "noQuestions": "No questions found in this file",
+  "imported_one": "Imported {{count}} question",
+  "imported_other": "Imported {{count}} questions"
+}

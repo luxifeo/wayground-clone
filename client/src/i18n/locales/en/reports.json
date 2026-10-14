@@ -1,0 +1,34 @@
+{
+  "title": "Reports",
+  "searchPlaceholder": "Search by report name",
+  "tabs": {
+    "all": "All"
+  },
+  "kind": {
+    "all": "All reports",
+    "live": "Live sessions"
+  },
+  "cols": {
+    "name": "Activity name",
+    "date": "Date",
+    "type": "Type",
+    "participants": "Participants",
+    "accuracy": "Accuracy",
+    "code": "Code",
+    "status": "Status"
+  },
+  "assessment": "Assessment",
+  "test": "Test",
+  "until": "until {{date}}",
+  "menu": {
+    "open": "Open report",
+    "host": "Open host screen",
+    "end": "End now"
+  },
+  "confirmDelete": "Delete this report?",
+  "empty": {
+    "title": "No reports yet",
+    "text": "Host or assign a quiz and the results will show up here.",
+    "library": "Go to library"
+  }
+}

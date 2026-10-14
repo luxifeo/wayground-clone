@@ -1,0 +1,131 @@
+{
+  "join": {
+    "codePlaceholder": "Nhập mã tham gia",
+    "join": "Tham gia",
+    "nameLabel": "Tên Wayground của bạn là…",
+    "namePlaceholder": "Nhập tên của bạn",
+    "randomName": "Tên ngẫu nhiên",
+    "start": "Bắt đầu",
+    "continueAs": "Tiếp tục với tên {{name}}",
+    "settings": "Cài đặt",
+    "soundEffects": "Âm thanh",
+    "differentCode": "Dùng mã khác",
+    "nameRequired": "Hãy nhập tên của bạn"
+  },
+  "game": {
+    "disconnected": "Giáo viên đã ngắt kết nối bạn khỏi game này.",
+    "removed": "Giáo viên đã mời bạn ra khỏi game này.",
+    "joinAnother": "Tham gia game khác",
+    "rank_ordinal_one": "Hạng {{count}}",
+    "rank_ordinal_other": "Hạng {{count}}",
+    "pts": "{{score}} điểm",
+    "fullscreen": "Toàn màn hình",
+    "waitingHost": "Đang chờ giáo viên bắt đầu…",
+    "leaderboard": "Bảng xếp hạng",
+    "waitingNext": "Đang chờ câu tiếp theo…",
+    "getReady": "Chuẩn bị nhé…",
+    "answerSubmitted": "Đã nộp câu trả lời!",
+    "waitingEveryone": "Đang chờ các bạn khác…",
+    "timeUp": "Hết giờ!",
+    "attemptsAllowed_other": "Được làm {{count}} lần",
+    "startGame": "Bắt đầu chơi",
+    "deadline": "Hạn chót: {{date}}",
+    "skip": "Bỏ qua",
+    "next": "Tiếp",
+    "finish": "Xong",
+    "banner": {
+      "submitted": "Đã nộp câu trả lời",
+      "recorded": "Đã ghi nhận câu trả lời",
+      "partial": "Đúng một phần",
+      "timeUp": "Hết giờ!",
+      "almost": "👍 Gần đúng rồi!"
+    },
+    "memesOk": ["🔥 Quá đỉnh!", "🚀 Bay lên nào!", "😎 Dễ ợt!", "🧠 Thông minh quá!", "🎯 Trúng phóc!", "💯 Chuẩn luôn!"],
+    "memesBad": ["😅 Ối!", "🙈 Suýt nữa thôi!", "🤔 Câu sau nhé!", "💪 Cố lên nào!", "🌱 Học thêm được điều mới!"]
+  },
+  "summary": {
+    "partial": "Đúng một phần",
+    "submitted": "Đã nộp",
+    "praiseThanks": "Cảm ơn bạn đã chia sẻ câu trả lời!",
+    "praiseGreat": "Xuất sắc lắm, cứ thế phát huy nhé!",
+    "praiseGood": "Làm tốt lắm, bạn sắp giỏi rồi!",
+    "praiseTry": "Cố gắng tốt lắm — luyện tập nhiều sẽ giỏi thôi!",
+    "rank": "Hạng",
+    "score": "Điểm",
+    "attempt": "Lần làm",
+    "accuracy": "Độ chính xác",
+    "performance": "Kết quả của bạn",
+    "statCorrect": "{{n}} Đúng",
+    "statIncorrect": "{{n}} Sai",
+    "statPartial": "{{n}} Đúng một phần",
+    "statUngraded": "{{n}} Chưa chấm",
+    "avgTime": "{{n}} giây/câu",
+    "streak": "Chuỗi đúng {{n}}",
+    "review": "Xem lại các câu",
+    "clickAnswers": "Bấm vào từng câu để xem đáp án",
+    "clickResponses": "Bấm vào từng câu để xem câu trả lời của bạn",
+    "question": "Câu hỏi",
+    "yourAnswer": "Câu trả lời của bạn: ",
+    "playAgain": "Chơi lại",
+    "joinAnother": "Tham gia game khác",
+    "leaderboard": "Bảng xếp hạng"
+  },
+  "player": {
+    "uploadFailed": "Tải lên thất bại",
+    "previewSubmitted": "✓ Đã nộp câu trả lời (xem trước)",
+    "passage": "Bài đọc"
+  },
+  "answers": {
+    "submit": "Nộp",
+    "choice": {
+      "selectN_other": "Chọn {{count}} đáp án",
+      "selectAll": "Chọn tất cả đáp án đúng"
+    },
+    "text": {
+      "placeholder": "Nhập câu trả lời…",
+      "mathPlaceholder": "Nhập biểu thức…",
+      "wordcloudPlaceholder": "Một từ hoặc một cụm từ ngắn",
+      "clear": "Xóa hết",
+      "correctAnswer": "Đáp án đúng: {{answer}}"
+    },
+    "match": {
+      "hint": "Bấm vào một ô bên trái, rồi bấm ô ghép đôi bên phải."
+    },
+    "dropdown": {
+      "select": "chọn ▾"
+    },
+    "dragdrop": {
+      "dropHere": "thả vào đây"
+    },
+    "hottext": {
+      "words_other": "Bấm để tô sáng {{count}} từ",
+      "sentences_other": "Bấm để tô sáng {{count}} câu",
+      "parts": "Bấm để tô sáng các phần đúng"
+    },
+    "hotspot": {
+      "tapN": "Bấm vào {{n}} vùng trên hình",
+      "tapOne": "Bấm vào vùng đúng trên hình"
+    },
+    "graphing": {
+      "line": "Chấm hai điểm nằm trên đường thẳng",
+      "plotN_other": "Chấm {{count}} điểm",
+      "plot": "Chấm các điểm",
+      "reset": "Làm lại"
+    },
+    "draw": {
+      "eraser": "Cục tẩy",
+      "clear": "Xóa hình vẽ"
+    },
+    "record": {
+      "cameraError": "Không mở được camera: {{msg}}",
+      "micError": "Không mở được micro: {{msg}}",
+      "stop": "Dừng · {{secs}}s",
+      "again": "Ghi lại",
+      "record": "Ghi câu trả lời"
+    },
+    "board": {
+      "noPosts": "Chưa có bài đăng nào.",
+      "noResponses": "Chưa có câu trả lời nào."
+    }
+  }
+}

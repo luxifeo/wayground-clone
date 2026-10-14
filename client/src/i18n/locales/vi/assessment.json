@@ -1,0 +1,36 @@
+{
+  "heading": "Bạn muốn bắt đầu như thế nào?",
+  "upload": {
+    "text": "Tải lên slide bài giảng, phiếu bài tập hoặc <u>bất kỳ tài liệu nào</u>",
+    "hint": "PDF, DOCX, TXT hoặc ảnh · tối đa 50 MB · AI biến nó thành câu hỏi",
+    "device": "Thiết bị",
+    "linkPlaceholder": "Dán đường link bất kỳ vào đây…"
+  },
+  "import": {
+    "title": "Nhập câu hỏi của bạn",
+    "sub": "Đã có sẵn danh sách câu hỏi? Đưa vào đúng như bạn đã viết.",
+    "useTemplate": "Dùng mẫu",
+    "searchLibrary": "Tìm trong thư viện"
+  },
+  "prompt": {
+    "title": "Tạo từ câu lệnh hoặc văn bản",
+    "placeholder": "Nhập một chủ đề…"
+  },
+  "standards": {
+    "title": "Tạo theo chuẩn hoặc chương trình học",
+    "text": "Mô tả một chuẩn (vd: CCSS.MATH.5.NF.A.1) và để AI viết các câu hỏi phù hợp.",
+    "topic": "Tạo câu hỏi phù hợp với chuẩn chương trình học sau: "
+  },
+  "scratch": "Bắt đầu từ đầu",
+  "modal": {
+    "title": "Nhập từ bảng tính",
+    "step1": "Tải mẫu xuống và điền bằng Excel hoặc Google Sheets.",
+    "step2": "Các loại được hỗ trợ: Trắc nghiệm, Nhiều đáp án, Đúng/Sai, Điền vào chỗ trống, Câu hỏi mở, Bình chọn, Sắp xếp.",
+    "step3": "Đáp án đúng: số thứ tự lựa chọn như <code>2</code> hoặc <code>1,3</code>; với câu điền vào chỗ trống, phân tách các đáp án thay thế bằng <code>|</code>.",
+    "step4": "Lưu dưới dạng <b>CSV</b> và tải lên tại đây.",
+    "download": "Tải mẫu xuống",
+    "upload": "Tải lên CSV"
+  },
+  "noQuestions": "Không tìm thấy câu hỏi nào trong file này",
+  "imported_other": "Đã nhập {{count}} câu hỏi"
+}

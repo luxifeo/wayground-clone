@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, X, ArrowUp, ArrowDown, GripVertical, Eraser, Trash2, Mic, Video, Square, RotateCcw, Send, Delete } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { splitBlanks } from '../../lib/constants.js';
 import Graph from '../Graph.jsx';
 import { Avatar, Spinner } from '../ui.jsx';
 
-export const SubmitBar = ({ onClick, disabled, label = 'Submit', busy }) => (
-  <div className="mt-4 flex justify-center">
-    <button onClick={onClick} disabled={disabled || busy} className="game-btn flex items-center gap-2 bg-white px-10 py-3 text-lg text-violet-800 disabled:opacity-40">
-      {busy ? <Spinner className="h-5 w-5" /> : <Send className="h-5 w-5" />}{label}
-    </button>
-  </div>
-);
+export function SubmitBar({ onClick, disabled, label, busy }) {
+  const { t } = useTranslation('play');
+  return (
+    <div className="mt-4 flex justify-center">
+      <button onClick={onClick} disabled={disabled || busy} className="game-btn flex items-center gap-2 bg-white px-10 py-3 text-lg text-violet-800 disabled:opacity-40">
+        {busy ? <Spinner className="h-5 w-5" /> : <Send className="h-5 w-5" />}{label ?? t('answers.submit')}
+      </button>
+    </div>
+  );
+}
 
 const chip = 'game-btn bg-white px-3 py-2 text-sm text-slate-800 shadow-[0_3px_0_rgba(0,0,0,.25)]';
 const okRing = 'ring-4 ring-emerald-400';
@@ -18,6 +22,7 @@ const badRing = 'ring-4 ring-red-500';
 
 // ------------------------------------------------------------ choices
 export function ChoiceAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
   const [sel, setSel] = useState([]);
   const multi = q.type === 'msq';
   const correct = result?.reveal?.correct;
@@ -29,7 +34,7 @@ export function ChoiceAnswer({ q, onSubmit, result, locked }) {
   const n = q.options.length;
   return (
     <div>
-      {multi && <div className="mb-2 text-center font-game text-sm font-bold text-white/80">Select {q.correctCount ? `${q.correctCount} answers` : 'all correct answers'}</div>}
+      {multi && <div className="mb-2 text-center font-game text-sm font-bold text-white/80">{q.correctCount ? t('answers.choice.selectN', { count: q.correctCount }) : t('answers.choice.selectAll')}</div>}
       <div className={`grid gap-2 sm:gap-3 ${n <= 2 ? 'grid-cols-2' : n === 3 ? 'grid-cols-1 sm:grid-cols-3' : n === 4 ? 'grid-cols-2 sm:grid-cols-4' : 'grid-cols-2 sm:grid-cols-5'}`}>
         {q.options.map((o, i) => {
           const chosen = (sel.length ? sel : [].concat(result?.answer || [])).includes(o.id);
@@ -45,7 +50,7 @@ export function ChoiceAnswer({ q, onSubmit, result, locked }) {
             >
               <span className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-md bg-black/20 text-sm">{multi ? (chosen ? <Check className="h-4 w-4" /> : '') : i + 1}</span>
               {o.image && <img src={o.image} alt="" className="max-h-28 rounded-lg" />}
-              <span className="break-words">{o.text}</span>
+              <span className="break-words">{q.type === 'tf' && o.text === { true: 'True', false: 'False' }[o.id] ? t(`common:tf.${o.id}`) : o.text}</span>
             </button>
           );
         })}
@@ -59,27 +64,28 @@ export function ChoiceAnswer({ q, onSubmit, result, locked }) {
 const KEYS = ['7', '8', '9', '÷', '(', ')', '4', '5', '6', '×', 'x', 'y', '1', '2', '3', '−', '^', '√', '0', '.', 'π', '+', '/', '='];
 
 export function TextAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
   const [v, setV] = useState('');
   const ref = useRef(null);
   const long = ['open', 'discussion'].includes(q.type);
   const insert = (k) => {
     const map = { '÷': '/', '×': '*', '−': '-', '√': 'sqrt(' };
-    const t = map[k] ?? k;
+    const ins = map[k] ?? k;
     const el = ref.current; const pos = el?.selectionStart ?? v.length;
-    setV(v.slice(0, pos) + t + v.slice(pos));
-    setTimeout(() => { el?.focus(); el?.setSelectionRange(pos + t.length, pos + t.length); }, 0);
+    setV(v.slice(0, pos) + ins + v.slice(pos));
+    setTimeout(() => { el?.focus(); el?.setSelectionRange(pos + ins.length, pos + ins.length); }, 0);
   };
   const accepted = result?.reveal?.accepted;
   return (
     <div className="mx-auto max-w-2xl">
       {long ? (
-        <textarea ref={ref} value={v} onChange={(e) => setV(e.target.value)} disabled={locked} maxLength={2000} placeholder="Type your answer…" className="min-h-[160px] w-full rounded-2xl bg-white p-4 font-game text-lg text-slate-800 outline-none" />
+        <textarea ref={ref} value={v} onChange={(e) => setV(e.target.value)} disabled={locked} maxLength={2000} placeholder={t('answers.text.placeholder')} className="min-h-[160px] w-full rounded-2xl bg-white p-4 font-game text-lg text-slate-800 outline-none" />
       ) : (
         <input
           ref={ref} value={v} onChange={(e) => setV(e.target.value)} disabled={locked} autoFocus
           maxLength={q.type === 'wordcloud' ? 40 : 200}
           onKeyDown={(e) => e.key === 'Enter' && v.trim() && !locked && onSubmit(v.trim())}
-          placeholder={q.type === 'math' ? 'Type an expression…' : q.type === 'wordcloud' ? 'One word or a short phrase' : 'Type your answer…'}
+          placeholder={t(q.type === 'math' ? 'answers.text.mathPlaceholder' : q.type === 'wordcloud' ? 'answers.text.wordcloudPlaceholder' : 'answers.text.placeholder')}
           className={`w-full rounded-2xl bg-white px-5 py-4 text-center font-game text-2xl font-bold text-slate-800 outline-none ${q.type === 'math' ? 'font-mono' : ''} ${result && result.status === 'correct' ? okRing : ''} ${result && result.status === 'incorrect' ? badRing : ''}`}
         />
       )}
@@ -87,11 +93,11 @@ export function TextAnswer({ q, onSubmit, result, locked }) {
         <div className="mx-auto mt-3 grid max-w-md grid-cols-6 gap-1.5">
           {KEYS.map((k) => <button key={k} onClick={() => insert(k)} className="rounded-lg bg-white/15 py-2 font-mono text-lg font-bold text-white hover:bg-white/25">{k}</button>)}
           <button onClick={() => setV(v.slice(0, -1))} className="col-span-2 flex items-center justify-center rounded-lg bg-white/25 py-2 text-white"><Delete className="h-5 w-5" /></button>
-          <button onClick={() => setV('')} className="col-span-4 rounded-lg bg-white/10 py-2 text-sm font-bold text-white">Clear</button>
+          <button onClick={() => setV('')} className="col-span-4 rounded-lg bg-white/10 py-2 text-sm font-bold text-white">{t('answers.text.clear')}</button>
         </div>
       )}
       {accepted && result.status !== 'correct' && (
-        <div className="mt-3 rounded-xl bg-emerald-500 px-4 py-2 text-center font-game font-bold text-white">Correct answer: {accepted.join(' / ')}</div>
+        <div className="mt-3 rounded-xl bg-emerald-500 px-4 py-2 text-center font-game font-bold text-white">{t('answers.text.correctAnswer', { answer: accepted.join(' / ') })}</div>
       )}
       {!result && <SubmitBar onClick={() => onSubmit(v.trim())} disabled={!v.trim() || locked} />}
     </div>
@@ -139,6 +145,7 @@ export function ReorderAnswer({ q, onSubmit, result, locked }) {
 const PAIR_COLORS = ['#f59e0b', '#06b6d4', '#a855f7', '#22c55e', '#ef4444', '#3b82f6', '#ec4899', '#84cc16'];
 
 export function MatchAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
   const [pairs, setPairs] = useState({});
   const [active, setActive] = useState(null);
   const reveal = result?.reveal?.pairs;
@@ -181,7 +188,7 @@ export function MatchAnswer({ q, onSubmit, result, locked }) {
           })}
         </div>
       </div>
-      {!result && <p className="mt-3 text-center text-sm text-white/70">Tap an item on the left, then its match on the right.</p>}
+      {!result && <p className="mt-3 text-center text-sm text-white/70">{t('answers.match.hint')}</p>}
       {!result && <SubmitBar onClick={() => onSubmit(pairs)} disabled={locked || Object.keys(pairs).length < q.lefts.length} />}
     </div>
   );
@@ -189,6 +196,7 @@ export function MatchAnswer({ q, onSubmit, result, locked }) {
 
 // ------------------------------------------------------------ dropdown & drag-drop (inline blanks)
 export function DropdownAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
   const [ans, setAns] = useState({});
   const rv = result?.reveal;
   const byId = new Map(q.blanks.map((b) => [b.id, b]));
@@ -205,7 +213,7 @@ export function DropdownAnswer({ q, onSubmit, result, locked }) {
                 value={ans[p.id] || ''} disabled={locked} onChange={(e) => setAns({ ...ans, [p.id]: e.target.value })}
                 className={`rounded-lg bg-white px-2 py-1 text-lg text-slate-800 outline-none ${rv ? (ok ? okRing : badRing) : ''}`}
               >
-                <option value="">select ▾</option>
+                <option value="">{t('answers.dropdown.select')}</option>
                 {b.choices.map((c) => <option key={c.id} value={c.id}>{c.text}</option>)}
               </select>
               {rv && !ok && <span className="text-sm leading-5 text-emerald-300">{rv.text?.[p.id]}</span>}
@@ -219,6 +227,7 @@ export function DropdownAnswer({ q, onSubmit, result, locked }) {
 }
 
 export function DragDropAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
   const [ans, setAns] = useState({});
   const [held, setHeld] = useState(null); // chip index
   const rv = result?.reveal?.blanks;
@@ -242,7 +251,7 @@ export function DragDropAnswer({ q, onSubmit, result, locked }) {
                 onClick={() => (held !== null ? place(p.id, held) : a && !locked && setAns(Object.fromEntries(Object.entries(ans).filter(([k]) => k !== p.id))))}
                 onDragOver={(e) => e.preventDefault()} onDrop={(e) => place(p.id, Number(e.dataTransfer.getData('text/plain')))}
                 className={`min-w-[96px] rounded-lg border-2 border-dashed px-3 py-0.5 text-lg ${a ? 'border-transparent bg-emerald-400 text-white' : 'border-white/60 bg-white/10 text-white/50'} ${rv ? (ok ? okRing : badRing) : ''}`}
-              >{a ? a.text : 'drop here'}</button>
+              >{a ? a.text : t('answers.dragdrop.dropHere')}</button>
               {rv && !ok && <span className="text-sm leading-5 text-emerald-300">{rv[p.id]}</span>}
             </span>
           );
@@ -307,11 +316,12 @@ export function CategorizeAnswer({ q, onSubmit, result, locked }) {
 
 // ------------------------------------------------------------ hot text
 export function HotTextAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
   const [sel, setSel] = useState([]);
   const correct = result?.reveal?.correct;
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="mb-2 text-center font-game text-sm font-bold text-white/80">Tap to highlight {q.selectCount ? `${q.selectCount} ${q.unit}${q.selectCount > 1 ? 's' : ''}` : 'the correct parts'}</div>
+      <div className="mb-2 text-center font-game text-sm font-bold text-white/80">{q.selectCount ? t(q.unit === 'sentence' ? 'answers.hottext.sentences' : 'answers.hottext.words', { count: q.selectCount }) : t('answers.hottext.parts')}</div>
       <div className="rounded-2xl bg-white p-5 text-lg leading-9 text-slate-800">
         {q.units.map((u) => {
           const on = sel.includes(u.id);
@@ -444,11 +454,12 @@ export function LabelingAnswer({ q, onSubmit, result, locked }) {
 
 // ------------------------------------------------------------ hotspot
 export function HotspotAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
   const [sel, setSel] = useState([]);
   const correct = result?.reveal?.correct;
   return (
     <div className="mx-auto max-w-4xl">
-      <div className="mb-2 text-center font-game text-sm font-bold text-white/80">Tap {q.selectCount > 1 ? `${q.selectCount} areas` : 'the correct area'} on the image</div>
+      <div className="mb-2 text-center font-game text-sm font-bold text-white/80">{q.selectCount > 1 ? t('answers.hotspot.tapN', { n: q.selectCount }) : t('answers.hotspot.tapOne')}</div>
       <div className="relative overflow-hidden rounded-2xl bg-white">
         <img src={q.image} alt="" className="w-full" draggable={false} />
         {q.regions.map((r) => {
@@ -470,6 +481,7 @@ export function HotspotAnswer({ q, onSubmit, result, locked }) {
 
 // ------------------------------------------------------------ graphing
 export function GraphingAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
   const [pts, setPts] = useState([]);
   const g = q.graph;
   const toggle = (x, y) => {
@@ -481,11 +493,11 @@ export function GraphingAnswer({ q, onSubmit, result, locked }) {
   };
   return (
     <div className="mx-auto max-w-xl">
-      <div className="mb-2 text-center font-game text-sm font-bold text-white/80">{g.mode === 'line' ? 'Plot two points on the line' : `Plot ${q.expected || ''} point${q.expected === 1 ? '' : 's'}`}</div>
+      <div className="mb-2 text-center font-game text-sm font-bold text-white/80">{g.mode === 'line' ? t('answers.graphing.line') : q.expected ? t('answers.graphing.plotN', { count: q.expected }) : t('answers.graphing.plot')}</div>
       <div className="rounded-2xl bg-white p-2"><Graph {...g} points={pts} onToggle={locked ? undefined : toggle} correct={result?.reveal?.points} size={460} /></div>
       {!result && (
         <div className="flex items-center justify-center gap-2">
-          <button onClick={() => setPts([])} disabled={locked} className="mt-4 rounded-xl bg-white/15 px-4 py-3 font-game font-bold text-white"><RotateCcw className="inline h-4 w-4" /> Reset</button>
+          <button onClick={() => setPts([])} disabled={locked} className="mt-4 rounded-xl bg-white/15 px-4 py-3 font-game font-bold text-white"><RotateCcw className="inline h-4 w-4" /> {t('answers.graphing.reset')}</button>
           <SubmitBar onClick={() => onSubmit({ points: pts })} disabled={locked || !pts.length || (g.mode === 'line' && pts.length < 2)} />
         </div>
       )}
@@ -497,6 +509,7 @@ export function GraphingAnswer({ q, onSubmit, result, locked }) {
 const PENS = ['#111827', '#ef4444', '#3b82f6', '#22c55e', '#f59e0b', '#a855f7'];
 
 export function DrawAnswer({ q, onSubmit, result, locked, uploadBlob }) {
+  const { t } = useTranslation('play');
   const ref = useRef(null);
   const [color, setColor] = useState(PENS[0]);
   const [erase, setErase] = useState(false);
@@ -531,8 +544,8 @@ export function DrawAnswer({ q, onSubmit, result, locked, uploadBlob }) {
       {!locked && (
         <div className="mb-2 flex items-center justify-center gap-2">
           {PENS.map((p) => <button key={p} onClick={() => { setColor(p); setErase(false); }} className={`h-8 w-8 rounded-full border-4 ${color === p && !erase ? 'border-white' : 'border-transparent'}`} style={{ background: p }} />)}
-          <button onClick={() => setErase(true)} className={`rounded-lg p-2 text-white ${erase ? 'bg-white/30' : 'bg-white/10'}`}><Eraser className="h-5 w-5" /></button>
-          <button onClick={() => { const c = ref.current; const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }} className="rounded-lg bg-white/10 p-2 text-white"><Trash2 className="h-5 w-5" /></button>
+          <button onClick={() => setErase(true)} title={t('answers.draw.eraser')} className={`rounded-lg p-2 text-white ${erase ? 'bg-white/30' : 'bg-white/10'}`}><Eraser className="h-5 w-5" /></button>
+          <button onClick={() => { const c = ref.current; const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); }} title={t('answers.draw.clear')} className="rounded-lg bg-white/10 p-2 text-white"><Trash2 className="h-5 w-5" /></button>
         </div>
       )}
       <canvas
@@ -548,6 +561,7 @@ export function DrawAnswer({ q, onSubmit, result, locked, uploadBlob }) {
 
 // ------------------------------------------------------------ audio / video recording
 export function RecordAnswer({ q, onSubmit, result, locked, uploadBlob }) {
+  const { t } = useTranslation('play');
   const video = q.type === 'video';
   const [stream, setStream] = useState(null);
   const [rec, setRec] = useState(null);
@@ -556,12 +570,12 @@ export function RecordAnswer({ q, onSubmit, result, locked, uploadBlob }) {
   const [busy, setBusy] = useState(false);
   const [secs, setSecs] = useState(0);
   const live = useRef(null);
-  useEffect(() => () => stream?.getTracks().forEach((t) => t.stop()), [stream]);
+  useEffect(() => () => stream?.getTracks().forEach((tr) => tr.stop()), [stream]);
   useEffect(() => { if (live.current && stream) live.current.srcObject = stream; }, [stream]);
   useEffect(() => {
     if (!rec) return undefined;
-    const t = setInterval(() => setSecs((s) => s + 1), 1000);
-    return () => clearInterval(t);
+    const iv = setInterval(() => setSecs((s) => s + 1), 1000);
+    return () => clearInterval(iv);
   }, [rec]);
   const start = async () => {
     setErr(''); setBlob(null); setSecs(0);
@@ -571,9 +585,9 @@ export function RecordAnswer({ q, onSubmit, result, locked, uploadBlob }) {
       const chunks = [];
       const r = new MediaRecorder(s);
       r.ondataavailable = (e) => chunks.push(e.data);
-      r.onstop = () => { setBlob(new Blob(chunks, { type: r.mimeType || (video ? 'video/webm' : 'audio/webm') })); s.getTracks().forEach((t) => t.stop()); setStream(null); };
+      r.onstop = () => { setBlob(new Blob(chunks, { type: r.mimeType || (video ? 'video/webm' : 'audio/webm') })); s.getTracks().forEach((tr) => tr.stop()); setStream(null); };
       r.start(); setRec(r);
-    } catch (e) { setErr(`Cannot access ${video ? 'camera' : 'microphone'}: ${e.message}`); }
+    } catch (e) { setErr(t(video ? 'answers.record.cameraError' : 'answers.record.micError', { msg: e.message })); }
   };
   const stop = () => { rec?.stop(); setRec(null); };
   const submit = async () => {
@@ -591,9 +605,9 @@ export function RecordAnswer({ q, onSubmit, result, locked, uploadBlob }) {
       {err && <div className="rounded-lg bg-red-500/80 px-3 py-2 text-sm text-white">{err}</div>}
       {!locked && !result && (
         rec ? (
-          <button onClick={stop} className="game-btn flex items-center gap-2 bg-red-500 px-6 py-3 text-white"><Square className="h-5 w-5" />Stop · {secs}s</button>
+          <button onClick={stop} className="game-btn flex items-center gap-2 bg-red-500 px-6 py-3 text-white"><Square className="h-5 w-5" />{t('answers.record.stop', { secs })}</button>
         ) : (
-          <button onClick={start} className="game-btn flex items-center gap-2 bg-violet-500 px-6 py-3 text-white">{video ? <Video className="h-5 w-5" /> : <Mic className="h-5 w-5" />}{blob ? 'Record again' : 'Record response'}</button>
+          <button onClick={start} className="game-btn flex items-center gap-2 bg-violet-500 px-6 py-3 text-white">{video ? <Video className="h-5 w-5" /> : <Mic className="h-5 w-5" />}{blob ? t('answers.record.again') : t('answers.record.record')}</button>
         )
       )}
       {!result && blob && <SubmitBar onClick={submit} disabled={locked} busy={busy} />}
@@ -603,13 +617,14 @@ export function RecordAnswer({ q, onSubmit, result, locked, uploadBlob }) {
 
 // ------------------------------------------------------------ discussion board / word cloud
 export function Board({ fetchBoard, type, myId }) {
+  const { t } = useTranslation('play');
   const [posts, setPosts] = useState([]);
   useEffect(() => {
     let alive = true;
     const load = () => fetchBoard().then((d) => alive && setPosts(d.posts)).catch(() => {});
     load();
-    const t = setInterval(load, 3000);
-    return () => { alive = false; clearInterval(t); };
+    const iv = setInterval(load, 3000);
+    return () => { alive = false; clearInterval(iv); };
   }, [fetchBoard]);
   if (type === 'wordcloud') return <WordCloud words={posts.map((p) => p.text)} />;
   return (
@@ -620,12 +635,13 @@ export function Board({ fetchBoard, type, myId }) {
           <div className="whitespace-pre-wrap font-game font-semibold">{p.text}</div>
         </div>
       ))}
-      {!posts.length && <div className="col-span-full text-center text-white/60">No posts yet.</div>}
+      {!posts.length && <div className="col-span-full text-center text-white/60">{t('answers.board.noPosts')}</div>}
     </div>
   );
 }
 
 export function WordCloud({ words, dark = true }) {
+  const { t } = useTranslation('play');
   const counts = {};
   words.forEach((w) => { const k = String(w || '').trim().toLowerCase(); if (k) counts[k] = (counts[k] || 0) + 1; });
   const list = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 60);
@@ -636,7 +652,7 @@ export function WordCloud({ words, dark = true }) {
       {list.map(([w, n], i) => (
         <span key={w} className="font-game font-bold animate-pop" style={{ fontSize: `${16 + (n / max) * 40}px`, color: colors[i % colors.length] }} title={`${n}`}>{w}</span>
       ))}
-      {!list.length && <span className={dark ? 'text-white/60' : 'text-slate-400'}>No responses yet.</span>}
+      {!list.length && <span className={dark ? 'text-white/60' : 'text-slate-400'}>{t('answers.board.noResponses')}</span>}
     </div>
   );
 }

@@ -1,9 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { CheckCircle2, Circle, Square, SquareCheck, ArrowRight, FileText } from 'lucide-react';
 import { splitBlanks } from '../lib/constants.js';
 import Graph from './Graph.jsx';
 
 /** Read-only rendering of a full question (with answers) for teacher views. */
 export function QuestionBody({ q, showAnswers = true, compact = false }) {
+  const { t } = useTranslation('editor');
   const o = q.options || [];
   const ex = q.extra || {};
   const Mark = ({ ok, multi }) => (showAnswers && ok
@@ -20,17 +22,17 @@ export function QuestionBody({ q, showAnswers = true, compact = false }) {
           {o.map((x) => (
             <div key={x.id} className="flex items-center gap-2 text-sm">
               <Mark ok={(q.answer || []).includes(x.id)} multi={q.type === 'msq'} />
-              {x.image && <img src={x.image} alt="" className="h-8 rounded" />}{x.text}
+              {x.image && <img src={x.image} alt="" className="h-8 rounded" />}{q.type === 'tf' && ['true', 'false'].includes(x.id) ? t(`common:tf.${x.id}`) : x.text}
             </div>
           ))}
         </div>
       );
       break;
     case 'fill': case 'math':
-      body = showAnswers && <div className="text-sm"><span className="font-semibold text-emerald-700">✓ {(q.answer?.accepted || [])[0]}</span>{(q.answer?.accepted || []).length > 1 && <span className="text-slate-500"> · Alternatives: {(q.answer.accepted || []).slice(1).join(', ')}</span>}</div>;
+      body = showAnswers && <div className="text-sm"><span className="font-semibold text-emerald-700">✓ {(q.answer?.accepted || [])[0]}</span>{(q.answer?.accepted || []).length > 1 && <span className="text-slate-500"> · {t('card.alternatives', { list: (q.answer.accepted || []).slice(1).join(', ') })}</span>}</div>;
       break;
     case 'open':
-      body = showAnswers && q.answer?.sample ? <div className="text-sm text-slate-500">Sample answer: {q.answer.sample}</div> : null;
+      body = showAnswers && q.answer?.sample ? <div className="text-sm text-slate-500">{t('card.sampleAnswer', { text: q.answer.sample })}</div> : null;
       break;
     case 'reorder':
       body = <ol className="list-decimal space-y-0.5 pl-5 text-sm">{o.map((x) => <li key={x.id}>{x.text}</li>)}</ol>;
@@ -45,7 +47,7 @@ export function QuestionBody({ q, showAnswers = true, compact = false }) {
       body = (
         <div className="text-sm leading-7">
           {textWithBlanks((id) => pill(showAnswers ? o.find((x) => x.id === id)?.answer : '_____'))}
-          {(ex.distractors || []).length > 0 && <div className="text-xs text-slate-500">Distractors: {ex.distractors.join(', ')}</div>}
+          {(ex.distractors || []).length > 0 && <div className="text-xs text-slate-500">{t('card.distractors', { list: ex.distractors.join(', ') })}</div>}
         </div>
       );
       break;
@@ -58,7 +60,7 @@ export function QuestionBody({ q, showAnswers = true, compact = false }) {
               {showAnswers && o.filter((i) => i.cat === c.id).map((i) => <div key={i.id} className="text-slate-600">• {i.text}</div>)}
             </div>
           ))}
-          {!showAnswers && <div className="text-slate-500">Items: {o.map((i) => i.text).join(', ')}</div>}
+          {!showAnswers && <div className="text-slate-500">{t('card.items', { list: o.map((i) => i.text).join(', ') })}</div>}
         </div>
       );
       break;
@@ -85,7 +87,7 @@ export function QuestionBody({ q, showAnswers = true, compact = false }) {
       body = q.image && (
         <div className="relative inline-block max-w-sm">
           <img src={q.image} alt="" className="rounded-lg" />
-          {q.type === 'labeling' && o.map((t) => <span key={t.id} className="absolute -translate-x-1/2 -translate-y-1/2 rounded bg-violet-600 px-1.5 text-[10px] font-bold text-white" style={{ left: `${t.x}%`, top: `${t.y}%` }}>{showAnswers ? t.text : '?'}</span>)}
+          {q.type === 'labeling' && o.map((lb) => <span key={lb.id} className="absolute -translate-x-1/2 -translate-y-1/2 rounded bg-violet-600 px-1.5 text-[10px] font-bold text-white" style={{ left: `${lb.x}%`, top: `${lb.y}%` }}>{showAnswers ? lb.text : '?'}</span>)}
           {q.type === 'hotspot' && o.map((r) => <span key={r.id} className={`absolute rounded border-2 border-dashed ${showAnswers && (q.answer || []).includes(r.id) ? 'border-emerald-500 bg-emerald-300/30' : 'border-slate-400'}`} style={{ left: `${r.x}%`, top: `${r.y}%`, width: `${r.w}%`, height: `${r.h}%` }} />)}
         </div>
       );

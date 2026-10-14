@@ -1,0 +1,29 @@
+{
+  "title": "Thư viện",
+  "side": {
+    "created": "Đã tạo",
+    "recent": "Đã dùng trước đây",
+    "explore": "Khám phá thư viện công khai"
+  },
+  "searchPlaceholder": "Tìm theo tên hoạt động",
+  "createdByMe": "Do tôi tạo",
+  "addResource": "Thêm học liệu",
+  "assessment": "Bài đánh giá",
+  "tabs": {
+    "published": "Đã tạo ({{n}})",
+    "draft": "Bản nháp ({{n}})",
+    "archived": "Đã lưu trữ ({{n}})"
+  },
+  "cols": {
+    "details": "Chi tiết hoạt động",
+    "updated": "Cập nhật lần cuối"
+  },
+  "empty": {
+    "title": "Chưa có gì ở đây",
+    "text": "Tạo một bài đánh giá để thấy nó trong thư viện của bạn."
+  },
+  "draftBadge": "NHÁP",
+  "shareWithStudents": "Chia sẻ với học sinh",
+  "duplicated": "Đã nhân bản",
+  "confirmDelete": "Xoá \"{{title}}\"?"
+}

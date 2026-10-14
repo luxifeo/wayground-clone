@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import {
   Trash2, Image as ImageIcon, Check, Plus, ArrowUp, ArrowDown, X, ArrowRight, Info, Upload,
 } from 'lucide-react';
@@ -33,6 +34,7 @@ const addBtn = 'inline-flex items-center gap-1 rounded-lg border border-dashed b
 
 // ------------------------------------------------------------ choice (mcq/msq/poll/tf)
 export function ChoiceBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const { pick } = useUpload();
   const isTF = q.type === 'tf';
   const graded = q.type !== 'poll';
@@ -53,14 +55,14 @@ export function ChoiceBody({ q, set }) {
               <div key={o.id} className={`edit-${isTF ? (i === 0 ? 0 : 3) : i} relative flex min-h-[170px] flex-col rounded-lg p-2 ${correct ? 'ring-4 ring-emerald-400' : ''}`}>
                 <div className="flex items-center gap-1">
                   {!isTF && q.options.length > 2 && (
-                    <button title="Delete option" onClick={() => set({ options: q.options.filter((_, j) => j !== i), answer: (q.answer || []).filter((a) => a !== o.id) })} className="rounded bg-white/20 p-1 text-white hover:bg-white/30"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <button title={t('bodies.choice.deleteOption')} onClick={() => set({ options: q.options.filter((_, j) => j !== i), answer: (q.answer || []).filter((a) => a !== o.id) })} className="rounded bg-white/20 p-1 text-white hover:bg-white/30"><Trash2 className="h-3.5 w-3.5" /></button>
                   )}
                   {!isTF && (
-                    <button title="Add image" onClick={async () => { const url = await pick(); if (url) setOpt(i, { image: url }); }} className="rounded bg-white/20 p-1 text-white hover:bg-white/30"><ImageIcon className="h-3.5 w-3.5" /></button>
+                    <button title={t('bodies.choice.addImage')} onClick={async () => { const url = await pick(); if (url) setOpt(i, { image: url }); }} className="rounded bg-white/20 p-1 text-white hover:bg-white/30"><ImageIcon className="h-3.5 w-3.5" /></button>
                   )}
                   {graded && (
                     <button
-                      title="Mark as correct" onClick={() => toggleCorrect(o.id)}
+                      title={t('bodies.choice.markCorrect')} onClick={() => toggleCorrect(o.id)}
                       className={`ml-auto grid h-6 w-6 place-items-center rounded-full border-2 ${correct ? 'border-emerald-400 bg-emerald-500 text-white' : 'border-white/70 text-white/70 hover:bg-white/20'}`}
                     ><Check className="h-3.5 w-3.5" /></button>
                   )}
@@ -72,11 +74,11 @@ export function ChoiceBody({ q, set }) {
                   </div>
                 )}
                 {isTF ? (
-                  <button onClick={() => toggleCorrect(o.id)} className="flex flex-1 items-center justify-center text-2xl font-bold text-white">{o.text}</button>
+                  <button onClick={() => toggleCorrect(o.id)} className="flex flex-1 items-center justify-center text-2xl font-bold text-white">{['true', 'false'].includes(o.id) ? t(`common:tf.${o.id}`) : o.text}</button>
                 ) : (
                   <textarea
                     value={o.text} onChange={(e) => setOpt(i, { text: e.target.value })}
-                    placeholder="Type answer option here"
+                    placeholder={t('bodies.choice.placeholder')}
                     className="mt-1 flex-1 resize-none bg-transparent text-center text-lg text-white placeholder-white/60 outline-none"
                   />
                 )}
@@ -85,73 +87,69 @@ export function ChoiceBody({ q, set }) {
           })}
         </div>
         {!isTF && q.options.length < 5 && (
-          <button title="Add option" onClick={() => set({ options: [...q.options, { id: rid(), text: '' }] })} className="self-center rounded-lg bg-white/15 p-2 text-white hover:bg-white/25"><Plus className="h-4 w-4" /></button>
+          <button title={t('bodies.choice.addOption')} onClick={() => set({ options: [...q.options, { id: rid(), text: '' }] })} className="self-center rounded-lg bg-white/15 p-2 text-white hover:bg-white/25"><Plus className="h-4 w-4" /></button>
         )}
       </div>
       {(q.type === 'mcq' || q.type === 'msq') && (
         <div className="mt-3 flex items-center gap-2 text-sm font-semibold text-white">
-          Multiple correct answers:
+          {t('bodies.choice.multiCorrect')}
           <Toggle checked={multi} onChange={(v) => set({ type: v ? 'msq' : 'mcq', answer: v ? q.answer : (q.answer || []).slice(0, 1) })} />
         </div>
       )}
-      {q.type === 'poll' && <div className="mt-3"><Info2>Polls are not graded. Students see how the class voted.</Info2></div>}
+      {q.type === 'poll' && <div className="mt-3"><Info2>{t('bodies.choice.pollNote')}</Info2></div>}
     </div>
   );
 }
 
 // ------------------------------------------------------------ fill / math
 export function FillBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const acc = q.answer?.accepted?.length ? q.answer.accepted : [''];
   const setAcc = (list) => set({ answer: { ...q.answer, accepted: list } });
   const isMath = q.type === 'math';
   return (
     <div className="space-y-3">
-      <div className="text-sm font-semibold text-white">{isMath ? 'Correct expression(s)' : 'Correct answer(s)'}</div>
+      <div className="text-sm font-semibold text-white">{isMath ? t('bodies.fill.correctExpressions') : t('bodies.fill.correctAnswers')}</div>
       <div className="flex flex-wrap gap-2">
         {acc.map((a, i) => (
           <div key={i} className="flex items-center gap-1 rounded-lg bg-emerald-600 p-1.5">
             <input
               value={a} onChange={(e) => setAcc(acc.map((x, j) => (j === i ? e.target.value : x)))}
-              placeholder={isMath ? 'e.g. 2x+6' : i === 0 ? 'Type the answer' : 'Alternative answer'}
+              placeholder={isMath ? t('bodies.fill.mathPlaceholder') : i === 0 ? t('bodies.fill.answerPlaceholder') : t('bodies.fill.altPlaceholder')}
               className={`w-52 rounded bg-white/15 px-2 py-1.5 text-white placeholder-white/60 outline-none ${isMath ? 'font-mono' : ''}`}
             />
             {acc.length > 1 && <button onClick={() => setAcc(acc.filter((_, j) => j !== i))} className="p-1 text-white/80"><X className="h-4 w-4" /></button>}
           </div>
         ))}
-        <button onClick={() => setAcc([...acc, ''])} className={addBtn}><Plus className="h-3.5 w-3.5" />Add {isMath ? 'another form' : 'alternative'}</button>
+        <button onClick={() => setAcc([...acc, ''])} className={addBtn}><Plus className="h-3.5 w-3.5" />{isMath ? t('bodies.fill.addForm') : t('bodies.fill.addAlt')}</button>
       </div>
       {isMath ? (
         <div className="flex items-center gap-2 text-sm text-white">
           <Toggle checked={!q.extra?.exact} onChange={(v) => set({ extra: { ...q.extra, exact: !v } })} />
-          Accept mathematically equivalent answers (e.g. <code className="rounded bg-black/30 px-1">2(x+3)</code> = <code className="rounded bg-black/30 px-1">2x+6</code>)
+          <span><Trans ns="editor" i18nKey="bodies.fill.equivalent" components={{ c: <code className="rounded bg-black/30 px-1" /> }} /></span>
         </div>
       ) : (
         <div className="flex items-center gap-2 text-sm text-white">
-          <Toggle checked={!!q.extra?.caseSensitive} onChange={(v) => set({ extra: { ...q.extra, caseSensitive: v } })} />Case sensitive
+          <Toggle checked={!!q.extra?.caseSensitive} onChange={(v) => set({ extra: { ...q.extra, caseSensitive: v } })} />{t('bodies.fill.caseSensitive')}
         </div>
       )}
-      {isMath && <Info2>Students type with an on-screen math keypad. Supports + − × ÷ ^ √, parentheses, variables and π.</Info2>}
+      {isMath && <Info2>{t('bodies.fill.mathNote')}</Info2>}
     </div>
   );
 }
 
 // ------------------------------------------------------------ open & media types
+const OPEN_NOTE_TYPES = ['open', 'draw', 'video', 'audio', 'wordcloud', 'discussion'];
+
 export function OpenBody({ q, set }) {
-  const notes = {
-    open: 'Students type a free response. Grade it in the report — manually or with AI using the sample answer.',
-    draw: 'Students get a drawing canvas (with your question image as background if you add one).',
-    video: 'Students record a short video with their camera. Review it in the report.',
-    audio: 'Students record a spoken answer with their microphone. Review it in the report.',
-    wordcloud: 'Students submit short words or phrases. Responses build a live word cloud.',
-    discussion: 'Students post ideas to a shared board and can read each other’s posts in real time.',
-  };
+  const { t } = useTranslation('editor');
   return (
     <div className="space-y-3">
-      <Info2>{notes[q.type]}</Info2>
+      <Info2>{OPEN_NOTE_TYPES.includes(q.type) ? t(`bodies.open.notes.${q.type}`) : null}</Info2>
       {q.type === 'open' && (
         <div>
-          <div className="mb-1 text-sm font-semibold text-white">Sample answer (optional, used for AI grading)</div>
-          <textarea value={q.answer?.sample || ''} onChange={(e) => set({ answer: { sample: e.target.value } })} className={`${darkInput} min-h-[90px]`} placeholder="A model answer…" />
+          <div className="mb-1 text-sm font-semibold text-white">{t('bodies.open.sampleAnswer')}</div>
+          <textarea value={q.answer?.sample || ''} onChange={(e) => set({ answer: { sample: e.target.value } })} className={`${darkInput} min-h-[90px]`} placeholder={t('bodies.open.samplePlaceholder')} />
         </div>
       )}
     </div>
@@ -160,6 +158,7 @@ export function OpenBody({ q, set }) {
 
 // ------------------------------------------------------------ reorder
 export function ReorderBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const move = (i, d) => {
     const o = [...q.options]; const j = i + d;
     if (j < 0 || j >= o.length) return;
@@ -167,36 +166,37 @@ export function ReorderBody({ q, set }) {
   };
   return (
     <div className="space-y-2">
-      <Info2>Enter the items in the correct order. Students will see them shuffled.</Info2>
+      <Info2>{t('bodies.reorder.note')}</Info2>
       {q.options.map((o, i) => (
         <div key={o.id} className={`edit-${i % 5} flex items-center gap-2 rounded-lg p-2`}>
           <span className="grid h-7 w-7 place-items-center rounded-full bg-white/25 text-sm font-bold text-white">{i + 1}</span>
-          <input value={o.text} onChange={(e) => set({ options: q.options.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} placeholder="Type an item" className="flex-1 bg-transparent text-white placeholder-white/60 outline-none" />
+          <input value={o.text} onChange={(e) => set({ options: q.options.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} placeholder={t('bodies.reorder.placeholder')} className="flex-1 bg-transparent text-white placeholder-white/60 outline-none" />
           <button onClick={() => move(i, -1)} className="p-1 text-white/80 hover:text-white"><ArrowUp className="h-4 w-4" /></button>
           <button onClick={() => move(i, 1)} className="p-1 text-white/80 hover:text-white"><ArrowDown className="h-4 w-4" /></button>
           {q.options.length > 2 && <button onClick={() => set({ options: q.options.filter((_, j) => j !== i) })} className="p-1 text-white/80 hover:text-white"><Trash2 className="h-4 w-4" /></button>}
         </div>
       ))}
-      {q.options.length < 8 && <button onClick={() => set({ options: [...q.options, { id: rid(), text: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />Add item</button>}
+      {q.options.length < 8 && <button onClick={() => set({ options: [...q.options, { id: rid(), text: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />{t('bodies.reorder.addItem')}</button>}
     </div>
   );
 }
 
 // ------------------------------------------------------------ match
 export function MatchBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const setP = (i, patch) => set({ options: q.options.map((x, j) => (j === i ? { ...x, ...patch } : x)) });
   return (
     <div className="space-y-2">
-      <Info2>Each row is a correct pair. Students see the right column shuffled.</Info2>
+      <Info2>{t('bodies.match.note')}</Info2>
       {q.options.map((p, i) => (
         <div key={p.id} className="flex items-center gap-2">
-          <input value={p.left} onChange={(e) => setP(i, { left: e.target.value })} placeholder="Item" className="edit-0 flex-1 rounded-lg px-3 py-3 text-white placeholder-white/60 outline-none" />
+          <input value={p.left} onChange={(e) => setP(i, { left: e.target.value })} placeholder={t('bodies.match.left')} className="edit-0 flex-1 rounded-lg px-3 py-3 text-white placeholder-white/60 outline-none" />
           <ArrowRight className="h-5 w-5 shrink-0 text-white/70" />
-          <input value={p.right} onChange={(e) => setP(i, { right: e.target.value })} placeholder="Matching item" className="edit-2 flex-1 rounded-lg px-3 py-3 text-white placeholder-white/70 outline-none" />
+          <input value={p.right} onChange={(e) => setP(i, { right: e.target.value })} placeholder={t('bodies.match.right')} className="edit-2 flex-1 rounded-lg px-3 py-3 text-white placeholder-white/70 outline-none" />
           {q.options.length > 2 && <button onClick={() => set({ options: q.options.filter((_, j) => j !== i) })} className="p-1 text-white/80"><Trash2 className="h-4 w-4" /></button>}
         </div>
       ))}
-      {q.options.length < 8 && <button onClick={() => set({ options: [...q.options, { id: rid(), left: '', right: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />Add pair</button>}
+      {q.options.length < 8 && <button onClick={() => set({ options: [...q.options, { id: rid(), left: '', right: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />{t('bodies.match.addPair')}</button>}
     </div>
   );
 }
@@ -209,6 +209,7 @@ function nextBlankId(text) {
 }
 
 export function BlankText({ q, set, textRef }) {
+  const { t } = useTranslation('editor');
   const insert = () => {
     const id = nextBlankId(q.text);
     const el = textRef.current;
@@ -219,31 +220,32 @@ export function BlankText({ q, set, textRef }) {
   };
   return (
     <div className="mt-2 flex items-center justify-between gap-2">
-      <span className="text-xs text-white/60">Blanks appear as <code className="rounded bg-black/30 px-1">[[b1]]</code> in the text.</span>
-      <button onClick={insert} className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-50"><Plus className="mr-1 inline h-3.5 w-3.5" />Insert blank</button>
+      <span className="text-xs text-white/60"><Trans ns="editor" i18nKey="bodies.blanks.hint" components={{ c: <code className="rounded bg-black/30 px-1" /> }} /></span>
+      <button onClick={insert} className="rounded-lg bg-white px-3 py-1.5 text-xs font-bold text-violet-700 hover:bg-violet-50"><Plus className="mr-1 inline h-3.5 w-3.5" />{t('bodies.blanks.insert')}</button>
     </div>
   );
 }
 
 export function DropdownBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const ids = splitBlanks(q.text).filter((p) => p.t === 'blank').map((p) => p.id);
   const byId = new Map(q.options.map((b) => [b.id, b]));
   const blanks = ids.map((id) => byId.get(id) || { id, choices: [{ id: rid(), text: '' }], correct: null });
   const setB = (id, patch) => set({ options: blanks.map((b) => (b.id === id ? { ...b, ...patch } : b)) });
-  if (!blanks.length) return <Info2>Insert at least one blank into the question text.</Info2>;
+  if (!blanks.length) return <Info2>{t('bodies.blanks.needBlank')}</Info2>;
   return (
     <div className="grid gap-3 md:grid-cols-2">
       {blanks.map((b, k) => (
         <div key={b.id} className="rounded-lg bg-black/20 p-3">
-          <div className="mb-2 text-xs font-bold uppercase text-white/70">Blank {k + 1} <code className="ml-1 normal-case text-white/50">[[{b.id}]]</code></div>
+          <div className="mb-2 text-xs font-bold uppercase text-white/70">{t('bodies.blanks.blankN', { n: k + 1 })} <code className="ml-1 normal-case text-white/50">[[{b.id}]]</code></div>
           {b.choices.map((c, i) => (
             <div key={c.id} className="mb-1.5 flex items-center gap-2">
-              <button title="Correct" onClick={() => setB(b.id, { correct: c.id })} className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 ${b.correct === c.id ? 'border-emerald-400 bg-emerald-500 text-white' : 'border-white/50 text-transparent'}`}><Check className="h-3.5 w-3.5" /></button>
-              <input value={c.text} onChange={(e) => setB(b.id, { choices: b.choices.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} placeholder={`Option ${i + 1}`} className={darkInput} />
+              <button title={t('bodies.dropdown.correct')} onClick={() => setB(b.id, { correct: c.id })} className={`grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 ${b.correct === c.id ? 'border-emerald-400 bg-emerald-500 text-white' : 'border-white/50 text-transparent'}`}><Check className="h-3.5 w-3.5" /></button>
+              <input value={c.text} onChange={(e) => setB(b.id, { choices: b.choices.map((x, j) => (j === i ? { ...x, text: e.target.value } : x)) })} placeholder={t('bodies.dropdown.optionN', { n: i + 1 })} className={darkInput} />
               {b.choices.length > 1 && <button onClick={() => setB(b.id, { choices: b.choices.filter((_, j) => j !== i) })} className="text-white/70"><X className="h-4 w-4" /></button>}
             </div>
           ))}
-          <button onClick={() => setB(b.id, { choices: [...b.choices, { id: rid(), text: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />Add option</button>
+          <button onClick={() => setB(b.id, { choices: [...b.choices, { id: rid(), text: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />{t('bodies.dropdown.addOption')}</button>
         </div>
       ))}
     </div>
@@ -266,23 +268,24 @@ export function ChipsInput({ values, onChange, placeholder }) {
 }
 
 export function DragDropBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const ids = splitBlanks(q.text).filter((p) => p.t === 'blank').map((p) => p.id);
   const byId = new Map(q.options.map((b) => [b.id, b]));
   const blanks = ids.map((id) => byId.get(id) || { id, answer: '' });
   return (
     <div className="space-y-3">
-      {!blanks.length && <Info2>Insert at least one blank into the question text.</Info2>}
+      {!blanks.length && <Info2>{t('bodies.blanks.needBlank')}</Info2>}
       <div className="grid gap-2 md:grid-cols-3">
         {blanks.map((b, k) => (
           <div key={b.id} className="rounded-lg bg-emerald-700/60 p-2">
-            <div className="mb-1 text-[11px] font-bold uppercase text-white/70">Blank {k + 1}</div>
-            <input value={b.answer} onChange={(e) => set({ options: blanks.map((x) => (x.id === b.id ? { ...x, answer: e.target.value } : x)) })} placeholder="Correct item" className={darkInput} />
+            <div className="mb-1 text-[11px] font-bold uppercase text-white/70">{t('bodies.blanks.blankN', { n: k + 1 })}</div>
+            <input value={b.answer} onChange={(e) => set({ options: blanks.map((x) => (x.id === b.id ? { ...x, answer: e.target.value } : x)) })} placeholder={t('bodies.dragdrop.correctItem')} className={darkInput} />
           </div>
         ))}
       </div>
       <div>
-        <div className="mb-1 text-sm font-semibold text-white">Distractors (extra wrong items)</div>
-        <ChipsInput values={q.extra?.distractors || []} onChange={(d) => set({ extra: { ...q.extra, distractors: d } })} placeholder="Type and press Enter" />
+        <div className="mb-1 text-sm font-semibold text-white">{t('bodies.dragdrop.distractors')}</div>
+        <ChipsInput values={q.extra?.distractors || []} onChange={(d) => set({ extra: { ...q.extra, distractors: d } })} placeholder={t('bodies.dragdrop.chipsPlaceholder')} />
       </div>
     </div>
   );
@@ -290,6 +293,7 @@ export function DragDropBody({ q, set }) {
 
 // ------------------------------------------------------------ categorize
 export function CategorizeBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const cats = q.extra?.categories || [];
   const setCats = (c) => set({ extra: { ...q.extra, categories: c } });
   const setItem = (id, patch) => set({ options: q.options.map((x) => (x.id === id ? { ...x, ...patch } : x)) });
@@ -299,20 +303,20 @@ export function CategorizeBody({ q, set }) {
         {cats.map((c, ci) => (
           <div key={c.id} className="flex flex-col rounded-lg bg-black/20 p-2">
             <div className={`edit-${ci % 5} mb-2 flex items-center gap-1 rounded-md px-2 py-1.5`}>
-              <input value={c.name} onChange={(e) => setCats(cats.map((x) => (x.id === c.id ? { ...x, name: e.target.value } : x)))} placeholder={`Group ${ci + 1}`} className="flex-1 bg-transparent font-bold text-white placeholder-white/70 outline-none" />
+              <input value={c.name} onChange={(e) => setCats(cats.map((x) => (x.id === c.id ? { ...x, name: e.target.value } : x)))} placeholder={t('bodies.categorize.groupN', { n: ci + 1 })} className="flex-1 bg-transparent font-bold text-white placeholder-white/70 outline-none" />
               {cats.length > 2 && <button onClick={() => { setCats(cats.filter((x) => x.id !== c.id)); set({ options: q.options.filter((i) => i.cat !== c.id) }); }} className="text-white/80"><Trash2 className="h-4 w-4" /></button>}
             </div>
             {q.options.filter((i) => i.cat === c.id).map((it) => (
               <div key={it.id} className="mb-1.5 flex items-center gap-1">
-                <input value={it.text} onChange={(e) => setItem(it.id, { text: e.target.value })} placeholder="Item" className={darkInput} />
+                <input value={it.text} onChange={(e) => setItem(it.id, { text: e.target.value })} placeholder={t('bodies.categorize.item')} className={darkInput} />
                 <button onClick={() => set({ options: q.options.filter((x) => x.id !== it.id) })} className="text-white/70"><X className="h-4 w-4" /></button>
               </div>
             ))}
-            <button onClick={() => set({ options: [...q.options, { id: rid(), text: '', cat: c.id }] })} className={`${addBtn} mt-auto justify-center`}><Plus className="h-3.5 w-3.5" />Add item</button>
+            <button onClick={() => set({ options: [...q.options, { id: rid(), text: '', cat: c.id }] })} className={`${addBtn} mt-auto justify-center`}><Plus className="h-3.5 w-3.5" />{t('bodies.categorize.addItem')}</button>
           </div>
         ))}
       </div>
-      {cats.length < 5 && <button onClick={() => setCats([...cats, { id: rid(), name: '' }])} className={`${addBtn} mt-3`}><Plus className="h-3.5 w-3.5" />Add group</button>}
+      {cats.length < 5 && <button onClick={() => setCats([...cats, { id: rid(), name: '' }])} className={`${addBtn} mt-3`}><Plus className="h-3.5 w-3.5" />{t('bodies.categorize.addGroup')}</button>}
     </div>
   );
 }
@@ -326,6 +330,7 @@ export function tokenizeHot(source, unit) {
 }
 
 export function HotTextBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const unit = q.extra?.unit || 'word';
   const units = q.options || [];
   const update = (source, u = unit) => {
@@ -338,16 +343,16 @@ export function HotTextBody({ q, set }) {
     <div className="space-y-3">
       <div>
         <div className="mb-1 flex items-center justify-between text-sm font-semibold text-white">
-          Text
+          {t('bodies.hottext.text')}
           <span className="flex gap-1 rounded-lg bg-black/30 p-0.5 text-xs">
-            {['word', 'sentence'].map((u) => <button key={u} onClick={() => update(q.extra?.source || '', u)} className={`rounded-md px-2 py-1 capitalize ${unit === u ? 'bg-white text-violet-700' : 'text-white/80'}`}>{u}s</button>)}
+            {['word', 'sentence'].map((u) => <button key={u} onClick={() => update(q.extra?.source || '', u)} className={`rounded-md px-2 py-1 ${unit === u ? 'bg-white text-violet-700' : 'text-white/80'}`}>{t(`bodies.hottext.units.${u}`)}</button>)}
           </span>
         </div>
-        <textarea value={q.extra?.source || ''} onChange={(e) => update(e.target.value)} className={`${darkInput} min-h-[90px]`} placeholder="Paste or type the passage students will highlight in…" />
+        <textarea value={q.extra?.source || ''} onChange={(e) => update(e.target.value)} className={`${darkInput} min-h-[90px]`} placeholder={t('bodies.hottext.placeholder')} />
       </div>
       {units.length > 0 && (
         <div>
-          <div className="mb-1 text-sm font-semibold text-white">Click the correct {unit}s</div>
+          <div className="mb-1 text-sm font-semibold text-white">{t(`bodies.hottext.pick.${unit === 'sentence' ? 'sentence' : 'word'}`)}</div>
           <div className="rounded-lg bg-white p-3 leading-8 text-slate-800">
             {units.map((u) => (
               <span key={u.id}>
@@ -363,6 +368,7 @@ export function HotTextBody({ q, set }) {
 
 // ------------------------------------------------------------ match table grid
 export function MatchGridBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const cols = q.extra?.columns || [];
   const multi = !!q.extra?.multi;
   const ans = q.answer || {};
@@ -382,7 +388,7 @@ export function MatchGridBody({ q, set }) {
               {cols.map((c, i) => (
                 <th key={c.id} className="p-1.5">
                   <div className="flex items-center gap-1">
-                    <input value={c.text} onChange={(e) => setCols(cols.map((x) => (x.id === c.id ? { ...x, text: e.target.value } : x)))} placeholder={`Column ${i + 1}`} className="input py-1 text-center" />
+                    <input value={c.text} onChange={(e) => setCols(cols.map((x) => (x.id === c.id ? { ...x, text: e.target.value } : x)))} placeholder={t('bodies.matchgrid.columnN', { n: i + 1 })} className="input py-1 text-center" />
                     {cols.length > 2 && <button onClick={() => setCols(cols.filter((x) => x.id !== c.id))} className="text-slate-400"><X className="h-4 w-4" /></button>}
                   </div>
                 </th>
@@ -393,7 +399,7 @@ export function MatchGridBody({ q, set }) {
           <tbody>
             {q.options.map((r, ri) => (
               <tr key={r.id} className="border-t border-slate-100">
-                <td className="p-1.5"><input value={r.text} onChange={(e) => set({ options: q.options.map((x) => (x.id === r.id ? { ...x, text: e.target.value } : x)) })} placeholder={`Row ${ri + 1}`} className="input py-1" /></td>
+                <td className="p-1.5"><input value={r.text} onChange={(e) => set({ options: q.options.map((x) => (x.id === r.id ? { ...x, text: e.target.value } : x)) })} placeholder={t('bodies.matchgrid.rowN', { n: ri + 1 })} className="input py-1" /></td>
                 {cols.map((c) => {
                   const on = (ans[r.id] || []).includes(c.id);
                   return (
@@ -409,8 +415,8 @@ export function MatchGridBody({ q, set }) {
         </table>
       </div>
       <div className="flex items-center gap-4">
-        <button onClick={() => set({ options: [...q.options, { id: rid(), text: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />Add row</button>
-        <label className="flex items-center gap-2 text-sm text-white"><Toggle checked={multi} onChange={(v) => set({ extra: { ...q.extra, multi: v } })} />Allow multiple columns per row</label>
+        <button onClick={() => set({ options: [...q.options, { id: rid(), text: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />{t('bodies.matchgrid.addRow')}</button>
+        <label className="flex items-center gap-2 text-sm text-white"><Toggle checked={multi} onChange={(v) => set({ extra: { ...q.extra, multi: v } })} />{t('bodies.matchgrid.allowMulti')}</label>
       </div>
     </div>
   );
@@ -418,12 +424,13 @@ export function MatchGridBody({ q, set }) {
 
 // ------------------------------------------------------------ table fill in
 export function TableFillBody({ q, set }) {
+  const { t: tr } = useTranslation('editor');
   const t = q.extra?.table || { cols: ['', ''], rows: [] };
   const setT = (nt) => set({ extra: { ...q.extra, table: nt } });
   const setCell = (ri, ci, cell) => setT({ ...t, rows: t.rows.map((r, i) => (i === ri ? r.map((c, j) => (j === ci ? cell : c)) : r)) });
   return (
     <div className="space-y-3">
-      <Info2>Type values in the cells. Click <b>⬚</b> to turn a cell into a blank students must fill. Separate alternative answers with <code>|</code>.</Info2>
+      <Info2><span><Trans ns="editor" i18nKey="bodies.tablefill.note" components={{ b: <b />, c: <code /> }} /></span></Info2>
       <div className="overflow-x-auto rounded-lg bg-white p-1">
         <table className="w-full text-sm">
           <thead>
@@ -431,7 +438,7 @@ export function TableFillBody({ q, set }) {
               {t.cols.map((c, ci) => (
                 <th key={ci} className="p-1">
                   <div className="flex items-center gap-1">
-                    <input value={c} onChange={(e) => setT({ ...t, cols: t.cols.map((x, j) => (j === ci ? e.target.value : x)) })} placeholder={`Header ${ci + 1}`} className="input bg-slate-100 py-1 font-bold" />
+                    <input value={c} onChange={(e) => setT({ ...t, cols: t.cols.map((x, j) => (j === ci ? e.target.value : x)) })} placeholder={tr('bodies.tablefill.headerN', { n: ci + 1 })} className="input bg-slate-100 py-1 font-bold" />
                     {t.cols.length > 1 && <button onClick={() => setT({ cols: t.cols.filter((_, j) => j !== ci), rows: t.rows.map((r) => r.filter((_, j) => j !== ci)) })} className="text-slate-400"><X className="h-4 w-4" /></button>}
                   </div>
                 </th>
@@ -448,11 +455,11 @@ export function TableFillBody({ q, set }) {
                       <input
                         value={c.t === 'blank' ? (c.accepted || []).join(' | ') : c.v}
                         onChange={(e) => setCell(ri, ci, c.t === 'blank' ? { ...c, accepted: e.target.value.split('|').map((s) => s.trimStart()) } : { ...c, v: e.target.value })}
-                        placeholder={c.t === 'blank' ? 'Correct answer' : 'Text'}
+                        placeholder={c.t === 'blank' ? tr('bodies.tablefill.correctAnswer') : tr('bodies.tablefill.text')}
                         className={`w-full rounded-lg bg-transparent px-2 py-1.5 outline-none ${c.t === 'blank' ? 'font-semibold text-emerald-700' : ''}`}
                       />
                       <button
-                        title={c.t === 'blank' ? 'Make it a text cell' : 'Make it a blank'}
+                        title={c.t === 'blank' ? tr('bodies.tablefill.makeText') : tr('bodies.tablefill.makeBlank')}
                         onClick={() => setCell(ri, ci, c.t === 'blank' ? { t: 'text', v: (c.accepted || [])[0] || '' } : { t: 'blank', id: rid(), accepted: [c.v || ''] })}
                         className={`shrink-0 rounded px-1.5 py-0.5 text-xs font-bold ${c.t === 'blank' ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-500'}`}
                       >⬚</button>
@@ -465,24 +472,26 @@ export function TableFillBody({ q, set }) {
           </tbody>
         </table>
       </div>
-      <button onClick={() => setT({ ...t, rows: [...t.rows, t.cols.map(() => ({ t: 'text', v: '' }))] })} className={addBtn}><Plus className="h-3.5 w-3.5" />Add row</button>
+      <button onClick={() => setT({ ...t, rows: [...t.rows, t.cols.map(() => ({ t: 'text', v: '' }))] })} className={addBtn}><Plus className="h-3.5 w-3.5" />{tr('bodies.tablefill.addRow')}</button>
     </div>
   );
 }
 
 // ------------------------------------------------------------ image based (labeling / hotspot)
 function ImageRequired({ set }) {
+  const { t } = useTranslation('editor');
   const { pick, busy } = useUpload();
   return (
     <button onClick={async () => { const url = await pick(); if (url) set({ image: url }); }} className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-white/40 py-10 text-white hover:bg-white/10">
       {busy ? <Spinner /> : <Upload className="h-7 w-7" />}
-      <span className="font-semibold">Upload an image</span>
-      <span className="text-xs text-white/60">A diagram, map, photo or chart</span>
+      <span className="font-semibold">{t('bodies.image.upload')}</span>
+      <span className="text-xs text-white/60">{t('bodies.image.uploadHint')}</span>
     </button>
   );
 }
 
 export function LabelingBody({ q, set }) {
+  const { t: tr } = useTranslation('editor');
   if (!q.image) return <ImageRequired q={q} set={set} />;
   const add = (e) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -499,25 +508,26 @@ export function LabelingBody({ q, set }) {
             <span key={t.id} className="absolute grid h-6 w-6 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border-2 border-white bg-violet-600 text-xs font-bold text-white shadow" style={{ left: `${t.x}%`, top: `${t.y}%` }}>{i + 1}</span>
           ))}
         </div>
-        <p className="mt-1 text-xs text-white/70">Click on the image to add a label position.</p>
+        <p className="mt-1 text-xs text-white/70">{tr('bodies.labeling.clickToAdd')}</p>
       </div>
       <div className="space-y-2">
         {q.options.map((t, i) => (
           <div key={t.id} className="flex items-center gap-1.5">
             <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-violet-600 text-xs font-bold text-white">{i + 1}</span>
-            <input value={t.text} onChange={(e) => set({ options: q.options.map((x) => (x.id === t.id ? { ...x, text: e.target.value } : x)) })} placeholder="Label" className={darkInput} />
+            <input value={t.text} onChange={(e) => set({ options: q.options.map((x) => (x.id === t.id ? { ...x, text: e.target.value } : x)) })} placeholder={tr('bodies.labeling.label')} className={darkInput} />
             <button onClick={() => set({ options: q.options.filter((x) => x.id !== t.id) })} className="text-white/70"><X className="h-4 w-4" /></button>
           </div>
         ))}
-        <div className="pt-2 text-xs font-semibold text-white">Distractor labels</div>
-        <ChipsInput values={q.extra?.distractors || []} onChange={(d) => set({ extra: { ...q.extra, distractors: d } })} placeholder="Wrong label + Enter" />
-        <button onClick={() => set({ image: null, options: [] })} className="text-xs text-white/60 underline">Change image</button>
+        <div className="pt-2 text-xs font-semibold text-white">{tr('bodies.labeling.distractors')}</div>
+        <ChipsInput values={q.extra?.distractors || []} onChange={(d) => set({ extra: { ...q.extra, distractors: d } })} placeholder={tr('bodies.labeling.distractorPlaceholder')} />
+        <button onClick={() => set({ image: null, options: [] })} className="text-xs text-white/60 underline">{tr('bodies.image.change')}</button>
       </div>
     </div>
   );
 }
 
 export function HotspotBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const ref = useRef(null);
   const [drag, setDrag] = useState(null);
   if (!q.image) return <ImageRequired q={q} set={set} />;
@@ -562,8 +572,8 @@ export function HotspotBody({ q, set }) {
         )}
       </div>
       <div className="mt-2 flex items-center justify-between text-xs text-white/70">
-        <span>Drag on the image to draw a clickable area. Click an area to toggle correct (<span className="font-bold text-emerald-300">green</span>) or distractor (gray).</span>
-        <button onClick={() => set({ image: null, options: [], answer: [] })} className="underline">Change image</button>
+        <span><Trans ns="editor" i18nKey="bodies.hotspot.hint" components={{ g: <span className="font-bold text-emerald-300" /> }} /></span>
+        <button onClick={() => set({ image: null, options: [], answer: [] })} className="underline">{t('bodies.image.change')}</button>
       </div>
     </div>
   );
@@ -571,6 +581,7 @@ export function HotspotBody({ q, set }) {
 
 // ------------------------------------------------------------ graphing
 export function GraphingBody({ q, set }) {
+  const { t } = useTranslation('editor');
   const ex = q.extra || {};
   const pts = q.answer?.points || [];
   const toggle = (x, y) => {
@@ -585,17 +596,17 @@ export function GraphingBody({ q, set }) {
       <div className="rounded-lg bg-white p-2"><Graph {...ex} points={pts} onToggle={toggle} size={420} /></div>
       <div className="space-y-3 text-sm text-white">
         <div>
-          <div className="mb-1 font-semibold">Students must plot</div>
+          <div className="mb-1 font-semibold">{t('bodies.graphing.mustPlot')}</div>
           <div className="flex gap-1 rounded-lg bg-black/30 p-0.5 text-xs">
-            {[['points', 'Points'], ['line', 'A line']].map(([m, l]) => <button key={m} onClick={() => { setEx({ mode: m }); if (m === 'line') set({ extra: { ...ex, mode: m }, answer: { points: pts.slice(-2) } }); }} className={`flex-1 rounded-md px-2 py-1.5 ${ex.mode === m ? 'bg-white text-violet-700' : ''}`}>{l}</button>)}
+            {['points', 'line'].map((m) => <button key={m} onClick={() => { setEx({ mode: m }); if (m === 'line') set({ extra: { ...ex, mode: m }, answer: { points: pts.slice(-2) } }); }} className={`flex-1 rounded-md px-2 py-1.5 ${ex.mode === m ? 'bg-white text-violet-700' : ''}`}>{t(`bodies.graphing.modes.${m}`)}</button>)}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          {[['xmin', 'X min'], ['xmax', 'X max'], ['ymin', 'Y min'], ['ymax', 'Y max']].map(([k, l]) => (
-            <label key={k} className="text-xs">{l}<input type="number" value={ex[k]} onChange={(e) => setEx({ [k]: Number(e.target.value) })} className={darkInput} /></label>
+          {['xmin', 'xmax', 'ymin', 'ymax'].map((k) => (
+            <label key={k} className="text-xs">{t(`bodies.graphing.${k}`)}<input type="number" value={ex[k]} onChange={(e) => setEx({ [k]: Number(e.target.value) })} className={darkInput} /></label>
           ))}
         </div>
-        <Info2>Click the grid to place the correct {ex.mode === 'line' ? 'two points of the line' : 'points'}. Correct answer: {pts.map((p) => `(${p[0]}, ${p[1]})`).join(', ') || 'none yet'}</Info2>
+        <Info2>{t(ex.mode === 'line' ? 'bodies.graphing.hintLine' : 'bodies.graphing.hintPoints', { answer: pts.map((p) => `(${p[0]}, ${p[1]})`).join(', ') || t('bodies.graphing.none') })}</Info2>
       </div>
     </div>
   );

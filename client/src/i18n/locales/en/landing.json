@@ -1,0 +1,47 @@
+{
+  "header": {
+    "enterCode": "Enter code",
+    "logIn": "Log in",
+    "signUp": "Sign up"
+  },
+  "hero": {
+    "title": "Assessments students <hl>love</hl> to take",
+    "sub": "Create engaging quizzes in seconds with AI, run them live or as homework and see exactly where every student needs help.",
+    "cta": "Get started — it's free",
+    "codePlaceholder": "Enter a join code",
+    "join": "Join"
+  },
+  "demo": {
+    "earth": "Earth",
+    "mars": "Mars",
+    "jupiter": "Jupiter",
+    "venus": "Venus"
+  },
+  "features": {
+    "assessments": {
+      "title": "Interactive assessments",
+      "text": "Multiple choice, multi-select, fill in the blank, reorder, match, polls, open ended and drawing questions."
+    },
+    "ai": {
+      "title": "AI that saves hours",
+      "text": "Turn a topic, a PDF, a Word file or a photo of a worksheet into a ready-to-play quiz with a multimodal Gemma model."
+    },
+    "games": {
+      "title": "Live & self-paced games",
+      "text": "Host teacher-led sessions on the big screen or let students play at their own pace with a live leaderboard."
+    },
+    "reports": {
+      "title": "Instant reports",
+      "text": "Accuracy per student and per question, answer distributions and AI-assisted grading of open ended answers."
+    },
+    "content": {
+      "title": "Bring your content",
+      "text": "Upload documents, paste text or share a link. Edit everything before you publish."
+    },
+    "homework": {
+      "title": "Homework mode",
+      "text": "Assign quizzes with a deadline and a join code. Students can join from any device."
+    }
+  },
+  "footer": "Wayground clone — built for learning purposes."
+}

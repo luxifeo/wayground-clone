@@ -1,0 +1,34 @@
+{
+  "enterCode": "Enter code",
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "welcome": "{{greeting}}, {{name}} 👋 Let's get started.",
+  "tabs": {
+    "create": { "title": "Create", "sub": "a resource" },
+    "search": { "title": "Search", "sub": "for resources" },
+    "upload": { "title": "Upload", "sub": "& enhance your content" }
+  },
+  "resources": {
+    "assessment": { "title": "Assessment", "sub": "Quick & interactive questions" },
+    "presentation": { "title": "Presentation", "sub": "Slides with questions and whiteboard" },
+    "video": { "title": "Video", "sub": "Questions at key points in the video" },
+    "passage": { "title": "Passage", "sub": "Questions based on a passage" },
+    "flashcards": { "title": "Flashcards", "sub": "Questions on front, answers on back" }
+  },
+  "comingSoon": "Coming soon",
+  "searchPlaceholder": "Search for quizzes on any topic",
+  "upload": {
+    "title": "Upload lesson slides, worksheets or any document",
+    "sub": "We'll turn it into an interactive assessment with AI",
+    "device": "Device"
+  },
+  "recent": {
+    "title": "Recently edited",
+    "seeAll": "See all",
+    "empty": "Nothing here yet — create your first assessment!",
+    "assessment": "Assessment"
+  }
+}

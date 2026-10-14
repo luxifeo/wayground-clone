@@ -1,0 +1,17 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "library": "Thư viện của tôi",
+    "reports": "Báo cáo",
+    "explore": "Khám phá",
+    "join": "Tham gia",
+    "joinGame": "Tham gia trò chơi"
+  },
+  "ai": {
+    "title": "AI chạy bằng Gemma",
+    "text": "Tạo bài quiz từ một chủ đề, một tài liệu hoặc ảnh chụp phiếu bài tập."
+  },
+  "user": {
+    "signedInAs": "Đã đăng nhập với <b>{{email}}</b>"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "titleGenerate": "Generate questions with AI",
+  "titleCreate": "Create with AI",
+  "tips": {
+    "reading": "Reading your content…",
+    "concepts": "Picking the key concepts…",
+    "writing": "Writing questions…",
+    "distractors": "Crafting plausible distractors…",
+    "checking": "Double-checking answers…"
+  },
+  "working": "Gemma is working on it — this usually takes a few seconds.",
+  "unreachable": "AI model is not reachable at <b>{{baseUrl}}</b> ({{error}}). Set <code>LLM_BASE_URL</code> and <code>LLM_MODEL</code> in <code>server/.env</code> and restart the server.",
+  "modes": {
+    "prompt": "Topic or text",
+    "upload": "Upload files",
+    "link": "Web link"
+  },
+  "topicPlaceholder": "Enter a topic (e.g. “Photosynthesis for 7th grade”) or paste your lesson text, notes or an article…",
+  "dropzone": "<b>Click to upload</b> or drag and drop",
+  "formats": "PDF, DOCX, TXT or images (photos of worksheets, slides, diagrams) — up to 50 MB",
+  "removeFile": "Remove file",
+  "instructionsExample": "Optional instructions, e.g. “focus on chapter 2 vocabulary”",
+  "instructions": "Optional instructions",
+  "types": "Question types",
+  "count": "Questions",
+  "grade": "Grade",
+  "any": "Any",
+  "difficulty": "Difficulty",
+  "levels": {
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard"
+  },
+  "findImages": "<b>Find illustration images</b> <muted>— free photos & diagrams (Wikimedia, Openverse…) are added to suitable questions</muted>",
+  "generate": "Generate",
+  "generated_one": "Generated {{count}} question",
+  "generated_other": "Generated {{count}} questions",
+  "generatedImages_one": " · {{count}} image",
+  "generatedImages_other": " · {{count}} images"
+}

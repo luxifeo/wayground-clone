@@ -1,0 +1,216 @@
+{
+  "question": {
+    "saveQuestion": "Lưu câu hỏi",
+    "saved": "Đã lưu câu hỏi",
+    "aiUpdated": "AI đã cập nhật câu hỏi — hãy kiểm tra và lưu",
+    "enhance": "Cải thiện bằng AI",
+    "ai": {
+      "rephrase": "Diễn đạt lại",
+      "fix": "Sửa ngữ pháp & nội dung",
+      "easier": "Làm dễ hơn",
+      "harder": "Làm khó hơn",
+      "distractors": "Cải thiện đáp án sai",
+      "explanation": "Viết giải thích"
+    },
+    "addPassage": "Thêm bài đọc",
+    "removePassage": "Gỡ bài đọc",
+    "previewQuestion": "Xem trước câu hỏi",
+    "addExplanation": "Thêm giải thích đáp án",
+    "hideExplanation": "Ẩn giải thích đáp án",
+    "passage": "Bài đọc",
+    "passagePlaceholder": "Dán bài đọc vào đây…",
+    "uploadImage": "Tải ảnh lên",
+    "searchFreeImages": "Tìm ảnh miễn phí",
+    "searchImages": "Tìm ảnh",
+    "textPlaceholder": "Nhập câu hỏi tại đây",
+    "placeholders": {
+      "dropdown": "Nhập câu và chèn chỗ trống, ví dụ “Bầu trời màu [[b1]].”",
+      "dragdrop": "Nhập câu và chèn chỗ trống, ví dụ “23 × 2 = [[b1]]”",
+      "hottext": "Hướng dẫn, ví dụ “Chọn ý chính”",
+      "tablefill": "Hướng dẫn, ví dụ “Hoàn thành bảng”",
+      "labeling": "Hướng dẫn, ví dụ “Gắn nhãn các bộ phận của cây”",
+      "hotspot": "Ví dụ “Bấm vào thủ đô”",
+      "graphing": "Ví dụ “Vẽ đường thẳng y = 2x + 1”"
+    },
+    "explanation": "Giải thích đáp án",
+    "explanationPlaceholder": "Giải thích vì sao đáp án đúng. Học sinh sẽ thấy sau khi trả lời.",
+    "toSave": "Để lưu: {{list}}",
+    "studentPreview": "Xem trước như học sinh",
+    "problems": {
+      "text": "Nhập câu hỏi",
+      "minOptions": "Thêm ít nhất 2 lựa chọn",
+      "emptyOptions": "Điền hoặc xoá các lựa chọn trống",
+      "markCorrect": "Đánh dấu đáp án đúng",
+      "addAnswer": "Thêm đáp án đúng",
+      "minItems": "Thêm ít nhất 2 mục",
+      "emptyPairs": "Hoàn thành hoặc xoá các cặp trống",
+      "insertBlank": "Chèn ít nhất một chỗ trống",
+      "dropdownChoices": "Mỗi danh sách thả xuống cần có lựa chọn đã điền và một đáp án đúng",
+      "dragdropItems": "Mỗi chỗ trống cần một mục đúng",
+      "categorize": "Đặt tên cho mọi nhóm và thêm ít nhất 2 mục",
+      "hottext": "Chọn các phần đúng trong văn bản",
+      "matchgrid": "Đánh dấu cột đúng cho mọi hàng",
+      "tablefill": "Biến ít nhất một ô thành chỗ trống có đáp án",
+      "image": "Tải lên một ảnh",
+      "labels": "Thêm ít nhất 2 nhãn có tên",
+      "hotspot": "Vẽ ít nhất một vùng đúng",
+      "graphing": "Vẽ đáp án đúng"
+    }
+  },
+  "picker": {
+    "title": "Loại câu hỏi",
+    "hover": "Di chuột để xem trước",
+    "new": "MỚI",
+    "demo": {
+      "capital": "Thủ đô của Pháp:",
+      "paris": "Paris",
+      "select": "chọn",
+      "rightAngle": "VUÔNG",
+      "acute": "NHỌN",
+      "hottext": "Một cậu bé đang <m>ngắm những ngọn lửa đỏ</m> trong lò sưởi rộng mở…",
+      "material": "Vật liệu",
+      "light": "Cho ánh sáng qua?",
+      "glass": "Thuỷ tinh",
+      "yes": "Có",
+      "wood": "Gỗ",
+      "yAxis": "Trục Y",
+      "xAxis": "Trục X",
+      "record": "Ghi câu trả lời",
+      "green": "Xanh lá",
+      "red": "Đỏ",
+      "blue": "Xanh dương",
+      "pink": "Hồng",
+      "idea": "Ý tưởng #{{n}}",
+      "story": "Ngày xửa ngày xưa, ở một ngôi làng nhỏ…"
+    }
+  },
+  "bodies": {
+    "choice": {
+      "deleteOption": "Xoá lựa chọn",
+      "addImage": "Thêm ảnh",
+      "markCorrect": "Đánh dấu là đúng",
+      "placeholder": "Nhập lựa chọn tại đây",
+      "addOption": "Thêm lựa chọn",
+      "multiCorrect": "Nhiều đáp án đúng:",
+      "pollNote": "Bình chọn không được chấm điểm. Học sinh thấy kết quả bình chọn của cả lớp."
+    },
+    "fill": {
+      "correctExpressions": "Biểu thức đúng",
+      "correctAnswers": "Đáp án đúng",
+      "mathPlaceholder": "Ví dụ 2x+6",
+      "answerPlaceholder": "Nhập đáp án",
+      "altPlaceholder": "Đáp án thay thế",
+      "addForm": "Thêm dạng khác",
+      "addAlt": "Thêm đáp án thay thế",
+      "equivalent": "Chấp nhận các đáp án tương đương về mặt toán học (ví dụ <c>2(x+3)</c> = <c>2x+6</c>)",
+      "caseSensitive": "Phân biệt hoa thường",
+      "mathNote": "Học sinh nhập bằng bàn phím toán trên màn hình. Hỗ trợ + − × ÷ ^ √, dấu ngoặc, biến và π."
+    },
+    "open": {
+      "notes": {
+        "open": "Học sinh tự viết câu trả lời. Chấm trong báo cáo — thủ công hoặc bằng AI dựa trên đáp án mẫu.",
+        "draw": "Học sinh có một khung vẽ (dùng ảnh câu hỏi làm nền nếu bạn thêm ảnh).",
+        "video": "Học sinh quay một video ngắn bằng camera. Xem lại trong báo cáo.",
+        "audio": "Học sinh ghi âm câu trả lời bằng micro. Nghe lại trong báo cáo.",
+        "wordcloud": "Học sinh gửi các từ hoặc cụm từ ngắn. Câu trả lời tạo thành đám mây từ trực tiếp.",
+        "discussion": "Học sinh đăng ý tưởng lên bảng chung và có thể đọc bài của nhau theo thời gian thực."
+      },
+      "sampleAnswer": "Đáp án mẫu (không bắt buộc, dùng để AI chấm)",
+      "samplePlaceholder": "Một câu trả lời mẫu…"
+    },
+    "reorder": {
+      "note": "Nhập các mục theo đúng thứ tự. Học sinh sẽ thấy chúng bị xáo trộn.",
+      "placeholder": "Nhập một mục",
+      "addItem": "Thêm mục"
+    },
+    "match": {
+      "note": "Mỗi hàng là một cặp đúng. Học sinh thấy cột bên phải bị xáo trộn.",
+      "left": "Mục",
+      "right": "Mục tương ứng",
+      "addPair": "Thêm cặp"
+    },
+    "blanks": {
+      "hint": "Chỗ trống hiển thị dạng <c>[[b1]]</c> trong văn bản.",
+      "insert": "Chèn chỗ trống",
+      "needBlank": "Chèn ít nhất một chỗ trống vào câu hỏi.",
+      "blankN": "Chỗ trống {{n}}"
+    },
+    "dropdown": {
+      "correct": "Đúng",
+      "optionN": "Lựa chọn {{n}}",
+      "addOption": "Thêm lựa chọn"
+    },
+    "dragdrop": {
+      "correctItem": "Mục đúng",
+      "distractors": "Đáp án gây nhiễu (các mục sai thêm vào)",
+      "chipsPlaceholder": "Nhập rồi nhấn Enter"
+    },
+    "categorize": {
+      "groupN": "Nhóm {{n}}",
+      "item": "Mục",
+      "addItem": "Thêm mục",
+      "addGroup": "Thêm nhóm"
+    },
+    "hottext": {
+      "text": "Văn bản",
+      "units": {
+        "word": "Từ",
+        "sentence": "Câu"
+      },
+      "placeholder": "Dán hoặc nhập đoạn văn để học sinh đánh dấu…",
+      "pick": {
+        "word": "Bấm vào các từ đúng",
+        "sentence": "Bấm vào các câu đúng"
+      }
+    },
+    "matchgrid": {
+      "columnN": "Cột {{n}}",
+      "rowN": "Hàng {{n}}",
+      "addRow": "Thêm hàng",
+      "allowMulti": "Cho phép nhiều cột mỗi hàng"
+    },
+    "tablefill": {
+      "note": "Nhập giá trị vào các ô. Bấm <b>⬚</b> để biến một ô thành chỗ trống học sinh phải điền. Ngăn cách các đáp án thay thế bằng <c>|</c>.",
+      "headerN": "Tiêu đề {{n}}",
+      "correctAnswer": "Đáp án đúng",
+      "text": "Văn bản",
+      "makeText": "Chuyển thành ô văn bản",
+      "makeBlank": "Chuyển thành chỗ trống",
+      "addRow": "Thêm hàng"
+    },
+    "image": {
+      "upload": "Tải lên một ảnh",
+      "uploadHint": "Sơ đồ, bản đồ, ảnh chụp hoặc biểu đồ",
+      "change": "Đổi ảnh"
+    },
+    "labeling": {
+      "clickToAdd": "Bấm vào ảnh để thêm vị trí nhãn.",
+      "label": "Nhãn",
+      "distractors": "Nhãn gây nhiễu",
+      "distractorPlaceholder": "Nhãn sai + Enter"
+    },
+    "hotspot": {
+      "hint": "Kéo trên ảnh để vẽ vùng có thể bấm. Bấm vào một vùng để chuyển giữa đúng (<g>xanh</g>) và gây nhiễu (xám)."
+    },
+    "graphing": {
+      "mustPlot": "Học sinh phải vẽ",
+      "modes": {
+        "points": "Các điểm",
+        "line": "Một đường thẳng"
+      },
+      "xmin": "X nhỏ nhất",
+      "xmax": "X lớn nhất",
+      "ymin": "Y nhỏ nhất",
+      "ymax": "Y lớn nhất",
+      "hintPoints": "Bấm vào lưới để đặt các điểm đúng. Đáp án đúng: {{answer}}",
+      "hintLine": "Bấm vào lưới để đặt hai điểm đúng của đường thẳng. Đáp án đúng: {{answer}}",
+      "none": "chưa có"
+    }
+  },
+  "card": {
+    "alternatives": "Đáp án thay thế: {{list}}",
+    "sampleAnswer": "Đáp án mẫu: {{text}}",
+    "distractors": "Đáp án gây nhiễu: {{list}}",
+    "items": "Các mục: {{list}}"
+  }
+}

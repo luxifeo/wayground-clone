@@ -1,0 +1,57 @@
+{
+  "modes": {
+    "classic": { "title": "Classic", "desc": "Students answer at their own pace and you see results on a live leaderboard" },
+    "mastery": { "title": "Mastery Peak", "desc": "Coming soon" },
+    "playground": { "title": "Playground", "desc": "Coming soon" },
+    "test": { "title": "Test mode", "desc": "Serious, no-frills assessment. No leaderboard, no timer pressure" },
+    "team": { "title": "Team mode", "desc": "Coming soon" }
+  },
+  "selectMode": "Select a session mode",
+  "back": "Back",
+  "homeworkTitle": "Assign as homework",
+  "homeworkDesc": "Students join with a code and complete it any time before the deadline.",
+  "teacherDesc": "You control the pace from the big screen. Everyone answers the same question together.",
+  "details": {
+    "title": "Assignment details",
+    "name": "Title",
+    "start": "Start",
+    "now": "Now",
+    "deadline": "Deadline"
+  },
+  "primary": "Primary Settings",
+  "more": "More settings",
+  "tabs": {
+    "general": "General",
+    "mastery": "Mastery",
+    "anti": "Anti-cheating",
+    "game": "Gamification"
+  },
+  "opt": {
+    "on": "On",
+    "off": "Off",
+    "unlimited": "Unlimited",
+    "validate": "Validate only",
+    "questionsOnly": "Questions only"
+  },
+  "rows": {
+    "attempts": "Session attempts",
+    "timer": "Question timer",
+    "timerSub": "Use each question's time limit and give speed bonuses",
+    "timerTeacherSub": "Each question uses its own time limit. You can reveal early.",
+    "anonymize": "Anonymize student names",
+    "anonymizeSub": "Show fun names instead of real names on the leaderboard",
+    "skip": "Skip questions & attempt later",
+    "showAnswers": "Show answer after each question",
+    "showAnswersSub": "Validate only tells students if they were right",
+    "showAll": "Show all answers after session",
+    "shuffleQuestions": "Shuffle questions",
+    "shuffleAnswers": "Shuffle answers",
+    "serious": "Serious theme",
+    "new": "NEW",
+    "seriousSub": "Focused environment without gamifications",
+    "leaderboard": "Leaderboard",
+    "memes": "Show memes",
+    "memesSub": "Fun reactions after each answer",
+    "sound": "Sound effects"
+  }
+}

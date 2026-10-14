@@ -1,0 +1,47 @@
+{
+  "header": {
+    "enterCode": "Nhập mã",
+    "logIn": "Đăng nhập",
+    "signUp": "Đăng ký"
+  },
+  "hero": {
+    "title": "Bài đánh giá mà học sinh <hl>thích</hl> làm",
+    "sub": "Tạo bài quiz hấp dẫn trong vài giây với AI, tổ chức trực tiếp hoặc giao làm bài tập về nhà và biết chính xác học sinh nào cần hỗ trợ ở đâu.",
+    "cta": "Bắt đầu — miễn phí",
+    "codePlaceholder": "Nhập mã tham gia",
+    "join": "Tham gia"
+  },
+  "demo": {
+    "earth": "Trái Đất",
+    "mars": "Sao Hỏa",
+    "jupiter": "Sao Mộc",
+    "venus": "Sao Kim"
+  },
+  "features": {
+    "assessments": {
+      "title": "Bài đánh giá tương tác",
+      "text": "Trắc nghiệm một đáp án, nhiều đáp án, điền vào chỗ trống, sắp xếp, nối cặp, bình chọn, câu hỏi mở và câu hỏi vẽ."
+    },
+    "ai": {
+      "title": "AI giúp tiết kiệm hàng giờ",
+      "text": "Biến một chủ đề, file PDF, file Word hoặc ảnh chụp phiếu bài tập thành bài quiz sẵn sàng để chơi với mô hình đa phương thức Gemma."
+    },
+    "games": {
+      "title": "Trò chơi trực tiếp & tự làm",
+      "text": "Tổ chức phiên do giáo viên dẫn trên màn hình lớn hoặc để học sinh tự làm theo tốc độ riêng với bảng xếp hạng trực tiếp."
+    },
+    "reports": {
+      "title": "Báo cáo tức thì",
+      "text": "Độ chính xác theo từng học sinh và từng câu hỏi, phân bố câu trả lời và chấm câu hỏi mở với sự hỗ trợ của AI."
+    },
+    "content": {
+      "title": "Dùng nội dung của bạn",
+      "text": "Tải tài liệu lên, dán văn bản hoặc chia sẻ đường link. Chỉnh sửa mọi thứ trước khi xuất bản."
+    },
+    "homework": {
+      "title": "Chế độ bài tập về nhà",
+      "text": "Giao bài quiz kèm hạn nộp và mã tham gia. Học sinh có thể tham gia từ mọi thiết bị."
+    }
+  },
+  "footer": "Wayground clone — xây dựng cho mục đích học tập."
+}

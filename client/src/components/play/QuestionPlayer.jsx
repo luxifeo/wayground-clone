@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ImageCredit } from '../ImageSearchModal.jsx';
 import {
   ChoiceAnswer, TextAnswer, ReorderAnswer, MatchAnswer, DropdownAnswer, DragDropAnswer, CategorizeAnswer, HotTextAnswer,
@@ -22,6 +23,7 @@ const IMAGE_IN_ANSWER = ['labeling', 'hotspot', 'draw'];
  * props: question (sanitized), onSubmit(answer), result, locked, token (player token), preview, header (node)
  */
 export default function QuestionPlayer({ question: q, onSubmit, result, locked = false, token, preview = false, header, myResponseId }) {
+  const { t } = useTranslation('play');
   const [submitted, setSubmitted] = useState(false);
   const Answer = ANSWERS[q.type];
   const submit = (a) => { setSubmitted(true); onSubmit(a); };
@@ -32,9 +34,9 @@ export default function QuestionPlayer({ question: q, onSubmit, result, locked =
     form.append('file', blob, name);
     const r = await fetch(`/api/play/${token}/upload`, { method: 'POST', body: form });
     const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Upload failed');
+    if (!r.ok) throw new Error(d.error || t('player.uploadFailed'));
     return d.url;
-  }, [preview, token]);
+  }, [preview, token, t]);
 
   const fetchBoard = useCallback(() => fetch(`/api/play/${token}/board/${q.id}`).then((r) => r.json()), [token, q.id]);
 
@@ -56,7 +58,7 @@ export default function QuestionPlayer({ question: q, onSubmit, result, locked =
       {Answer && (
         <Answer q={q} onSubmit={submit} result={result} locked={locked || submitted || !!result} uploadBlob={uploadBlob} />
       )}
-      {preview && submitted && !result && <div className="mt-4 text-center font-game font-bold text-white/80">✓ Answer submitted (preview)</div>}
+      {preview && submitted && !result && <div className="mt-4 text-center font-game font-bold text-white/80">{t('player.previewSubmitted')}</div>}
       {token && result && ['discussion', 'wordcloud'].includes(q.type) && <Board fetchBoard={fetchBoard} type={q.type} myId={myResponseId} />}
     </div>
   );
@@ -67,7 +69,7 @@ export default function QuestionPlayer({ question: q, onSubmit, result, locked =
       {q.passage ? (
         <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]">
           <div className="max-h-[70vh] overflow-auto rounded-2xl bg-white p-5 scrollbar-thin">
-            <div className="mb-2 flex items-center gap-2 text-sm font-bold text-violet-700"><FileText className="h-4 w-4" />Passage</div>
+            <div className="mb-2 flex items-center gap-2 text-sm font-bold text-violet-700"><FileText className="h-4 w-4" />{t('player.passage')}</div>
             <div className="whitespace-pre-wrap leading-relaxed text-slate-800">{q.passage}</div>
           </div>
           {body}

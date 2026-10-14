@@ -1,0 +1,34 @@
+{
+  "enterCode": "Nhập mã",
+  "greeting": {
+    "morning": "Chào buổi sáng",
+    "afternoon": "Chào buổi chiều",
+    "evening": "Chào buổi tối"
+  },
+  "welcome": "{{greeting}}, {{name}} 👋 Cùng bắt đầu nào.",
+  "tabs": {
+    "create": { "title": "Tạo", "sub": "học liệu" },
+    "search": { "title": "Tìm kiếm", "sub": "học liệu" },
+    "upload": { "title": "Tải lên", "sub": "& nâng cấp nội dung" }
+  },
+  "resources": {
+    "assessment": { "title": "Bài đánh giá", "sub": "Câu hỏi nhanh & tương tác" },
+    "presentation": { "title": "Bài trình chiếu", "sub": "Trang chiếu kèm câu hỏi và bảng trắng" },
+    "video": { "title": "Video", "sub": "Câu hỏi tại các thời điểm quan trọng trong video" },
+    "passage": { "title": "Bài đọc", "sub": "Câu hỏi dựa trên một bài đọc" },
+    "flashcards": { "title": "Thẻ ghi nhớ", "sub": "Câu hỏi ở mặt trước, đáp án ở mặt sau" }
+  },
+  "comingSoon": "Sắp ra mắt",
+  "searchPlaceholder": "Tìm bài quiz về bất kỳ chủ đề nào",
+  "upload": {
+    "title": "Tải lên slide bài giảng, phiếu bài tập hoặc bất kỳ tài liệu nào",
+    "sub": "Chúng tôi sẽ dùng AI biến nó thành bài đánh giá tương tác",
+    "device": "Thiết bị"
+  },
+  "recent": {
+    "title": "Chỉnh sửa gần đây",
+    "seeAll": "Xem tất cả",
+    "empty": "Chưa có gì ở đây — hãy tạo bài đánh giá đầu tiên của bạn!",
+    "assessment": "Bài đánh giá"
+  }
+}

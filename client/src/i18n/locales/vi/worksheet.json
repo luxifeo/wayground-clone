@@ -1,0 +1,10 @@
+{
+  "answerKey": "Đáp án",
+  "print": "In / Lưu PDF",
+  "titleKey": "{{title}} — Đáp án",
+  "name": "Họ tên",
+  "class": "Lớp",
+  "date": "Ngày",
+  "question": "CÂU {{n}}",
+  "pts_other": "{{count}} điểm"
+}

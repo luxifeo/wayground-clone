@@ -1,0 +1,10 @@
+{
+  "title": "Search images",
+  "placeholder": "Search free images, e.g. “volcano diagram” (English works best)",
+  "sources": "Free sources: {{list}} · Images are copied to your library with their license credit.",
+  "none": "No images found. Try other (English) keywords.",
+  "untitled": "Untitled",
+  "openSource": "Open source page",
+  "empty": "Type keywords to find an illustration for your question.",
+  "by": "by {{name}}"
+}

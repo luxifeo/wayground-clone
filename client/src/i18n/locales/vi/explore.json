@@ -1,0 +1,12 @@
+{
+  "heading": "Hôm nay bạn sẽ dạy gì?",
+  "searchPlaceholder": "Tìm bài quiz về bất kỳ chủ đề nào",
+  "allSubjects": "Tất cả môn học",
+  "allGrades": "Tất cả khối lớp",
+  "empty": {
+    "title": "Không tìm thấy bài quiz nào",
+    "text": "Hãy thử tìm kiếm khác hoặc tự tạo bài quiz với AI."
+  },
+  "assessment": "Bài đánh giá",
+  "plays_other": "{{count}} lượt chơi"
+}

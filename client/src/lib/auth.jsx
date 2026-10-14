@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { api, getToken, setToken } from './api.js';
 
 const AuthCtx = createContext(null);
@@ -38,7 +39,8 @@ export const useAuth = () => useContext(AuthCtx);
 export function RequireAuth({ children }) {
   const { user, loading } = useAuth();
   const loc = useLocation();
-  if (loading) return <div className="grid h-full place-items-center text-slate-400">Loading…</div>;
+  const { t } = useTranslation();
+  if (loading) return <div className="grid h-full place-items-center text-slate-400">{t('status.loading')}</div>;
   if (!user) return <Navigate to={`/login?next=${encodeURIComponent(loc.pathname + loc.search)}`} replace />;
   return children;
 }

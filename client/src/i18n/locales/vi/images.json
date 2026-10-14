@@ -1,0 +1,10 @@
+{
+  "title": "Tìm ảnh",
+  "placeholder": "Tìm ảnh miễn phí, ví dụ: “volcano diagram” (từ khoá tiếng Anh cho kết quả tốt nhất)",
+  "sources": "Nguồn miễn phí: {{list}} · Ảnh được sao chép vào thư viện của bạn kèm thông tin giấy phép.",
+  "none": "Không tìm thấy ảnh. Hãy thử từ khoá khác (bằng tiếng Anh).",
+  "untitled": "Không có tiêu đề",
+  "openSource": "Mở trang nguồn",
+  "empty": "Nhập từ khoá để tìm ảnh minh hoạ cho câu hỏi của bạn.",
+  "by": "của {{name}}"
+}

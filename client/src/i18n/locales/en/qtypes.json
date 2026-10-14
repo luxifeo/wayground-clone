@@ -1,0 +1,39 @@
+{
+  "groups": {
+    "Basic": "Basic",
+    "Interactive & higher order": "Interactive & higher order",
+    "Visual learning": "Visual learning",
+    "Math": "Math",
+    "Open ended": "Open ended"
+  },
+  "graded": {
+    "Auto graded": "Auto graded",
+    "Partial grading": "Partial grading",
+    "Flexible grading": "Flexible grading",
+    "Ungraded": "Ungraded"
+  },
+  "mcq": { "label": "Multiple choice", "desc": "Students pick the one correct answer." },
+  "msq": { "label": "Multi-select", "desc": "Students select every correct answer." },
+  "tf": { "label": "True or false", "desc": "Students decide whether a statement is true or false." },
+  "fill": { "label": "Fill in the blank", "desc": "Students type the missing answer. Alternatives are accepted." },
+  "open": { "label": "Open ended", "desc": "Students write a free response, graded by you or by AI." },
+  "tablefill": { "label": "Table Fill In", "desc": "Students fill in blanks within a table to answer questions." },
+  "passage": { "label": "Passage", "desc": "Questions are shown next to a reading passage." },
+  "dragdrop": { "label": "Drag and drop", "desc": "Students drag or place items into their correct positions within the text." },
+  "dropdown": { "label": "Dropdown", "desc": "Students select answers from dropdown menus within the text." },
+  "categorize": { "label": "Categorize", "desc": "Students sort items into their appropriate groups." },
+  "reorder": { "label": "Reorder", "desc": "Students place items in their correct sequence." },
+  "match": { "label": "Match", "desc": "Students match the correct items from two sets." },
+  "hottext": { "label": "Hot text", "desc": "Students highlight the correct words or sentences in a text." },
+  "matchgrid": { "label": "Match Table Grid", "desc": "Students match each row to one or more columns in a grid." },
+  "labeling": { "label": "Labeling", "desc": "Students drag labels to their correct positions on an image." },
+  "hotspot": { "label": "Hotspot", "desc": "Students answer by clicking specific areas on an image." },
+  "graphing": { "label": "Graphing", "desc": "Students plot points or a line on a coordinate plane." },
+  "math": { "label": "Math response", "desc": "Students enter expressions with a math keypad; equivalent answers count." },
+  "draw": { "label": "Draw", "desc": "Students use drawing tools to illustrate or mark up images." },
+  "video": { "label": "Video response", "desc": "Students record a video answer with their camera." },
+  "audio": { "label": "Audio response", "desc": "Students record a spoken answer with their microphone." },
+  "poll": { "label": "Poll", "desc": "Collect everyone's opinion on a list of options." },
+  "wordcloud": { "label": "Word cloud", "desc": "Collect short text responses live in a word cloud." },
+  "discussion": { "label": "Discussion Board", "desc": "Students share ideas on a collaborative board in real time." }
+}

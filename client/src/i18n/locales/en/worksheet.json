@@ -1,0 +1,11 @@
+{
+  "answerKey": "Answer key",
+  "print": "Print / Save PDF",
+  "titleKey": "{{title}} — Answer key",
+  "name": "Name",
+  "class": "Class",
+  "date": "Date",
+  "question": "QUESTION {{n}}",
+  "pts_one": "{{count}} pt",
+  "pts_other": "{{count}} pts"
+}

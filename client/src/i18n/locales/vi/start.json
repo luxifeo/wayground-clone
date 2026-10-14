@@ -1,0 +1,57 @@
+{
+  "modes": {
+    "classic": { "title": "Cổ điển", "desc": "Học sinh trả lời theo tốc độ của mình và bạn theo dõi kết quả trên bảng xếp hạng trực tiếp" },
+    "mastery": { "title": "Đỉnh thành thạo", "desc": "Sắp ra mắt" },
+    "playground": { "title": "Sân chơi", "desc": "Sắp ra mắt" },
+    "test": { "title": "Chế độ kiểm tra", "desc": "Đánh giá nghiêm túc, tối giản. Không bảng xếp hạng, không áp lực thời gian" },
+    "team": { "title": "Chế độ đội", "desc": "Sắp ra mắt" }
+  },
+  "selectMode": "Chọn chế độ phiên",
+  "back": "Quay lại",
+  "homeworkTitle": "Giao bài tập về nhà",
+  "homeworkDesc": "Học sinh tham gia bằng mã và hoàn thành bất cứ lúc nào trước hạn chót.",
+  "teacherDesc": "Bạn điều khiển nhịp độ từ màn hình lớn. Mọi người cùng trả lời một câu hỏi.",
+  "details": {
+    "title": "Chi tiết bài được giao",
+    "name": "Tiêu đề",
+    "start": "Bắt đầu",
+    "now": "Ngay bây giờ",
+    "deadline": "Hạn chót"
+  },
+  "primary": "Cài đặt chính",
+  "more": "Cài đặt khác",
+  "tabs": {
+    "general": "Chung",
+    "mastery": "Thành thạo",
+    "anti": "Chống gian lận",
+    "game": "Trò chơi hoá"
+  },
+  "opt": {
+    "on": "Bật",
+    "off": "Tắt",
+    "unlimited": "Không giới hạn",
+    "validate": "Chỉ báo đúng/sai",
+    "questionsOnly": "Chỉ câu hỏi"
+  },
+  "rows": {
+    "attempts": "Số lần làm",
+    "timer": "Hẹn giờ câu hỏi",
+    "timerSub": "Dùng giới hạn thời gian của từng câu hỏi và cộng điểm thưởng tốc độ",
+    "timerTeacherSub": "Mỗi câu hỏi dùng giới hạn thời gian riêng. Bạn có thể công bố đáp án sớm.",
+    "anonymize": "Ẩn danh tên học sinh",
+    "anonymizeSub": "Hiển thị tên vui nhộn thay cho tên thật trên bảng xếp hạng",
+    "skip": "Bỏ qua câu hỏi & làm sau",
+    "showAnswers": "Hiện đáp án sau mỗi câu hỏi",
+    "showAnswersSub": "\"Chỉ báo đúng/sai\" chỉ cho học sinh biết mình trả lời đúng hay sai",
+    "showAll": "Hiện tất cả đáp án sau phiên",
+    "shuffleQuestions": "Xáo trộn câu hỏi",
+    "shuffleAnswers": "Xáo trộn đáp án",
+    "serious": "Giao diện nghiêm túc",
+    "new": "MỚI",
+    "seriousSub": "Môi trường tập trung, không có yếu tố trò chơi",
+    "leaderboard": "Bảng xếp hạng",
+    "memes": "Hiện meme",
+    "memesSub": "Phản ứng vui nhộn sau mỗi câu trả lời",
+    "sound": "Hiệu ứng âm thanh"
+  }
+}

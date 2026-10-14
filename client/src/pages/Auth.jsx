@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation, Trans } from 'react-i18next';
 import { useAuth } from '../lib/auth.jsx';
 import { Logo, Spinner } from '../components/ui.jsx';
+import LanguageSwitcher from '../components/LanguageSwitcher.jsx';
 
 function Shell({ title, sub, children }) {
   return (
-    <div className="flex min-h-full items-center justify-center bg-gradient-to-br from-brand-50 via-white to-violet-50 p-4">
+    <div className="relative flex min-h-full items-center justify-center bg-gradient-to-br from-brand-50 via-white to-violet-50 p-4">
+      <LanguageSwitcher className="absolute right-4 top-4" />
       <div className="w-full max-w-md">
         <div className="mb-6 flex justify-center"><Link to="/"><Logo /></Link></div>
         <div className="card p-7">
@@ -19,6 +22,7 @@ function Shell({ title, sub, children }) {
 }
 
 export function Login() {
+  const { t } = useTranslation('auth');
   const { login } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
@@ -37,23 +41,24 @@ export function Login() {
   };
 
   return (
-    <Shell title="Welcome back" sub="Log in to create and host assessments.">
+    <Shell title={t('login.title')} sub={t('login.sub')}>
       <form onSubmit={submit} className="space-y-4">
-        <div><label className="label">Email</label><input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></div>
-        <div><label className="label">Password</label><input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+        <div><label className="label">{t('email')}</label><input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoFocus /></div>
+        <div><label className="label">{t('password')}</label><input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
         {err && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{err}</div>}
-        <button className="btn-primary w-full py-2.5" disabled={busy}>{busy && <Spinner className="h-4 w-4" />}Log in</button>
+        <button className="btn-primary w-full py-2.5" disabled={busy}>{busy && <Spinner className="h-4 w-4" />}{t('login.submit')}</button>
       </form>
       <div className="mt-4 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
-        Demo account: <button className="font-semibold text-violet-700 underline" onClick={() => { setEmail('demo@wayground.local'); setPassword('demo123'); }}>demo@wayground.local / demo123</button>
+        {t('login.demo')} <button className="font-semibold text-violet-700 underline" onClick={() => { setEmail('demo@wayground.local'); setPassword('demo123'); }}>demo@wayground.local / demo123</button>
       </div>
-      <p className="mt-5 text-center text-sm text-slate-600">New here? <Link className="font-semibold text-brand-600" to="/signup">Create an account</Link></p>
-      <p className="mt-2 text-center text-sm text-slate-600">Student? <Link className="font-semibold text-violet-700" to="/join">Join a game</Link></p>
+      <p className="mt-5 text-center text-sm text-slate-600"><Trans ns="auth" i18nKey="login.newHere" components={{ link: <Link className="font-semibold text-brand-600" to="/signup" /> }} /></p>
+      <p className="mt-2 text-center text-sm text-slate-600"><Trans ns="auth" i18nKey="login.student" components={{ link: <Link className="font-semibold text-violet-700" to="/join" /> }} /></p>
     </Shell>
   );
 }
 
 export function Signup() {
+  const { t } = useTranslation('auth');
   const { signup } = useAuth();
   const nav = useNavigate();
   const [f, setF] = useState({ name: '', email: '', password: '' });
@@ -71,15 +76,15 @@ export function Signup() {
   };
 
   return (
-    <Shell title="Create your teacher account" sub="Free forever. Start making engaging assessments in minutes.">
+    <Shell title={t('signup.title')} sub={t('signup.sub')}>
       <form onSubmit={submit} className="space-y-4">
-        <div><label className="label">Full name</label><input className="input" value={f.name} onChange={set('name')} required autoFocus /></div>
-        <div><label className="label">Email</label><input className="input" type="email" value={f.email} onChange={set('email')} required /></div>
-        <div><label className="label">Password</label><input className="input" type="password" minLength={6} value={f.password} onChange={set('password')} required /><p className="mt-1 text-xs text-slate-400">At least 6 characters.</p></div>
+        <div><label className="label">{t('signup.fullName')}</label><input className="input" value={f.name} onChange={set('name')} required autoFocus /></div>
+        <div><label className="label">{t('email')}</label><input className="input" type="email" value={f.email} onChange={set('email')} required /></div>
+        <div><label className="label">{t('password')}</label><input className="input" type="password" minLength={6} value={f.password} onChange={set('password')} required /><p className="mt-1 text-xs text-slate-400">{t('signup.passwordHint')}</p></div>
         {err && <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{err}</div>}
-        <button className="btn-primary w-full py-2.5" disabled={busy}>{busy && <Spinner className="h-4 w-4" />}Sign up</button>
+        <button className="btn-primary w-full py-2.5" disabled={busy}>{busy && <Spinner className="h-4 w-4" />}{t('signup.submit')}</button>
       </form>
-      <p className="mt-5 text-center text-sm text-slate-600">Already have an account? <Link className="font-semibold text-brand-600" to="/login">Log in</Link></p>
+      <p className="mt-5 text-center text-sm text-slate-600"><Trans ns="auth" i18nKey="signup.haveAccount" components={{ link: <Link className="font-semibold text-brand-600" to="/login" /> }} /></p>
     </Shell>
   );
 }

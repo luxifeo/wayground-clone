@@ -1,0 +1,13 @@
+{
+  "heading": "What will you teach today?",
+  "searchPlaceholder": "Search for quizzes on any topic",
+  "allSubjects": "All subjects",
+  "allGrades": "All grades",
+  "empty": {
+    "title": "No quizzes found",
+    "text": "Try another search, or create your own with AI."
+  },
+  "assessment": "Assessment",
+  "plays_one": "{{count}} play",
+  "plays_other": "{{count}} plays"
+}

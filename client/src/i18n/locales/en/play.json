@@ -1,0 +1,138 @@
+{
+  "join": {
+    "codePlaceholder": "Enter a join code",
+    "join": "Join",
+    "nameLabel": "Your Wayground name is…",
+    "namePlaceholder": "Enter your name",
+    "randomName": "Random name",
+    "start": "Start",
+    "continueAs": "Continue as {{name}}",
+    "settings": "Settings",
+    "soundEffects": "Sound effects",
+    "differentCode": "Use a different code",
+    "nameRequired": "Please enter your name"
+  },
+  "game": {
+    "disconnected": "The host disconnected you from this game.",
+    "removed": "You were removed from this game by the host.",
+    "joinAnother": "Join another game",
+    "rank_ordinal_one": "{{count}}st",
+    "rank_ordinal_two": "{{count}}nd",
+    "rank_ordinal_few": "{{count}}rd",
+    "rank_ordinal_other": "{{count}}th",
+    "pts": "{{score}} pts",
+    "fullscreen": "Full screen",
+    "waitingHost": "Waiting for the host to start…",
+    "leaderboard": "Leaderboard",
+    "waitingNext": "Waiting for the next question…",
+    "getReady": "Get ready…",
+    "answerSubmitted": "Answer submitted!",
+    "waitingEveryone": "Waiting for everyone else…",
+    "timeUp": "Time's up!",
+    "attemptsAllowed_one": "{{count}} attempt allowed",
+    "attemptsAllowed_other": "{{count}} attempts allowed",
+    "startGame": "Start game",
+    "deadline": "Deadline: {{date}}",
+    "skip": "Skip",
+    "next": "Next",
+    "finish": "Finish",
+    "banner": {
+      "submitted": "Answer submitted",
+      "recorded": "Response recorded",
+      "partial": "Partially correct",
+      "timeUp": "Time's up!",
+      "almost": "👍 Almost there!"
+    },
+    "memesOk": ["🔥 On fire!", "🚀 To the moon!", "😎 Too easy!", "🧠 Big brain!", "🎯 Bullseye!", "💯 Nailed it!"],
+    "memesBad": ["😅 Oops!", "🙈 So close!", "🤔 Next one!", "💪 Keep going!", "🌱 Learning moment!"]
+  },
+  "summary": {
+    "partial": "Partial",
+    "submitted": "Submitted",
+    "praiseThanks": "Thanks for sharing your answers!",
+    "praiseGreat": "Remarkable win, keep it up!",
+    "praiseGood": "Great job, you are getting there!",
+    "praiseTry": "Good try — practice makes perfect!",
+    "rank": "Rank",
+    "score": "Score",
+    "attempt": "Attempt",
+    "accuracy": "Accuracy",
+    "performance": "Performance Stats",
+    "statCorrect": "{{n}} Correct",
+    "statIncorrect": "{{n}} Incorrect",
+    "statPartial": "{{n}} Partial",
+    "statUngraded": "{{n}} Ungraded",
+    "avgTime": "{{n}} s/question",
+    "streak": "{{n}} Streak",
+    "review": "Review Questions",
+    "clickAnswers": "Click on the questions to see answers",
+    "clickResponses": "Click on the questions to see your responses",
+    "question": "Question",
+    "yourAnswer": "Your answer: ",
+    "playAgain": "Play again",
+    "joinAnother": "Join another game",
+    "leaderboard": "Leaderboard"
+  },
+  "player": {
+    "uploadFailed": "Upload failed",
+    "previewSubmitted": "✓ Answer submitted (preview)",
+    "passage": "Passage"
+  },
+  "answers": {
+    "submit": "Submit",
+    "choice": {
+      "selectN_one": "Select {{count}} answer",
+      "selectN_other": "Select {{count}} answers",
+      "selectAll": "Select all correct answers"
+    },
+    "text": {
+      "placeholder": "Type your answer…",
+      "mathPlaceholder": "Type an expression…",
+      "wordcloudPlaceholder": "One word or a short phrase",
+      "clear": "Clear",
+      "correctAnswer": "Correct answer: {{answer}}"
+    },
+    "match": {
+      "hint": "Tap an item on the left, then its match on the right."
+    },
+    "dropdown": {
+      "select": "select ▾"
+    },
+    "dragdrop": {
+      "dropHere": "drop here"
+    },
+    "hottext": {
+      "words_one": "Tap to highlight {{count}} word",
+      "words_other": "Tap to highlight {{count}} words",
+      "sentences_one": "Tap to highlight {{count}} sentence",
+      "sentences_other": "Tap to highlight {{count}} sentences",
+      "parts": "Tap to highlight the correct parts"
+    },
+    "hotspot": {
+      "tapN": "Tap {{n}} areas on the image",
+      "tapOne": "Tap the correct area on the image"
+    },
+    "graphing": {
+      "line": "Plot two points on the line",
+      "plotN_one": "Plot {{count}} point",
+      "plotN_other": "Plot {{count}} points",
+      "plot": "Plot points",
+      "reset": "Reset"
+    },
+    "draw": {
+      "eraser": "Eraser",
+      "clear": "Clear drawing"
+    },
+    "record": {
+      "cameraError": "Cannot access camera: {{msg}}",
+      "micError": "Cannot access microphone: {{msg}}",
+      "stop": "Stop · {{secs}}s",
+      "again": "Record again",
+      "record": "Record response"
+    },
+    "board": {
+      "noPosts": "No posts yet.",
+      "noResponses": "No responses yet."
+    }
+  }
+}

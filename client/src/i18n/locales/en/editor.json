@@ -1,0 +1,216 @@
+{
+  "question": {
+    "saveQuestion": "Save question",
+    "saved": "Question saved",
+    "aiUpdated": "Question updated by AI — review and save",
+    "enhance": "Enhance with AI",
+    "ai": {
+      "rephrase": "Rephrase",
+      "fix": "Fix grammar & facts",
+      "easier": "Make it easier",
+      "harder": "Make it harder",
+      "distractors": "Improve wrong options",
+      "explanation": "Write explanation"
+    },
+    "addPassage": "Add passage",
+    "removePassage": "Remove passage",
+    "previewQuestion": "Preview question",
+    "addExplanation": "Add answer explanation",
+    "hideExplanation": "Hide answer explanation",
+    "passage": "Passage",
+    "passagePlaceholder": "Paste the reading passage here…",
+    "uploadImage": "Upload image",
+    "searchFreeImages": "Search free images",
+    "searchImages": "Search images",
+    "textPlaceholder": "Type question here",
+    "placeholders": {
+      "dropdown": "Type your sentence and insert blanks, e.g. “The sky is [[b1]].”",
+      "dragdrop": "Type your sentence and insert blanks, e.g. “23 × 2 = [[b1]]”",
+      "hottext": "Instructions, e.g. “Select the main idea”",
+      "tablefill": "Instructions, e.g. “Complete the table”",
+      "labeling": "Instructions, e.g. “Label the parts of the plant”",
+      "hotspot": "e.g. “Click on the capital city”",
+      "graphing": "e.g. “Plot the line y = 2x + 1”"
+    },
+    "explanation": "Answer explanation",
+    "explanationPlaceholder": "Explain why the answer is correct. Students see this after answering.",
+    "toSave": "To save: {{list}}",
+    "studentPreview": "Student preview",
+    "problems": {
+      "text": "Type the question",
+      "minOptions": "Add at least 2 answer options",
+      "emptyOptions": "Fill in or delete the empty options",
+      "markCorrect": "Mark the correct answer",
+      "addAnswer": "Add the correct answer",
+      "minItems": "Add at least 2 items",
+      "emptyPairs": "Complete or delete the empty pairs",
+      "insertBlank": "Insert at least one blank",
+      "dropdownChoices": "Every dropdown needs filled options and a correct one",
+      "dragdropItems": "Every blank needs a correct item",
+      "categorize": "Name every group and add at least 2 items",
+      "hottext": "Select the correct parts of the text",
+      "matchgrid": "Mark the correct column for every row",
+      "tablefill": "Make at least one cell a blank with an answer",
+      "image": "Upload an image",
+      "labels": "Add at least 2 named labels",
+      "hotspot": "Draw at least one correct area",
+      "graphing": "Plot the correct answer"
+    }
+  },
+  "picker": {
+    "title": "Question types",
+    "hover": "Hover to preview",
+    "new": "NEW",
+    "demo": {
+      "capital": "Capital of France:",
+      "paris": "Paris",
+      "select": "select",
+      "rightAngle": "RIGHT",
+      "acute": "ACUTE",
+      "hottext": "A little boy was <m>watching the red flames</m> in the wide open fireplace…",
+      "material": "Material",
+      "light": "Light?",
+      "glass": "Glass",
+      "yes": "Yes",
+      "wood": "Wood",
+      "yAxis": "Y axis",
+      "xAxis": "X axis",
+      "record": "Record response",
+      "green": "Green",
+      "red": "Red",
+      "blue": "Blue",
+      "pink": "Pink",
+      "idea": "Idea #{{n}}",
+      "story": "Once upon a time, in a small village…"
+    }
+  },
+  "bodies": {
+    "choice": {
+      "deleteOption": "Delete option",
+      "addImage": "Add image",
+      "markCorrect": "Mark as correct",
+      "placeholder": "Type answer option here",
+      "addOption": "Add option",
+      "multiCorrect": "Multiple correct answers:",
+      "pollNote": "Polls are not graded. Students see how the class voted."
+    },
+    "fill": {
+      "correctExpressions": "Correct expression(s)",
+      "correctAnswers": "Correct answer(s)",
+      "mathPlaceholder": "e.g. 2x+6",
+      "answerPlaceholder": "Type the answer",
+      "altPlaceholder": "Alternative answer",
+      "addForm": "Add another form",
+      "addAlt": "Add alternative",
+      "equivalent": "Accept mathematically equivalent answers (e.g. <c>2(x+3)</c> = <c>2x+6</c>)",
+      "caseSensitive": "Case sensitive",
+      "mathNote": "Students type with an on-screen math keypad. Supports + − × ÷ ^ √, parentheses, variables and π."
+    },
+    "open": {
+      "notes": {
+        "open": "Students type a free response. Grade it in the report — manually or with AI using the sample answer.",
+        "draw": "Students get a drawing canvas (with your question image as background if you add one).",
+        "video": "Students record a short video with their camera. Review it in the report.",
+        "audio": "Students record a spoken answer with their microphone. Review it in the report.",
+        "wordcloud": "Students submit short words or phrases. Responses build a live word cloud.",
+        "discussion": "Students post ideas to a shared board and can read each other’s posts in real time."
+      },
+      "sampleAnswer": "Sample answer (optional, used for AI grading)",
+      "samplePlaceholder": "A model answer…"
+    },
+    "reorder": {
+      "note": "Enter the items in the correct order. Students will see them shuffled.",
+      "placeholder": "Type an item",
+      "addItem": "Add item"
+    },
+    "match": {
+      "note": "Each row is a correct pair. Students see the right column shuffled.",
+      "left": "Item",
+      "right": "Matching item",
+      "addPair": "Add pair"
+    },
+    "blanks": {
+      "hint": "Blanks appear as <c>[[b1]]</c> in the text.",
+      "insert": "Insert blank",
+      "needBlank": "Insert at least one blank into the question text.",
+      "blankN": "Blank {{n}}"
+    },
+    "dropdown": {
+      "correct": "Correct",
+      "optionN": "Option {{n}}",
+      "addOption": "Add option"
+    },
+    "dragdrop": {
+      "correctItem": "Correct item",
+      "distractors": "Distractors (extra wrong items)",
+      "chipsPlaceholder": "Type and press Enter"
+    },
+    "categorize": {
+      "groupN": "Group {{n}}",
+      "item": "Item",
+      "addItem": "Add item",
+      "addGroup": "Add group"
+    },
+    "hottext": {
+      "text": "Text",
+      "units": {
+        "word": "Words",
+        "sentence": "Sentences"
+      },
+      "placeholder": "Paste or type the passage students will highlight in…",
+      "pick": {
+        "word": "Click the correct words",
+        "sentence": "Click the correct sentences"
+      }
+    },
+    "matchgrid": {
+      "columnN": "Column {{n}}",
+      "rowN": "Row {{n}}",
+      "addRow": "Add row",
+      "allowMulti": "Allow multiple columns per row"
+    },
+    "tablefill": {
+      "note": "Type values in the cells. Click <b>⬚</b> to turn a cell into a blank students must fill. Separate alternative answers with <c>|</c>.",
+      "headerN": "Header {{n}}",
+      "correctAnswer": "Correct answer",
+      "text": "Text",
+      "makeText": "Make it a text cell",
+      "makeBlank": "Make it a blank",
+      "addRow": "Add row"
+    },
+    "image": {
+      "upload": "Upload an image",
+      "uploadHint": "A diagram, map, photo or chart",
+      "change": "Change image"
+    },
+    "labeling": {
+      "clickToAdd": "Click on the image to add a label position.",
+      "label": "Label",
+      "distractors": "Distractor labels",
+      "distractorPlaceholder": "Wrong label + Enter"
+    },
+    "hotspot": {
+      "hint": "Drag on the image to draw a clickable area. Click an area to toggle correct (<g>green</g>) or distractor (gray)."
+    },
+    "graphing": {
+      "mustPlot": "Students must plot",
+      "modes": {
+        "points": "Points",
+        "line": "A line"
+      },
+      "xmin": "X min",
+      "xmax": "X max",
+      "ymin": "Y min",
+      "ymax": "Y max",
+      "hintPoints": "Click the grid to place the correct points. Correct answer: {{answer}}",
+      "hintLine": "Click the grid to place the correct two points of the line. Correct answer: {{answer}}",
+      "none": "none yet"
+    }
+  },
+  "card": {
+    "alternatives": "Alternatives: {{list}}",
+    "sampleAnswer": "Sample answer: {{text}}",
+    "distractors": "Distractors: {{list}}",
+    "items": "Items: {{list}}"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "groups": {
+    "Basic": "Cơ bản",
+    "Interactive & higher order": "Tương tác & tư duy bậc cao",
+    "Visual learning": "Học trực quan",
+    "Math": "Toán",
+    "Open ended": "Mở"
+  },
+  "graded": {
+    "Auto graded": "Chấm tự động",
+    "Partial grading": "Chấm từng phần",
+    "Flexible grading": "Chấm linh hoạt",
+    "Ungraded": "Không chấm điểm"
+  },
+  "mcq": { "label": "Trắc nghiệm", "desc": "Học sinh chọn một đáp án đúng." },
+  "msq": { "label": "Nhiều lựa chọn", "desc": "Học sinh chọn tất cả các đáp án đúng." },
+  "tf": { "label": "Đúng hay sai", "desc": "Học sinh xác định một phát biểu là đúng hay sai." },
+  "fill": { "label": "Điền vào chỗ trống", "desc": "Học sinh gõ đáp án còn thiếu. Chấp nhận nhiều cách viết." },
+  "open": { "label": "Câu hỏi mở", "desc": "Học sinh tự viết câu trả lời, do bạn hoặc AI chấm." },
+  "tablefill": { "label": "Điền bảng", "desc": "Học sinh điền vào các ô trống trong bảng." },
+  "passage": { "label": "Bài đọc", "desc": "Câu hỏi hiển thị cạnh một đoạn văn để đọc." },
+  "dragdrop": { "label": "Kéo và thả", "desc": "Học sinh kéo các mục vào đúng vị trí trong đoạn văn." },
+  "dropdown": { "label": "Danh sách thả xuống", "desc": "Học sinh chọn đáp án từ các danh sách thả xuống trong đoạn văn." },
+  "categorize": { "label": "Phân loại", "desc": "Học sinh xếp các mục vào đúng nhóm." },
+  "reorder": { "label": "Sắp xếp thứ tự", "desc": "Học sinh sắp xếp các mục theo đúng thứ tự." },
+  "match": { "label": "Ghép cặp", "desc": "Học sinh ghép các mục tương ứng của hai cột." },
+  "hottext": { "label": "Chọn từ trong văn bản", "desc": "Học sinh đánh dấu các từ hoặc câu đúng trong văn bản." },
+  "matchgrid": { "label": "Ghép bảng lưới", "desc": "Học sinh ghép mỗi hàng với một hoặc nhiều cột trong bảng." },
+  "labeling": { "label": "Gắn nhãn", "desc": "Học sinh kéo nhãn vào đúng vị trí trên ảnh." },
+  "hotspot": { "label": "Điểm nóng", "desc": "Học sinh trả lời bằng cách bấm vào vùng trên ảnh." },
+  "graphing": { "label": "Vẽ đồ thị", "desc": "Học sinh chấm điểm hoặc vẽ đường thẳng trên hệ trục toạ độ." },
+  "math": { "label": "Trả lời toán học", "desc": "Học sinh nhập biểu thức bằng bàn phím toán; đáp án tương đương được tính đúng." },
+  "draw": { "label": "Vẽ", "desc": "Học sinh dùng công cụ vẽ để minh hoạ hoặc đánh dấu lên ảnh." },
+  "video": { "label": "Trả lời bằng video", "desc": "Học sinh quay video câu trả lời bằng camera." },
+  "audio": { "label": "Trả lời bằng giọng nói", "desc": "Học sinh ghi âm câu trả lời bằng micro." },
+  "poll": { "label": "Thăm dò ý kiến", "desc": "Thu thập ý kiến của mọi người qua danh sách lựa chọn." },
+  "wordcloud": { "label": "Đám mây từ", "desc": "Thu thập các câu trả lời ngắn và hiển thị trực tiếp thành đám mây từ." },
+  "discussion": { "label": "Bảng thảo luận", "desc": "Học sinh chia sẻ ý tưởng trên bảng chung theo thời gian thực." }
+}

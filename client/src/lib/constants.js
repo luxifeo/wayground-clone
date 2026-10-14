@@ -2,6 +2,7 @@ import {
   SquareCheck, ListChecks, CircleCheck, PenLine, AlignLeft, ChartBar, ArrowDownUp, Link2, Brush, Table, FileText, Hand,
   SquareChevronDown, Columns3, Highlighter, Grid3x3, Tag, Crosshair, ChartLine, Sigma, Video, Mic, Cloud, MessagesSquare,
 } from 'lucide-react';
+import i18n, { qtypeText } from '../i18n/index.js';
 
 export const SUBJECTS = [
   'Mathematics', 'English', 'Science', 'Social Studies', 'History', 'Geography', 'Computers',
@@ -20,8 +21,9 @@ export const LANGUAGES = [
 
 export const TIME_OPTIONS = [5, 10, 15, 20, 30, 45, 60, 90, 120, 180, 300, 600, 900];
 
-export const fmtTime = (s) => (s < 60 ? `${s} seconds` : s % 60 === 0 ? `${s / 60} minute${s > 60 ? 's' : ''}` : `${Math.floor(s / 60)}m ${s % 60}s`);
-export const fmtShortTime = (s) => (s < 60 ? `${s} sec` : `${Math.round(s / 6) / 10} min`);
+const tc = (k, o) => i18n.t(k, { ns: 'common', ...o });
+export const fmtTime = (s) => (s < 60 ? tc('time.seconds', { count: s }) : s % 60 === 0 ? tc('time.minutes', { count: s / 60 }) : tc('time.minSec', { m: Math.floor(s / 60), s: s % 60 }));
+export const fmtShortTime = (s) => (s < 60 ? tc('time.sec', { count: s }) : tc('time.min', { count: Math.round(s / 6) / 10 }));
 
 const B = 'Basic';
 const I = 'Interactive & higher order';
@@ -60,9 +62,18 @@ export const QTYPES = {
   wordcloud: { label: 'Word cloud', icon: Cloud, group: O, ...blue, desc: 'Collect short text responses live in a word cloud.', graded: 'Ungraded' },
   discussion: { label: 'Discussion Board', icon: MessagesSquare, group: O, ...blue, desc: 'Students share ideas on a collaborative board in real time.', graded: 'Ungraded', isNew: true },
 };
+// label / desc / graded are translated on read; group and graded keys stay English (used as ids)
+for (const [k, v] of Object.entries(QTYPES)) {
+  const gradedKey = v.graded;
+  Object.defineProperties(v, {
+    label: { get: () => qtypeText(k, 'label'), enumerable: true },
+    desc: { get: () => qtypeText(k, 'desc'), enumerable: true },
+    graded: { get: () => i18n.t(`graded.${gradedKey}`, { ns: 'qtypes' }), enumerable: true },
+  });
+}
 export const QTYPE_GROUPS = [B, I, V, M, O];
 
-export const QTYPE_UPPER = Object.fromEntries(Object.entries(QTYPES).map(([k, v]) => [k, v.label.toUpperCase()]));
+export const QTYPE_UPPER = Object.defineProperties({}, Object.fromEntries(Object.keys(QTYPES).map((k) => [k, { get: () => QTYPES[k].label.toUpperCase(), enumerable: true }])));
 
 export const UNGRADED = ['open', 'poll', 'draw', 'wordcloud', 'audio', 'video', 'discussion'];
 export const CHOICE_TYPES = ['mcq', 'msq', 'tf', 'poll'];
@@ -130,8 +141,8 @@ export function blankQuestion(type) {
 
 export const timeAgo = (d) => {
   const s = Math.floor((Date.now() - new Date(d).getTime()) / 1000);
-  if (s < 60) return 'just now';
-  if (s < 3600) return `${Math.floor(s / 60)} minute${s < 120 ? '' : 's'} ago`;
-  if (s < 86400) return `${Math.floor(s / 3600)} hour${s < 7200 ? '' : 's'} ago`;
-  return `${Math.floor(s / 86400)} day${s < 172800 ? '' : 's'} ago`;
+  if (s < 60) return tc('time.justNow');
+  if (s < 3600) return tc('time.minutesAgo', { count: Math.floor(s / 60) });
+  if (s < 86400) return tc('time.hoursAgo', { count: Math.floor(s / 3600) });
+  return tc('time.daysAgo', { count: Math.floor(s / 86400) });
 };

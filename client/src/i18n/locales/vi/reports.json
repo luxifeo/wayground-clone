@@ -1,0 +1,34 @@
+{
+  "title": "Báo cáo",
+  "searchPlaceholder": "Tìm theo tên báo cáo",
+  "tabs": {
+    "all": "Tất cả"
+  },
+  "kind": {
+    "all": "Tất cả báo cáo",
+    "live": "Phiên trực tiếp"
+  },
+  "cols": {
+    "name": "Tên hoạt động",
+    "date": "Ngày",
+    "type": "Loại",
+    "participants": "Người tham gia",
+    "accuracy": "Độ chính xác",
+    "code": "Mã",
+    "status": "Trạng thái"
+  },
+  "assessment": "Bài đánh giá",
+  "test": "Kiểm tra",
+  "until": "đến {{date}}",
+  "menu": {
+    "open": "Mở báo cáo",
+    "host": "Mở màn hình điều khiển",
+    "end": "Kết thúc ngay"
+  },
+  "confirmDelete": "Xoá báo cáo này?",
+  "empty": {
+    "title": "Chưa có báo cáo nào",
+    "text": "Tổ chức hoặc giao một bài quiz và kết quả sẽ hiện ở đây.",
+    "library": "Đến thư viện"
+  }
+}

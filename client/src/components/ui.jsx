@@ -1,16 +1,18 @@
 import { useEffect, useLayoutEffect, useRef, useState, createContext, useContext, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, ChevronDown, Check, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { avatarBg } from '../lib/constants.js';
 
 export function Logo({ dark = false, small = false }) {
+  const { t } = useTranslation('ui');
   return (
     <div className="flex flex-col leading-none">
       <div className={`flex items-center gap-1 font-black italic tracking-tight ${small ? 'text-lg' : 'text-2xl'} ${dark ? 'text-white' : 'text-brand-500'}`}>
         <LogoMark className={small ? 'h-5 w-5' : 'h-6 w-6'} color={dark ? '#fff' : '#e8237d'} />
         WAYGROUND
       </div>
-      <span className={`self-end text-[10px] font-semibold ${dark ? 'text-white/80' : 'text-slate-600'}`}>clone · formerly Quizizz</span>
+      <span className={`self-end text-[10px] font-semibold ${dark ? 'text-white/80' : 'text-slate-600'}`}>{t('logoTagline')}</span>
     </div>
   );
 }
@@ -34,6 +36,7 @@ export function Modal({ open, onClose, title, icon, children, footer, width = 'm
     window.addEventListener('keydown', h);
     return () => window.removeEventListener('keydown', h);
   }, [open, onClose]);
+  const { t } = useTranslation('ui');
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-rise" onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
@@ -41,7 +44,7 @@ export function Modal({ open, onClose, title, icon, children, footer, width = 'm
         {(title || onClose) && (
           <div className="flex items-center justify-between px-5 pt-4">
             <div className="flex items-center gap-2 text-lg font-bold">{icon}{title}</div>
-            {onClose && <button onClick={onClose} className="rounded-full p-1 hover:bg-black/10" aria-label="Close"><X className="h-5 w-5" /></button>}
+            {onClose && <button onClick={onClose} className="rounded-full p-1 hover:bg-black/10" aria-label={t('common:actions.close')}><X className="h-5 w-5" /></button>}
           </div>
         )}
         <div className="px-5 py-4">{children}</div>
@@ -135,7 +138,8 @@ export function MenuItem({ icon: Icon, children, onClick, danger, sub }) {
 }
 
 /** Simple select styled like Wayground's dropdowns. */
-export function Select({ value, onChange, options, placeholder = 'Select…', icon: Icon, className = '', error }) {
+export function Select({ value, onChange, options, placeholder, icon: Icon, className = '', error }) {
+  const { t } = useTranslation('ui');
   return (
     <div className={`relative ${className}`}>
       {Icon && <Icon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />}
@@ -143,7 +147,7 @@ export function Select({ value, onChange, options, placeholder = 'Select…', ic
         value={value ?? ''} onChange={(e) => onChange(e.target.value || null)}
         className={`input appearance-none pr-8 ${Icon ? 'pl-9' : ''} ${error ? 'border-red-400' : ''} ${!value ? 'text-slate-500' : ''}`}
       >
-        <option value="">{placeholder}</option>
+        <option value="">{placeholder ?? t('select.placeholder')}</option>
         {options.map((o) => (typeof o === 'string' ? <option key={o} value={o}>{o}</option> : <option key={o.value} value={o.value}>{o.label}</option>))}
       </select>
       <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />

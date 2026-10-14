@@ -1,3 +1,5 @@
+import { lang } from '../i18n/index.js';
+
 const TOKEN_KEY = 'wg_token';
 
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
@@ -8,7 +10,8 @@ export class ApiError extends Error {
 }
 
 export async function api(path, { method = 'GET', body, form, signal } = {}) {
-  const headers = {};
+  // the server translates error messages from this header
+  const headers = { 'Accept-Language': lang() };
   const token = getToken();
   if (token) headers.Authorization = `Bearer ${token}`;
   let payload;

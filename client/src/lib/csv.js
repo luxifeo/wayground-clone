@@ -1,10 +1,16 @@
 // CSV import/export for question lists (compatible with a simple spreadsheet template)
 import { rid } from './constants.js';
+import i18n from '../i18n/index.js';
 
 export const CSV_HEADER = ['Question Text', 'Question Type', 'Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5', 'Correct Answer', 'Time in seconds', 'Explanation'];
 
-export const CSV_TEMPLATE = [
-  CSV_HEADER,
+/** Header row in the current UI language (the importer accepts English and Vietnamese headers). */
+export const csvHeader = () => {
+  const t = (k, o) => i18n.t(`report:csvTemplate.${k}`, o);
+  return [t('text'), t('type'), ...[1, 2, 3, 4, 5].map((n) => t('option', { n })), t('correct'), t('time'), t('explanation')];
+};
+
+const CSV_ROWS = [
   ['What is 2 + 2?', 'Multiple Choice', '3', '4', '5', '22', '', '2', '30', '2 plus 2 equals 4'],
   ['Select all prime numbers', 'Checkbox', '2', '4', '7', '9', '', '1,3', '45', ''],
   ['The Earth is flat.', 'True/False', '', '', '', '', '', 'False', '20', ''],
@@ -12,6 +18,11 @@ export const CSV_TEMPLATE = [
   ['Describe your favourite book.', 'Open-Ended', '', '', '', '', '', '', '120', ''],
   ['Which season do you like most?', 'Poll', 'Spring', 'Summer', 'Autumn', 'Winter', '', '', '20', ''],
 ];
+
+export const CSV_TEMPLATE = [CSV_HEADER, ...CSV_ROWS];
+
+/** Import template with a translated header row. Type names stay in English because the importer parses them. */
+export const csvTemplate = () => [csvHeader(), ...CSV_ROWS];
 
 export function toCSV(rows) {
   return rows.map((r) => r.map((c) => {
@@ -46,7 +57,7 @@ const TYPE_MAP = {
 export function csvToQuestions(text) {
   const rows = parseCSV(text);
   if (!rows.length) return [];
-  const start = /question/i.test(rows[0][0]) ? 1 : 0;
+  const start = /question|câu hỏi/i.test(rows[0][0]) ? 1 : 0;
   return rows.slice(start).map((r) => {
     const [qText, rawType, o1, o2, o3, o4, o5, correct, time, expl] = r.map((c) => (c ?? '').trim());
     const type = TYPE_MAP[(rawType || 'multiple choice').toLowerCase()] || 'mcq';

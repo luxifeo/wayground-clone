@@ -13,6 +13,7 @@ import { sessionRouter } from './routes/sessions.js';
 import { aiRouter } from './routes/ai.js';
 import { imageRouter } from './routes/images.js';
 import { initRealtime } from './realtime.js';
+import { i18nErrors } from './i18n.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOAD_DIR = path.join(__dirname, '..', 'uploads');
@@ -22,6 +23,7 @@ fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 const app = express();
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '15mb' }));
+app.use('/api', i18nErrors);
 
 // async error safety for express 4
 for (const r of [authRouter, quizRouter, sessionRouter, aiRouter, imageRouter]) {

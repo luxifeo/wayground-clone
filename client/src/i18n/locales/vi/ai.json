@@ -1,0 +1,38 @@
+{
+  "titleGenerate": "Tạo câu hỏi bằng AI",
+  "titleCreate": "Tạo bằng AI",
+  "tips": {
+    "reading": "Đang đọc nội dung của bạn…",
+    "concepts": "Đang chọn các khái niệm chính…",
+    "writing": "Đang viết câu hỏi…",
+    "distractors": "Đang tạo các phương án gây nhiễu hợp lý…",
+    "checking": "Đang kiểm tra lại đáp án…"
+  },
+  "working": "Gemma đang xử lý — thường chỉ mất vài giây.",
+  "unreachable": "Không kết nối được tới mô hình AI tại <b>{{baseUrl}}</b> ({{error}}). Hãy đặt <code>LLM_BASE_URL</code> và <code>LLM_MODEL</code> trong <code>server/.env</code> rồi khởi động lại máy chủ.",
+  "modes": {
+    "prompt": "Chủ đề hoặc văn bản",
+    "upload": "Tải tệp lên",
+    "link": "Liên kết web"
+  },
+  "topicPlaceholder": "Nhập chủ đề (ví dụ: “Quang hợp cho lớp 7”) hoặc dán nội dung bài học, ghi chú hay một bài viết…",
+  "dropzone": "<b>Nhấn để tải lên</b> hoặc kéo và thả",
+  "formats": "PDF, DOCX, TXT hoặc hình ảnh (ảnh chụp phiếu bài tập, slide, sơ đồ) — tối đa 50 MB",
+  "removeFile": "Gỡ tệp",
+  "instructionsExample": "Hướng dẫn thêm (không bắt buộc), ví dụ: “tập trung vào từ vựng chương 2”",
+  "instructions": "Hướng dẫn thêm (không bắt buộc)",
+  "types": "Loại câu hỏi",
+  "count": "Số câu hỏi",
+  "grade": "Khối lớp",
+  "any": "Bất kỳ",
+  "difficulty": "Độ khó",
+  "levels": {
+    "easy": "Dễ",
+    "medium": "Trung bình",
+    "hard": "Khó"
+  },
+  "findImages": "<b>Tìm ảnh minh hoạ</b> <muted>— ảnh và sơ đồ miễn phí (Wikimedia, Openverse…) sẽ được thêm vào các câu hỏi phù hợp</muted>",
+  "generate": "Tạo",
+  "generated_other": "Đã tạo {{count}} câu hỏi",
+  "generatedImages_other": " · {{count}} ảnh"
+}
