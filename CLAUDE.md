@@ -1,1 +1,1 @@
-Nếu cần test, tạo temp ở thư mục sau. Không được tạo ở thư mục khác H:\Code\2026\WayGroundClone\.temp
+Nếu cần test, tạo temp ở thư mục sau. Không được tạo ở thư mục khác C:\Users\HoaBD5\Documents\Personal\WG\wayground-clone\.temp
