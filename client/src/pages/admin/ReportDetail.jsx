@@ -132,19 +132,19 @@ export default function ReportDetail() {
           <div className="mt-4 overflow-x-auto rounded-xl border border-slate-200">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-left text-slate-600">
-                <tr><th className="p-3">#</th><th className="p-3">{t('name')}</th><th className="p-3">{t('score')}</th><th className="p-3">{t('accuracy')}</th>{d.questions.map((q, i) => <th key={q.id} className="p-1 text-center text-xs">{t('qShort', { n: i + 1 })}<div className="font-normal text-slate-400">{q.accuracy ?? '–'}%</div></th>)}<th className="w-10 p-1" /></tr>
+                <tr><th className="p-3">#</th><th className="p-3">{t('name')}</th><th className="p-3">{t('score')}</th><th className="p-3">{t('accuracy')}</th>{d.questions.map((q, i) => <th key={q.id} className="p-1 text-center text-xs">{t('qShort', { n: i + 1 })}<div className="font-normal text-slate-400">{q.accuracy ?? '–'}%</div></th>)}<th className="sticky right-0 shadow-[-8px_0_8px_-8px_rgba(15,23,42,0.25)] w-10 bg-slate-50 p-1" /></tr>
               </thead>
               <tbody>
                 {d.players.map((p) => (
-                  <tr key={p.id} className="cursor-pointer border-t border-slate-100 hover:bg-slate-50" onClick={() => setPlayer(p)}>
+                  <tr key={p.id} className="group cursor-pointer border-t border-slate-100 hover:bg-slate-50" onClick={() => setPlayer(p)}>
                     <td className="p-3 text-slate-500">{p.rank}</td>
                     <td className="p-3"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={26} /><span className="font-semibold">{p.name}</span>{p.attempt > 1 && <span className="text-xs text-slate-400">{t('attempt', { n: p.attempt })}</span>}{p.disconnected
-                      ? <span className="rounded bg-slate-100 px-1.5 text-[10px] font-bold uppercase text-slate-500">{t('common:status.disconnected')}</span>
-                      : !p.finished_at && s.status !== 'ended' && <span className="rounded bg-emerald-50 px-1.5 text-[10px] font-bold uppercase text-emerald-600">{t('common:status.inProgress')}</span>}</span></td>
+                      ? <span className="whitespace-nowrap rounded bg-slate-100 px-1.5 text-[10px] font-bold uppercase text-slate-500">{t('common:status.disconnected')}</span>
+                      : !p.finished_at && s.status !== 'ended' && <span className="whitespace-nowrap rounded bg-emerald-50 px-1.5 text-[10px] font-bold uppercase text-emerald-600">{t('common:status.inProgress')}</span>}</span></td>
                     <td className="p-3 font-bold">{p.score}</td>
                     <td className="p-3">{p.accuracy === null ? '–' : `${p.accuracy}%`}</td>
                     {p.statuses.map((st, i) => <td key={i} className="p-1"><span className={`mx-auto block h-6 w-6 rounded ${st ? ST[st] : 'bg-slate-100'}`} title={t(`common:result.${st || 'unattempted'}`)} /></td>)}
-                    <td className="p-1"><ParticipantActions sessionId={s.id} player={p} onChange={() => load()} /></td>
+                    <td className="sticky right-0 shadow-[-8px_0_8px_-8px_rgba(15,23,42,0.25)] bg-white p-1 group-hover:bg-slate-50"><ParticipantActions sessionId={s.id} player={p} onChange={() => load()} /></td>
                   </tr>
                 ))}
               </tbody>

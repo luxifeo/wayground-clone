@@ -82,7 +82,7 @@ function OverviewTable({ data, onPlayer, onChange }) {
             <tr className="text-left text-white/70">
               <th className="p-2">#</th><th className="p-2">{t('names')}</th><th className="p-2">{t('score')}</th><th className="p-2">{t('accuracy')}</th>
               {data.questions.map((q, i) => <th key={q.id} className="p-1 text-center text-xs">{t('qShort', { n: i + 1 })}</th>)}
-              {onChange && <th className="w-10 p-1" />}
+              {onChange && <th className="sticky right-0 w-10 bg-slate-900/80 p-1 backdrop-blur-sm" />}
             </tr>
           </thead>
           <tbody>
@@ -95,7 +95,7 @@ function OverviewTable({ data, onPlayer, onChange }) {
                 {p.statuses.map((st, i) => (
                   <td key={i} className="p-1 text-center"><span className={`mx-auto block h-6 w-6 rounded ${st ? STATUS_COLOR[st] : 'bg-white/10'}`} title={t(`common:result.${st || 'unattempted'}`)} /></td>
                 ))}
-                {onChange && <td className="p-1"><ParticipantActions dark sessionId={data.session.id} player={p} onChange={onChange} /></td>}
+                {onChange && <td className="sticky right-0 bg-slate-900/80 p-1 backdrop-blur-sm"><ParticipantActions dark sessionId={data.session.id} player={p} onChange={onChange} /></td>}
               </tr>
             ))}
           </tbody>
