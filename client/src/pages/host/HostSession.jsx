@@ -14,6 +14,7 @@ import { Avatar, Logo, Spinner, useToast } from '../../components/ui.jsx';
 import { QuestionBody } from '../../components/QuestionCard.jsx';
 import { WordCloud } from '../../components/play/answers.jsx';
 import ParticipantActions from '../../components/ParticipantActions.jsx';
+import SuspectBadge from '../../components/SuspectBadge.jsx';
 import LanguageSwitcher from '../../components/LanguageSwitcher.jsx';
 
 const STATUS_COLOR = { correct: 'bg-emerald-500', incorrect: 'bg-red-500', partial: 'bg-amber-400', ungraded: 'bg-blue-500', skipped: 'bg-slate-400' };
@@ -89,7 +90,7 @@ function OverviewTable({ data, onPlayer, onChange }) {
             {data.players.map((p) => (
               <tr key={p.id} className="cursor-pointer border-t border-white/10 hover:bg-white/5" onClick={() => onPlayer?.(p)}>
                 <td className="p-2">{p.rank}</td>
-                <td className="p-2"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={24} />{p.name}{p.attempt > 1 && <span className="text-xs text-white/50">{t('attempt', { n: p.attempt })}</span>}{p.disconnected && <span className="rounded bg-white/10 px-1.5 text-[10px] font-bold uppercase text-white/60">{t('common:status.disconnected')}</span>}</span></td>
+                <td className="p-2"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={24} />{p.name}{p.attempt > 1 && <span className="text-xs text-white/50">{t('attempt', { n: p.attempt })}</span>}<SuspectBadge dark suspect={p.suspect} hideNames={!!data.session.settings?.anonymize} />{p.disconnected && <span className="rounded bg-white/10 px-1.5 text-[10px] font-bold uppercase text-white/60">{t('common:status.disconnected')}</span>}</span></td>
                 <td className="p-2 font-bold">{p.score}</td>
                 <td className="p-2">{p.accuracy === null ? '–' : `${p.accuracy}%`}</td>
                 {p.statuses.map((st, i) => (

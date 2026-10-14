@@ -71,6 +71,8 @@
     "memesSub": "Fun reactions after each answer",
     "sound": "Sound effects",
     "scoring": "Scoring",
-    "scoringSub": "Fixed once the session starts"
+    "scoringSub": "Fixed once the session starts",
+    "deviceLock": "Recognize students by device",
+    "deviceLockSub": "Changing name on the same browser still counts as the same student. Turn off if students share computers."
   }
 }

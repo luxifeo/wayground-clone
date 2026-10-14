@@ -118,6 +118,7 @@ export default function StartSession() {
             {pace === 'student' && (
               <Row title={t('rows.attempts')}><Segmented value={s.attempts} onChange={set('attempts')} options={[{ value: 0, label: t('opt.unlimited') }, { value: 1, label: '1' }, { value: 2, label: '2' }, { value: 3, label: '3' }]} /></Row>
             )}
+            <Row title={t('rows.deviceLock')} sub={t('rows.deviceLockSub')}><Toggle checked={s.deviceLock !== false} onChange={set('deviceLock')} /></Row>
             {pace === 'student' && (
               <Row title={t('rows.timer')} sub={t('rows.timerSub')}>
                 <select className="input w-40" value={s.timer ? 'on' : 'off'} onChange={(e) => set('timer')(e.target.value === 'on')}><option value="off">{off}</option><option value="on">{on}</option></select>

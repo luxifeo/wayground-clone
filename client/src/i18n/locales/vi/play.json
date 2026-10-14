@@ -10,7 +10,8 @@
     "settings": "Cài đặt",
     "soundEffects": "Âm thanh",
     "differentCode": "Dùng mã khác",
-    "nameRequired": "Hãy nhập tên của bạn"
+    "nameRequired": "Hãy nhập tên của bạn",
+    "attemptsUsedHint": "Nếu đây không phải bạn, hãy nhập đầy đủ họ tên hoặc báo giáo viên."
   },
   "game": {
     "disconnected": "Giáo viên đã ngắt kết nối bạn khỏi game này.",

@@ -83,9 +83,10 @@ export const AVATAR_BG = ['#fde68a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#ddd6fe',
 export const avatarBg = (a = '') => AVATAR_BG[[...a].reduce((s, c) => s + c.codePointAt(0), 0) % AVATAR_BG.length];
 
 export const DEFAULT_SETTINGS = {
-  attempts: 0, timer: false, shuffleQuestions: true, shuffleAnswers: true, showAnswers: 'on', showAnswersAfter: 'on',
+  attempts: 1, timer: false, shuffleQuestions: true, shuffleAnswers: true, showAnswers: 'on', showAnswersAfter: 'on',
   leaderboard: true, memes: true, music: false, skipQuestions: false, anonymize: false, serious: false,
   scoring: 'classic', // classic | perQuestion
+  deviceLock: true, // same browser = same student when counting attempts
 };
 
 export const rid = () => Math.random().toString(36).slice(2, 8);

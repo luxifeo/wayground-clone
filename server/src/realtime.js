@@ -2,6 +2,7 @@ import { Server } from 'socket.io';
 import { one, many } from './db.js';
 import { verify } from './auth.js';
 import { sanitizeQuestion, revealFor } from './grading.js';
+import { suspectFlags } from './identity.js';
 
 let io = null;
 const pending = new Map(); // sessionId -> timeout (debounce)
@@ -63,7 +64,7 @@ export async function hostState(sessionId) {
   if (!session) return null;
   const questions = session.quiz_snapshot.questions || [];
   const participants = await many(
-    'SELECT id,name,avatar,score,streak,attempt,joined_at,finished_at,disconnected FROM participants WHERE session_id=$1 AND NOT kicked ORDER BY score DESC, joined_at',
+    'SELECT id,name,avatar,score,streak,attempt,joined_at,finished_at,disconnected,device_id FROM participants WHERE session_id=$1 AND NOT kicked ORDER BY score DESC, joined_at',
     [sessionId]);
   const responses = await many(
     'SELECT participant_id, question_id, status, fraction, score, time_ms, answer FROM responses WHERE session_id=$1', [sessionId]);
@@ -72,6 +73,8 @@ export async function hostState(sessionId) {
     if (!byP.has(r.participant_id)) byP.set(r.participant_id, []);
     byP.get(r.participant_id).push(r);
   });
+  // possible retakes under another name; device ids themselves never leave the server
+  const flags = suspectFlags(participants);
   let graded = 0, correctSum = 0;
   const players = participants.map((p, i) => {
     const rs = byP.get(p.id) || [];
@@ -83,7 +86,7 @@ export async function hostState(sessionId) {
     const acc = g.length ? g.reduce((a, r) => a + r.fraction, 0) / g.length : null;
     graded += g.length; correctSum += g.reduce((a, r) => a + r.fraction, 0);
     return {
-      ...p, rank: i + 1, answered: rs.length, statuses,
+      ...p, device_id: undefined, suspect: flags.get(p.id) || null, rank: i + 1, answered: rs.length, statuses,
       correct: rs.filter((r) => r.status === 'correct').length,
       incorrect: rs.filter((r) => r.status === 'incorrect').length,
       accuracy: acc === null ? null : Math.round(acc * 100),

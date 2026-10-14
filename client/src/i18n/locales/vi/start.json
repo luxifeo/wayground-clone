@@ -71,6 +71,8 @@
     "memesSub": "Phản ứng vui nhộn sau mỗi câu trả lời",
     "sound": "Hiệu ứng âm thanh",
     "scoring": "Cách tính điểm",
-    "scoringSub": "Không đổi được sau khi bắt đầu phiên"
+    "scoringSub": "Không đổi được sau khi bắt đầu phiên",
+    "deviceLock": "Nhận diện học sinh theo thiết bị",
+    "deviceLockSub": "Đổi tên trên cùng trình duyệt vẫn tính là cùng một học sinh. Tắt nếu học sinh dùng chung máy."
   }
 }

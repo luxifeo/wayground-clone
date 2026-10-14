@@ -69,6 +69,7 @@ const PROBLEMS = {
 const PATTERNS = [
   [/^Question (\d+) (.+)$/, (_m, n, rest) => `Câu ${n} ${PROBLEMS[rest] || rest}`],
   [/^Only (\d+) attempt\(s\) allowed$/, (_m, n) => `Chỉ được làm tối đa ${n} lần`],
+  [/^You have used all (\d+) attempt\(s\) for this game$/, (_m, n) => `Bạn đã dùng hết ${n} lượt làm bài này`],
   [/^"(.+)" looks like a scanned PDF with no text\. Upload page images instead\.$/, (_m, f) => `"${f}" có vẻ là PDF scan không có chữ. Hãy tải ảnh từng trang lên.`],
   [/^Unsupported file type: (.+)\. Use PDF, DOCX, TXT or images\.$/, (_m, f) => `Không hỗ trợ loại tệp: ${f}. Hãy dùng PDF, DOCX, TXT hoặc ảnh.`],
   [/^Cannot reach the AI model at (\S+) \((.*)\)\. Check LLM_BASE_URL in server\/\.env\.$/s, (_m, u, e) => `Không kết nối được model AI tại ${u} (${e}). Kiểm tra LLM_BASE_URL trong server/.env.`],

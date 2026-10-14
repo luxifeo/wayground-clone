@@ -10,7 +10,8 @@
     "settings": "Settings",
     "soundEffects": "Sound effects",
     "differentCode": "Use a different code",
-    "nameRequired": "Please enter your name"
+    "nameRequired": "Please enter your name",
+    "attemptsUsedHint": "If this is not you, enter your full name or ask your teacher."
   },
   "game": {
     "disconnected": "The host disconnected you from this game.",

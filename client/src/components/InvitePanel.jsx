@@ -166,6 +166,7 @@ export function SettingsDrawer({ session, open, onClose, onSaved }) {
               <option value={0}>{t('drawer.unlimited')}</option><option value={1}>1</option><option value={2}>2</option><option value={3}>3</option>
             </select>
           </Row>
+          <Row label={t('drawer.deviceLock')} sub={t('drawer.deviceLockSub')}><Toggle checked={s.deviceLock !== false} onChange={set('deviceLock')} /></Row>
           <Row label={t('drawer.showDuring')} sub={t('drawer.showDuringSub')}>
             <select className="input w-36" value={s.showAnswers || 'on'} onChange={(e) => set('showAnswers')(e.target.value)}>
               <option value="on">{t('drawer.on')}</option><option value="validate">{t('drawer.validate')}</option><option value="off">{t('drawer.off')}</option>

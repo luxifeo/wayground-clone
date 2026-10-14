@@ -85,6 +85,9 @@ CREATE TABLE IF NOT EXISTS participants (
 CREATE INDEX IF NOT EXISTS participants_session_idx ON participants(session_id);
 -- host cut the player off: they cannot keep playing but their results stay in the report
 ALTER TABLE participants ADD COLUMN IF NOT EXISTS disconnected BOOLEAN NOT NULL DEFAULT false;
+-- random id kept by the player's browser, used to count attempts when the name changes
+ALTER TABLE participants ADD COLUMN IF NOT EXISTS device_id TEXT;
+CREATE INDEX IF NOT EXISTS participants_device_idx ON participants(session_id, device_id);
 
 CREATE TABLE IF NOT EXISTS responses (
   id             SERIAL PRIMARY KEY,

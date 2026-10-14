@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { RefreshCw, X, Volume2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api.js';
+import { getDeviceId } from '../../lib/device.js';
 import { AVATARS } from '../../lib/constants.js';
 import { Avatar, Logo, Spinner, Toggle } from '../../components/ui.jsx';
 import LanguageSwitcher from '../../components/LanguageSwitcher.jsx';
@@ -40,13 +41,13 @@ export default function Join() {
     if (!name.trim()) return setErr(t('join.nameRequired'));
     setBusy(true); setErr('');
     try {
-      const d = await api(`/join/${session.code}`, { method: 'POST', body: { name: name.trim(), avatar } });
+      const d = await api(`/join/${session.code}`, { method: 'POST', body: { name: name.trim(), avatar, deviceId: getDeviceId() } });
       localStorage.setItem('wg_name', name.trim());
       localStorage.setItem('wg_avatar', avatar);
       localStorage.setItem('wg_sound', sound ? '1' : '0');
       localStorage.setItem(`wg_play_${session.code}`, JSON.stringify({ token: d.token, name: d.participant.name }));
       nav(`/play/${d.token}`);
-    } catch (ex) { setErr(ex.message); setBusy(false); }
+    } catch (ex) { setErr(ex.data?.attemptsUsed ? `${ex.message}. ${t('join.attemptsUsedHint')}` : ex.message); setBusy(false); }
   };
 
   return (

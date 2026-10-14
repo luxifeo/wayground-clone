@@ -12,6 +12,7 @@ import { QTYPES, QTYPE_UPPER, UNGRADED, CHOICE_TYPES } from '../../lib/constants
 import { Avatar, Modal, Spinner, useToast } from '../../components/ui.jsx';
 import { QuestionBody } from '../../components/QuestionCard.jsx';
 import ParticipantActions from '../../components/ParticipantActions.jsx';
+import SuspectBadge from '../../components/SuspectBadge.jsx';
 import { FormatAnswer } from '../../lib/formatAnswer.jsx';
 import { toCSV } from '../../lib/csv.js';
 import { WordCloud } from '../../components/play/answers.jsx';
@@ -138,7 +139,7 @@ export default function ReportDetail() {
                 {d.players.map((p) => (
                   <tr key={p.id} className="group cursor-pointer border-t border-slate-100 hover:bg-slate-50" onClick={() => setPlayer(p)}>
                     <td className="p-3 text-slate-500">{p.rank}</td>
-                    <td className="p-3"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={26} /><span className="font-semibold">{p.name}</span>{p.attempt > 1 && <span className="text-xs text-slate-400">{t('attempt', { n: p.attempt })}</span>}{p.disconnected
+                    <td className="p-3"><span className="flex items-center gap-2"><Avatar avatar={p.avatar} name={p.name} size={26} /><span className="font-semibold">{p.name}</span>{p.attempt > 1 && <span className="text-xs text-slate-400">{t('attempt', { n: p.attempt })}</span>}<SuspectBadge suspect={p.suspect} />{p.disconnected
                       ? <span className="whitespace-nowrap rounded bg-slate-100 px-1.5 text-[10px] font-bold uppercase text-slate-500">{t('common:status.disconnected')}</span>
                       : !p.finished_at && s.status !== 'ended' && <span className="whitespace-nowrap rounded bg-emerald-50 px-1.5 text-[10px] font-bold uppercase text-emerald-600">{t('common:status.inProgress')}</span>}</span></td>
                     <td className="p-3 font-bold">{p.score}</td>

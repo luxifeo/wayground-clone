@@ -51,5 +51,10 @@
     "time": "Thời gian (giây)",
     "explanation": "Giải thích"
   },
-  "scoringPerQuestion": "1 điểm mỗi câu"
+  "scoringPerQuestion": "1 điểm mỗi câu",
+  "suspect": {
+    "badge": "Nghi trùng",
+    "sameDevice": "Cùng thiết bị với: {{names}}",
+    "similarName": "Tên gần giống: {{names}}"
+  }
 }

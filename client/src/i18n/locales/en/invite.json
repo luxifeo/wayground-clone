@@ -39,6 +39,8 @@
     "shuffleAnswers": "Shuffle answer options",
     "skip": "Skip questions & attempt later",
     "anonymize": "Anonymize student names",
-    "updated": "Settings updated"
+    "updated": "Settings updated",
+    "deviceLock": "Recognize students by device",
+    "deviceLockSub": "Turn off if students share computers"
   }
 }

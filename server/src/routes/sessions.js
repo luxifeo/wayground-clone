@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 import { one, many, query } from '../db.js';
 import { requireAuth } from '../auth.js';
 import { loadQuiz } from './quizzes.js';
+import { cleanDeviceId, cleanName, nameKey, sameStudent, deviceLockOn } from '../identity.js';
 import { grade, computeScore, sanitizeQuestion, revealFor, shuffle, UNGRADED_TYPES, SCORING_MODES } from '../grading.js';
 import {
   broadcast, hostState, playerState, loadSession, leaderboard, setQuestionTimer, clearQuestionTimer, dropPlayer, getIO, anonymize,
@@ -11,7 +12,7 @@ import {
 export const sessionRouter = Router();
 
 export const DEFAULT_SETTINGS = {
-  attempts: 0,              // 0 = unlimited
+  attempts: 1,              // 0 = unlimited
   timer: false,             // student-paced: use per-question timers
   shuffleQuestions: true,
   shuffleAnswers: true,
@@ -25,6 +26,7 @@ export const DEFAULT_SETTINGS = {
   serious: false,
   redemption: false,
   scoring: 'classic',       // classic (speed + streak bonus) | perQuestion (1 point per correct question)
+  deviceLock: true,         // same device counts as the same student (turn off for shared computers)
 };
 
 async function uniqueCode() {
@@ -60,7 +62,7 @@ sessionRouter.post('/sessions', requireAuth, async (req, res) => {
   const settings = { ...DEFAULT_SETTINGS, ...(b.settings || {}) };
   if (!SCORING_MODES.includes(settings.scoring)) settings.scoring = 'classic';
   if (gameType === 'test') { settings.leaderboard = false; settings.memes = false; settings.showAnswers = settings.showAnswers === 'on' ? 'off' : settings.showAnswers; }
-  if (kind === 'preview') { settings.shuffleQuestions = false; }
+  if (kind === 'preview') { settings.shuffleQuestions = false; settings.attempts = 0; } // teachers may replay previews
   const snapshot = {
     title: quiz.title, subject: quiz.subject, grade: quiz.grade, cover_image: quiz.cover_image,
     questions: quiz.questions.map((q) => ({
@@ -286,21 +288,59 @@ sessionRouter.post('/join/:code', async (req, res) => {
   const s = await one("SELECT * FROM sessions WHERE code=$1 AND status<>'ended' ORDER BY created_at DESC LIMIT 1", [req.params.code]);
   if (!s) return res.status(404).json({ error: 'Game not found. Check the code and try again.' });
   if (isExpired(s)) return res.status(410).json({ error: 'The deadline for this assignment has passed' });
-  let name = String(req.body.name || '').trim().slice(0, 40);
+  let name = cleanName(req.body.name);
   if (!name) return res.status(400).json({ error: 'Please enter your name' });
-  const taken = await one('SELECT count(*)::int AS n FROM participants WHERE session_id=$1 AND lower(name)=lower($2)', [s.id, name]);
-  if (taken.n > 0) name = `${name} ${taken.n + 1}`;
-  const p = await createParticipant(s, { name, avatar: req.body.avatar, attempt: 1 });
+  const deviceId = cleanDeviceId(req.body.deviceId);
+  const reply = (p, resumed = false) => res.json({ token: p.token, participant: { id: p.id, name: p.name, avatar: p.avatar }, session: sessionPublic(s), resumed });
+  let attempt = 1;
+  if (s.pace === 'student') {
+    // same name or same device = same student: rejoining starts their next attempt
+    const prior = await attemptsOf(s, { name, deviceId });
+    const open = prior.find((r) => isOpen(r) && r.device_id && r.device_id === deviceId && nameKey(r.name) === nameKey(name));
+    if (open) return reply(open, true); // reloaded mid-attempt on this device: continue it
+    const max = s.settings.attempts || 0;
+    if (max && prior.length >= max) {
+      return res.status(403).json({ error: `You have used all ${max} attempt(s) for this game`, attemptsUsed: true });
+    }
+    attempt = prior.length + 1;
+  } else {
+    // teacher-led: one player per device, unique display names
+    if (deviceId && deviceLockOn(s.settings)) {
+      const mine = await one(
+        'SELECT * FROM participants WHERE session_id=$1 AND device_id=$2 AND NOT kicked AND NOT disconnected ORDER BY id DESC LIMIT 1',
+        [s.id, deviceId]);
+      if (mine) return reply(mine, true);
+    }
+    name = await uniqueName(s.id, name);
+  }
+  const p = await createParticipant(s, { name, avatar: req.body.avatar, attempt, deviceId });
   broadcast(s.id);
-  res.json({ token: p.token, participant: { id: p.id, name: p.name, avatar: p.avatar }, session: sessionPublic(s) });
+  reply(p);
 });
 
-async function createParticipant(s, { name, avatar, attempt }) {
+const isOpen = (r) => !r.finished_at && !r.kicked && !r.disconnected;
+
+/** Every attempt (participant row) of the student identified by name / device, oldest first. */
+async function attemptsOf(s, who) {
+  const rows = await many(
+    'SELECT id, token, name, avatar, attempt, device_id, finished_at, kicked, disconnected FROM participants WHERE session_id=$1 ORDER BY id',
+    [s.id]);
+  return rows.filter((r) => sameStudent(r, who, s.settings));
+}
+
+/** "Lan", "Lan 2", "Lan 3"… for teacher-led games where names must stay distinct. */
+async function uniqueName(sessionId, name) {
+  const used = new Set((await many('SELECT name FROM participants WHERE session_id=$1', [sessionId])).map((r) => nameKey(r.name)));
+  if (!used.has(nameKey(name))) return name;
+  for (let i = 2; ; i++) if (!used.has(nameKey(`${name} ${i}`))) return `${name} ${i}`;
+}
+
+async function createParticipant(s, { name, avatar, attempt, deviceId = null }) {
   const ids = s.quiz_snapshot.questions.map((q) => q.id);
   const order = s.settings.shuffleQuestions ? shuffle(ids) : ids;
   return one(
-    `INSERT INTO participants(session_id,token,name,avatar,attempt,order_map) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,
-    [s.id, crypto.randomBytes(18).toString('hex'), name, avatar || null, attempt, JSON.stringify(order)],
+    `INSERT INTO participants(session_id,token,name,avatar,attempt,order_map,device_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+    [s.id, crypto.randomBytes(18).toString('hex'), name, avatar || null, attempt, JSON.stringify(order), deviceId],
   );
 }
 
@@ -422,9 +462,13 @@ sessionRouter.post('/play/:token/again', async (req, res) => {
   const { p, s } = ctx;
   if (s.status !== 'running' || s.pace !== 'student') return res.status(400).json({ error: 'This game can no longer be played' });
   if (isExpired(s)) return res.status(410).json({ error: 'The deadline for this assignment has passed' });
+  // count by student, not by this token: an old attempt's token must not reopen the limit
+  const prior = await attemptsOf(s, { name: p.name, deviceId: p.device_id });
+  const open = prior.find((r) => r.id !== p.id && isOpen(r) && r.device_id && r.device_id === p.device_id);
+  if (open) return res.json({ token: open.token }); // already started the next attempt on this device
   const max = s.settings.attempts || 0;
-  if (max && p.attempt >= max) return res.status(400).json({ error: `Only ${max} attempt(s) allowed` });
-  const np = await createParticipant(s, { name: p.name, avatar: p.avatar, attempt: p.attempt + 1 });
+  if (max && prior.length >= max) return res.status(400).json({ error: `Only ${max} attempt(s) allowed` });
+  const np = await createParticipant(s, { name: p.name, avatar: p.avatar, attempt: prior.length + 1, deviceId: p.device_id });
   await query('UPDATE participants SET finished_at=coalesce(finished_at, now()) WHERE id=$1', [p.id]);
   broadcast(s.id);
   res.json({ token: np.token });
@@ -434,6 +478,7 @@ sessionRouter.get('/play/:token/summary', async (req, res) => {
   const ctx = await loadPlayer(req, res); if (!ctx) return;
   const { p, s } = ctx;
   const rs = await many('SELECT * FROM responses WHERE participant_id=$1', [p.id]);
+  const used = (await attemptsOf(s, { name: p.name, deviceId: p.device_id })).length;
   const ranks = await leaderboard(s.id);
   const graded = rs.filter((r) => r.status !== 'ungraded');
   const showAfter = s.settings.showAnswersAfter || 'on';
@@ -462,7 +507,7 @@ sessionRouter.get('/play/:token/summary', async (req, res) => {
       accuracy: graded.length ? Math.round((graded.reduce((a, r) => a + r.fraction, 0) / graded.length) * 100) : null,
       avgTime: rs.length ? Math.round(rs.reduce((a, r) => a + r.time_ms, 0) / rs.length / 1000) : 0,
     },
-    canPlayAgain: s.pace === 'student' && s.status === 'running' && !isExpired(s) && (!(s.settings.attempts) || p.attempt < s.settings.attempts),
+    canPlayAgain: s.pace === 'student' && s.status === 'running' && !isExpired(s) && (!(s.settings.attempts) || used < s.settings.attempts),
     review,
   });
 });

@@ -39,6 +39,8 @@
     "shuffleAnswers": "Xáo trộn phương án trả lời",
     "skip": "Bỏ qua câu hỏi & làm sau",
     "anonymize": "Ẩn danh tên học sinh",
-    "updated": "Đã cập nhật cài đặt"
+    "updated": "Đã cập nhật cài đặt",
+    "deviceLock": "Nhận diện học sinh theo thiết bị",
+    "deviceLockSub": "Tắt nếu học sinh dùng chung máy"
   }
 }

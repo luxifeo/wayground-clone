@@ -55,5 +55,10 @@
     "time": "Time in seconds",
     "explanation": "Explanation"
   },
-  "scoringPerQuestion": "1 point per question"
+  "scoringPerQuestion": "1 point per question",
+  "suspect": {
+    "badge": "Possible duplicate",
+    "sameDevice": "Same device as: {{names}}",
+    "similarName": "Similar name to: {{names}}"
+  }
 }
