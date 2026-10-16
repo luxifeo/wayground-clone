@@ -45,7 +45,8 @@ body { @apply bg-white text-slate-800 antialiased; }
 }
 
 /* ---------------------------------------------------------------- adventure mode */
-.font-adv { font-family: 'Fredoka', 'Quicksand', 'Inter', system-ui, sans-serif; }
+/* Baloo 2 (not Fredoka) so Vietnamese quiz text renders in one font whatever the UI language */
+.font-adv { font-family: 'Baloo 2', 'Quicksand', 'Inter', system-ui, sans-serif; }
 .adv-cloud { animation: adv-drift linear infinite alternate; }
 @keyframes adv-drift { from { transform: translateX(-30px); } to { transform: translateX(60px); } }
 .adv-twinkle { animation: adv-twinkle 2.4s ease-in-out infinite; }

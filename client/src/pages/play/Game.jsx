@@ -174,7 +174,7 @@ export default function Game() {
   const topBar = (
     <header className="flex items-center gap-2 px-3 py-2 sm:px-5">
       <LogoMark className="h-6 w-6" color="#fff" />
-      {!serious && session.settings.leaderboard && rank && <span className="flex items-center gap-1 rounded-lg bg-black/30 px-2.5 py-1 font-game text-sm font-bold text-white"><Trophy className="h-4 w-4 text-yellow-300" />{t('game.rank', { count: rank, ordinal: true })}</span>}
+      {!serious && session.settings.leaderboard && rank && <span className="flex items-center gap-1 rounded-lg bg-black/30 px-2.5 py-1 font-game text-sm font-bold text-white"><Trophy className="h-4 w-4 text-yellow-300" />{t('game.rank', { count: Number(rank), ordinal: true })}</span>}
       {!serious && <span className="flex items-center gap-1 rounded-lg bg-black/30 px-2.5 py-1 font-game text-sm font-bold text-white"><Flame className={`h-4 w-4 ${streak >= 2 ? 'text-orange-400' : 'text-white/50'}`} />{streak}</span>}
       {!serious && session.gameType !== 'test' && <span className="rounded-lg bg-black/30 px-2.5 py-1 font-game text-sm font-bold text-white">{t('game.pts', { score, count: score })}</span>}
       <LanguageSwitcher dark className="ml-auto" />

@@ -54,7 +54,7 @@ export function snapshotQuestion(session, index) {
 export async function leaderboard(sessionId) {
   return many(
     `SELECT p.id, p.name, p.avatar, p.score, p.attempt, p.finished_at,
-            rank() OVER (ORDER BY p.score DESC) AS rank
+            rank() OVER (ORDER BY p.score DESC)::int AS rank
      FROM participants p WHERE p.session_id=$1 AND NOT p.kicked ORDER BY p.score DESC, p.joined_at`, [sessionId]);
 }
 

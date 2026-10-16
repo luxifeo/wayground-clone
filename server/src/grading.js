@@ -119,8 +119,11 @@ export function grade(q, answer) {
       return result(hit, opts.length);
     }
     case 'match': {
+      // compare by content, so identical right-hand items are interchangeable
+      const rightKey = (o) => o && `${norm(o.right, true)}|${o.rightImage || ''}`;
+      const byId = new Map(opts.map((o) => [o.id, o]));
       let hit = 0;
-      opts.forEach((p) => { if (answer[p.id] === p.id) hit++; });
+      opts.forEach((p) => { const got = byId.get(answer?.[p.id]); if (got && rightKey(got) === rightKey(p)) hit++; });
       return result(hit, opts.length);
     }
     case 'dropdown': {

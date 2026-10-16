@@ -156,18 +156,62 @@ export function MatchAnswer({ q, onSubmit, result, locked }) {
     next[active] = rid; setPairs(next); setActive(null);
   };
   const colorOfLeft = (id) => PAIR_COLORS[q.lefts.findIndex((l) => l.id === id) % PAIR_COLORS.length];
+  // a pair is right when the picked item has the same content as the key (duplicates are interchangeable)
+  const rightKey = (o) => o && `${String(o.text ?? o.right ?? '').trim()}|${o.image ?? o.rightImage ?? ''}`;
+  const isOk = (lid) => {
+    const key = reveal?.find((p) => p.id === lid);
+    const got = q.rights.find((r) => r.id === pairs[lid]);
+    return !!key && !!got && rightKey(got) === rightKey(key);
+  };
+
+  // connector lines: measure the paired buttons and draw an SVG line between them
+  const wrapRef = useRef(null);
+  const btnRefs = useRef({});
+  const [lines, setLines] = useState([]);
+  useEffect(() => {
+    const measure = () => {
+      const wrap = wrapRef.current;
+      if (!wrap) return;
+      const w = wrap.getBoundingClientRect();
+      const next = [];
+      for (const [lid, rid] of Object.entries(pairs)) {
+        const a = btnRefs.current['l' + lid]?.getBoundingClientRect();
+        const b = btnRefs.current['r' + rid]?.getBoundingClientRect();
+        if (!a || !b) continue;
+        next.push({
+          lid, x1: a.right - w.left, y1: a.top + a.height / 2 - w.top,
+          x2: b.left - w.left, y2: b.top + b.height / 2 - w.top,
+        });
+      }
+      setLines(next);
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [pairs, q, result]);
+
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="grid grid-cols-2 gap-6">
+      <div ref={wrapRef} className="relative grid grid-cols-2 gap-x-16 gap-y-2">
+        <svg className="pointer-events-none absolute inset-0 h-full w-full overflow-visible">
+          {lines.map((ln) => {
+            const color = reveal ? (isOk(ln.lid) ? '#34d399' : '#ef4444') : colorOfLeft(ln.lid);
+            return (
+              <g key={ln.lid}>
+                <line x1={ln.x1} y1={ln.y1} x2={ln.x2} y2={ln.y2} stroke={color} strokeWidth="5" strokeLinecap="round" />
+                <circle cx={ln.x1} cy={ln.y1} r="7" fill={color} stroke="#fff" strokeWidth="2" />
+                <circle cx={ln.x2} cy={ln.y2} r="7" fill={color} stroke="#fff" strokeWidth="2" />
+              </g>
+            );
+          })}
+        </svg>
         <div className="space-y-2">
           {q.lefts.map((l) => {
-            const paired = pairs[l.id];
-            const ok = reveal && paired === l.id;
+            const ok = reveal && isOk(l.id);
             return (
               <button
-                key={l.id} onClick={() => pickLeft(l.id)}
-                style={{ borderColor: paired ? colorOfLeft(l.id) : 'transparent' }}
-                className={`w-full rounded-xl border-4 bg-white px-3 py-3 text-left font-game font-bold text-slate-800 ${active === l.id ? 'ring-4 ring-yellow-300' : ''} ${reveal ? (ok ? okRing : badRing) : ''}`}
+                key={l.id} ref={(el) => { btnRefs.current['l' + l.id] = el; }} onClick={() => pickLeft(l.id)}
+                className={`w-full rounded-xl border-4 border-transparent bg-white px-3 py-3 text-left font-game font-bold text-slate-800 ${active === l.id ? 'ring-4 ring-yellow-300' : ''} ${reveal ? (ok ? okRing : badRing) : ''}`}
               >
                 {l.text}
                 {reveal && !ok && <div className="mt-1 text-xs text-emerald-600">✓ {reveal.find((p) => p.id === l.id)?.right}</div>}
@@ -176,16 +220,12 @@ export function MatchAnswer({ q, onSubmit, result, locked }) {
           })}
         </div>
         <div className="space-y-2">
-          {q.rights.map((r) => {
-            const owner = Object.entries(pairs).find(([, v]) => v === r.id)?.[0];
-            return (
-              <button
-                key={r.id} onClick={() => pickRight(r.id)}
-                style={{ borderColor: owner ? colorOfLeft(owner) : 'transparent' }}
-                className={`w-full rounded-xl border-4 px-3 py-3 text-left font-game font-bold text-white opt-2 ${active ? 'hover:brightness-110' : ''}`}
-              >{r.text}</button>
-            );
-          })}
+          {q.rights.map((r) => (
+            <button
+              key={r.id} ref={(el) => { btnRefs.current['r' + r.id] = el; }} onClick={() => pickRight(r.id)}
+              className={`w-full rounded-xl border-4 border-transparent px-3 py-3 text-left font-game font-bold text-white opt-2 ${active ? 'hover:brightness-110' : ''}`}
+            >{r.text}</button>
+          ))}
         </div>
       </div>
       {!result && <p className="mt-3 text-center text-sm text-white/70">{t('answers.match.hint')}</p>}

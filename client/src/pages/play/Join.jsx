@@ -73,12 +73,13 @@ export default function Join() {
           <div className="w-full max-w-md space-y-3">
             <div className="text-center font-game text-xl font-bold text-white">{session.title}</div>
             <form onSubmit={join} className="game-panel p-4">
-              <div className="mb-3 flex flex-col items-center gap-2">
+              {/* adventure games pick their hero on the next screen */}
+              {session.gameType !== 'adventure' && <div className="mb-3 flex flex-col items-center gap-2">
                 <Avatar avatar={avatar} name={name} size={84} />
                 <div className="flex max-w-xs flex-wrap justify-center gap-1">
                   {AVATARS.slice(0, 12).map((a) => <button type="button" key={a} onClick={() => setAvatar(a)} className={`rounded-full p-0.5 ${a === avatar ? 'ring-2 ring-white' : 'opacity-70 hover:opacity-100'}`}><Avatar avatar={a} size={30} /></button>)}
                 </div>
-              </div>
+              </div>}
               <label className="mb-1 block text-sm font-semibold text-white/90">{t('join.nameLabel')}</label>
               <div className="flex overflow-hidden rounded-xl bg-white">
                 <input value={name} onChange={(e) => setName(e.target.value)} maxLength={30} autoFocus placeholder={t('join.namePlaceholder')} className="flex-1 px-4 py-3 font-game text-lg font-bold outline-none" />
