@@ -29,6 +29,21 @@ export const DEFAULT_SETTINGS = {
   deviceLock: true,         // same device counts as the same student (turn off for shared computers)
 };
 
+const GAME_TYPES = ['classic', 'test', 'adventure'];
+const ADVENTURE_WORLDS = ['dino', 'bakery', 'space', 'pirate', 'unicorn', 'panda', 'fire', 'candy', 'camping', 'dessert'];
+
+/** Adventure options chosen by the teacher (world, age group, difficulty, runs, question count). */
+function cleanAdventure(a = {}) {
+  const int = (v) => (v === null || v === undefined || v === '' ? null : Math.max(0, Math.min(500, parseInt(v, 10) || 0)));
+  return {
+    world: ADVENTURE_WORLDS.includes(a.world) ? a.world : 'dino',
+    age: ['4-5', '6-7', '8-10'].includes(a.age) ? a.age : '6-7',
+    difficulty: ['easy', 'medium', 'hard'].includes(a.difficulty) ? a.difficulty : 'easy',
+    runs: int(a.runs),
+    count: int(a.count) || 0,
+  };
+}
+
 async function uniqueCode() {
   for (let i = 0; i < 50; i++) {
     const code = String(Math.floor(100000 + Math.random() * 900000));
@@ -57,15 +72,23 @@ sessionRouter.post('/sessions', requireAuth, async (req, res) => {
   }
   if (!quiz.questions.length) return res.status(400).json({ error: 'This quiz has no questions' });
   const kind = ['live', 'homework', 'preview'].includes(b.kind) ? b.kind : 'live';
-  const pace = kind === 'live' && b.pace === 'teacher' ? 'teacher' : 'student';
-  const gameType = b.gameType === 'test' ? 'test' : 'classic';
+  const gameType = GAME_TYPES.includes(b.gameType) ? b.gameType : 'classic';
+  // adventures are always student paced: everyone walks their own map
+  const pace = kind === 'live' && b.pace === 'teacher' && gameType !== 'adventure' ? 'teacher' : 'student';
   const settings = { ...DEFAULT_SETTINGS, ...(b.settings || {}) };
   if (!SCORING_MODES.includes(settings.scoring)) settings.scoring = 'classic';
   if (gameType === 'test') { settings.leaderboard = false; settings.memes = false; settings.showAnswers = settings.showAnswers === 'on' ? 'off' : settings.showAnswers; }
+  if (gameType === 'adventure') {
+    settings.adventure = cleanAdventure(b.settings?.adventure);
+    Object.assign(settings, { timer: false, leaderboard: false, memes: false, showAnswers: 'on', skipQuestions: false });
+  }
   if (kind === 'preview') { settings.shuffleQuestions = false; settings.attempts = 0; } // teachers may replay previews
+  let questions = quiz.questions;
+  const count = settings.adventure?.count;
+  if (count && count < questions.length) questions = (settings.shuffleQuestions ? shuffle(questions) : questions).slice(0, count);
   const snapshot = {
     title: quiz.title, subject: quiz.subject, grade: quiz.grade, cover_image: quiz.cover_image,
-    questions: quiz.questions.map((q) => ({
+    questions: questions.map((q) => ({
       id: q.id, type: q.type, text: q.text, image: q.image, options: q.options, answer: q.answer,
       points: q.points, time_limit: q.time_limit, explanation: q.explanation, extra: q.extra,
     })),
@@ -274,6 +297,7 @@ const sessionPublic = (s) => ({
     serious: !!s.settings.serious, music: !!s.settings.music, attempts: s.settings.attempts || 0,
     scoring: s.settings.scoring || 'classic',
   },
+  adventure: s.game_type === 'adventure' ? s.settings.adventure || cleanAdventure() : undefined,
 });
 
 sessionRouter.get('/join/:code', async (req, res) => {
@@ -434,6 +458,42 @@ sessionRouter.post('/play/:token/answer', async (req, res) => {
 });
 
 /** Shared board for discussion / word cloud questions. */
+/**
+ * Adventure retries: grade another try without changing the recorded (first) answer.
+ * Only allowed once the question has a recorded response, so it cannot be used to probe answers.
+ */
+sessionRouter.post('/play/:token/check', async (req, res) => {
+  const ctx = await loadPlayer(req, res); if (!ctx) return;
+  const { p, s } = ctx;
+  const q = s.quiz_snapshot.questions.find((x) => x.id === Number(req.body.questionId));
+  if (!q) return res.status(404).json({ error: 'Question not found' });
+  const prev = await one('SELECT id FROM responses WHERE participant_id=$1 AND question_id=$2', [p.id, q.id]);
+  if (!prev) return res.status(400).json({ error: 'Answer the question first' });
+  const { status, fraction } = grade(q, req.body.answer);
+  const show = s.pace === 'student' ? s.settings.showAnswers : 'on';
+  res.json({ status, fraction, reveal: req.body.reveal && show === 'on' ? revealFor(q) : undefined, explanation: show === 'on' ? q.explanation : undefined });
+});
+
+/** Adventure hint: one wrong option to hide (choice questions) or the first letter of the answer (fill in). */
+sessionRouter.post('/play/:token/hint', async (req, res) => {
+  const ctx = await loadPlayer(req, res); if (!ctx) return;
+  const { p, s } = ctx;
+  const q = s.quiz_snapshot.questions.find((x) => x.id === Number(req.body.questionId));
+  if (!q) return res.status(404).json({ error: 'Question not found' });
+  const hidden = new Set((Array.isArray(req.body.hidden) ? req.body.hidden : []).map(String));
+  if (['mcq', 'msq', 'tf'].includes(q.type)) {
+    const right = new Set(q.answer || []);
+    const wrong = (q.options || []).map((o) => o.id).filter((id) => !right.has(id) && !hidden.has(id));
+    // keep at least one wrong option visible so the question stays a choice
+    if (wrong.length <= 1) return res.json({ remove: null });
+    return res.json({ remove: shuffle(wrong, p.id + q.id + hidden.size)[0] });
+  }
+  if (['fill', 'math'].includes(q.type) && q.answer?.accepted?.[0]) {
+    return res.json({ startsWith: String(q.answer.accepted[0]).trim().slice(0, 1) });
+  }
+  res.json({ remove: null });
+});
+
 sessionRouter.get('/play/:token/board/:qid', async (req, res) => {
   const ctx = await loadPlayer(req, res); if (!ctx) return;
   const { s } = ctx;

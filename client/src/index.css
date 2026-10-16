@@ -43,3 +43,43 @@ body { @apply bg-white text-slate-800 antialiased; }
   .no-print { display: none !important; }
   body { background: white; }
 }
+
+/* ---------------------------------------------------------------- adventure mode */
+.font-adv { font-family: 'Fredoka', 'Quicksand', 'Inter', system-ui, sans-serif; }
+.adv-cloud { animation: adv-drift linear infinite alternate; }
+@keyframes adv-drift { from { transform: translateX(-30px); } to { transform: translateX(60px); } }
+.adv-twinkle { animation: adv-twinkle 2.4s ease-in-out infinite; }
+@keyframes adv-twinkle { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+.adv-rays { animation: adv-spin 14s linear infinite; }
+@keyframes adv-spin { to { transform: rotate(360deg); } }
+.adv-bob { animation: adv-bob 1.6s ease-in-out infinite; }
+@keyframes adv-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+.adv-walk { animation: adv-walk .32s ease-in-out infinite; }
+@keyframes adv-walk { 0%, 100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-8px) rotate(4deg); } }
+.adv-jump { animation: adv-jump .7s ease-out infinite; }
+@keyframes adv-jump { 0%, 100% { transform: translateY(0) scale(1); } 40% { transform: translateY(-26px) scale(1.06); } 70% { transform: translateY(0) scale(1.08, .92); } }
+.adv-pulse { animation: adv-pulse 1.6s ease-out infinite; }
+@keyframes adv-pulse { 0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, .7); } 100% { box-shadow: 0 0 0 22px rgba(250, 204, 21, 0); } }
+.adv-coin { animation: adv-coin 2.2s ease-in-out infinite; }
+@keyframes adv-coin { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(.35); } }
+.adv-wobble { animation: adv-wobble .6s ease-in-out; }
+@keyframes adv-wobble { 0%, 100% { transform: rotate(0) scale(1); } 20% { transform: rotate(-12deg) scale(.92); } 40% { transform: rotate(10deg) scale(1.05); } 60% { transform: rotate(-6deg); } 80% { transform: rotate(4deg); } }
+.adv-lunge { animation: adv-lunge .55s ease-in-out; }
+@keyframes adv-lunge { 0%, 100% { transform: translateX(0); } 45% { transform: translateX(-90px) scale(1.12); } }
+.adv-knock { animation: adv-knock .6s ease-out; }
+@keyframes adv-knock { 0%, 100% { transform: translateX(0) rotate(0); } 30% { transform: translateX(-30px) rotate(-14deg); } }
+.adv-cheer { animation: adv-cheer .8s ease-in-out 2; }
+@keyframes adv-cheer { 0%, 100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-18px) rotate(-8deg); } 75% { transform: translateY(-18px) rotate(8deg); } }
+.adv-fall { animation: adv-fall linear forwards; }
+@keyframes adv-fall { 0% { transform: translateY(-10vh) rotate(0); opacity: 1; } 100% { transform: translateY(105vh) rotate(720deg); opacity: .9; } }
+.adv-float-up { animation: adv-float-up 1.2s ease-out forwards; }
+@keyframes adv-float-up { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
+.adv-lid { transform-origin: 10% 100%; animation: adv-lid .7s .3s ease-out both; }
+@keyframes adv-lid { from { transform: rotate(0); } to { transform: rotate(-28deg) translateY(-10px); } }
+.adv-btn { @apply rounded-2xl font-adv font-bold transition active:translate-y-0.5; }
+.adv-btn-green { @apply adv-btn bg-emerald-600 text-white shadow-[0_4px_0_#166534] hover:bg-emerald-500 active:shadow-none; }
+.adv-btn-violet { @apply adv-btn bg-violet-600 text-white shadow-[0_4px_0_#4c1d95] hover:bg-violet-500 active:shadow-none; }
+.adv-btn-white { @apply adv-btn bg-white text-slate-800 shadow-[0_4px_0_#ddd6fe] hover:bg-violet-50 active:shadow-none; }
+.adv-btn-yellow { @apply adv-btn bg-amber-400 text-slate-900 shadow-[0_4px_0_#b45309] hover:bg-amber-300 active:shadow-none; }
+.adv-card { @apply rounded-3xl bg-white shadow-2xl ring-4 ring-white/60; }
+.adv-pill { @apply rounded-full bg-white/90 px-3 py-1 font-adv font-bold text-slate-800 shadow-md backdrop-blur; }

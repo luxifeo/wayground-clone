@@ -4,6 +4,7 @@
 const VI = {
   'Add a question first': 'Hãy thêm một câu hỏi trước',
   'Add at least one question': 'Thêm ít nhất một câu hỏi',
+  'Answer the question first': 'Hãy trả lời câu hỏi trước',
   'Already answered': 'Bạn đã trả lời câu này rồi',
   'An account with this email already exists': 'Email này đã có tài khoản',
   'Choose a language': 'Hãy chọn một ngôn ngữ',

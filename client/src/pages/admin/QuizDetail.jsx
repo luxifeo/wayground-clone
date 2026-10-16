@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Share2, Download, Eye, EllipsisVertical, Bookmark, Pencil, Clock, Play, ChevronDown, Rocket, Settings2, Copy, Trash2,
-  Sparkles, Languages, Lightbulb, ClipboardCheck, Link2, ChartPie, Archive, Users, ImagePlus,
+  Sparkles, Languages, Lightbulb, ClipboardCheck, Link2, ChartPie, Archive, Users, ImagePlus, Map as MapIcon,
 } from 'lucide-react';
 import AdminLayout from '../../components/AdminLayout.jsx';
 import { shareWithStudents } from '../../components/InvitePanel.jsx';
@@ -102,6 +102,7 @@ export default function QuizDetail() {
           <div className="ml-auto flex flex-wrap gap-2">
             {!isOwner && <button className="btn-outline" onClick={copyToLibrary}><Bookmark className="h-4 w-4" />{t('common:actions.save')}</button>}
             {isOwner && <Link to={`/admin/quiz/${quiz.id}/edit`} className="btn-outline"><Pencil className="h-4 w-4" />{t('common:actions.edit')}</Link>}
+            <button className="btn border border-violet-300 bg-violet-50 text-violet-700 hover:bg-violet-100" onClick={() => nav(`/admin/quiz/${quiz.id}/adventure`)}><MapIcon className="h-4 w-4" />{t('adventureCreate:entry')}</button>
             <button className="btn-brand-outline" onClick={() => nav(`/admin/quiz/${quiz.id}/start?kind=homework`)}><Clock className="h-4 w-4" />{t('common:actions.assign')}</button>
             <Menu trigger={<button className="btn-primary"><Play className="h-4 w-4" />{t('common:actions.play')}<ChevronDown className="h-4 w-4" /></button>}>
               <MenuItem icon={Rocket} sub={t('detail.recommended')} onClick={quickStart}>{t('detail.quickStart')}</MenuItem>

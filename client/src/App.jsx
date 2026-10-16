@@ -12,6 +12,7 @@ import QuizEditor from './pages/admin/QuizEditor.jsx';
 import QuizDetail from './pages/admin/QuizDetail.jsx';
 import StartSession from './pages/admin/StartSession.jsx';
 import Worksheet from './pages/admin/Worksheet.jsx';
+import AdventureCreate from './pages/admin/AdventureCreate.jsx';
 import HostSession from './pages/host/HostSession.jsx';
 import Join from './pages/play/Join.jsx';
 import Game from './pages/play/Game.jsx';
@@ -37,6 +38,7 @@ export default function App() {
       <Route path="/admin/quiz/:id/edit" element={A(<QuizEditor />)} />
       <Route path="/admin/quiz/:id/start" element={A(<StartSession />)} />
       <Route path="/admin/quiz/:id/worksheet" element={A(<Worksheet />)} />
+      <Route path="/admin/quiz/:id/adventure" element={A(<AdventureCreate />)} />
       <Route path="/host/:id" element={A(<HostSession />)} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

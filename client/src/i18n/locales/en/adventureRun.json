@@ -1,0 +1,26 @@
+{
+  "run": {
+    "title": "Adventure run: {{world}}",
+    "intro": "Grab coins, bop monsters by landing on them (not the spiky ones!), bounce on springs. At the end, jump up into the block with the right answer.",
+    "introNoSpiky": "Grab coins, bop monsters by landing on them and bounce on springs. At the end, jump up into the block with the right answer.",
+    "questionLabel": "Your question",
+    "controlsKeys": "Arrow keys or A / D to move · Space or ↑ to jump",
+    "controlsTouch": "Hold ◀ ▶ to move · tap ⤒ to jump",
+    "go": "Go!",
+    "quizCard": "Answer with a quiz card instead",
+    "pause": "Pause",
+    "paused": "Paused",
+    "keepPlaying": "Keep playing",
+    "startOver": "Start over",
+    "left": "Move left",
+    "right": "Move right",
+    "jump": "Jump",
+    "toast": {
+      "fell": "Whoops! Back on solid ground.",
+      "spiky": "Ouch! Spiky ones can't be bopped. Jump over them!",
+      "side": "Oops! Land on top to bop it.",
+      "tried": "You already tried that one. Pick another block!",
+      "finish": "Jump up into the right answer!"
+    }
+  }
+}

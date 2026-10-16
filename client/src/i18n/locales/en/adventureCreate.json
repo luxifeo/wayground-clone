@@ -1,0 +1,77 @@
+{
+  "entry": "Create adventure",
+  "eyebrow": "A little learning. A big adventure.",
+  "title": "Create an adventure",
+  "subtitle": "Turn your quiz into a game world with checkpoints, treasure chests and a friendly boss. Three quick steps and it's ready to share.",
+  "backToQuiz": "Back to quiz",
+  "notFound": "We couldn't open this quiz.",
+  "toLibrary": "Go to library",
+  "steps": {
+    "aria": "Steps",
+    "questions": "Questions",
+    "world": "Choose your world",
+    "review": "Review and share"
+  },
+  "back": "Back",
+  "minutes": "about {{min}}–{{max}} minutes",
+  "questions": {
+    "fromQuiz": "Questions from your quiz",
+    "ready": "{{questions}} ready to play",
+    "readyDesc": "Every question becomes a checkpoint on the adventure map.",
+    "empty": "This quiz has no questions yet. Add a few questions, then come back to build the adventure.",
+    "editQuiz": "Edit quiz",
+    "found": "What we found",
+    "foundSub": "check the questions and answers",
+    "noText": "Question without text",
+    "count": "Number of questions",
+    "all": "All",
+    "plays": "Plays in {{time}}",
+    "random": "{{questions}} are picked at random from the quiz when you create the adventure.",
+    "next": "Choose your world"
+  },
+  "world": {
+    "gameTitle": "Game title",
+    "gameTitlePlaceholder": "Give your adventure a name",
+    "age": "Child's age",
+    "years": "years old",
+    "changes": "What this changes in the game:",
+    "world": "World",
+    "boss": "Boss: {{boss}}",
+    "bossMini": "Boss: {{boss}} · mini boss: {{mini}}",
+    "change": "Change world",
+    "advanced": "Advanced settings",
+    "advancedSub": "Difficulty, adventure runs and attempts",
+    "difficulty": "Difficulty",
+    "runs": "Number of adventure runs",
+    "runsAuto": "Auto ({{n}})",
+    "runsHelp": "Adventure-run games to play. Empty = 1 game every 5 questions",
+    "attempts": "Attempts per student",
+    "unlimited": "Unlimited",
+    "next": "Review and share"
+  },
+  "picker": {
+    "title": "Choose a world",
+    "subtitle": "Where should the adventure happen? Every world has its own scenery, boss and mini boss.",
+    "use": "Use this world"
+  },
+  "review": {
+    "age": "Child's age",
+    "ageValue": "{{age}} years · {{label}}",
+    "difficulty": "Difficulty",
+    "attempts": "Attempts",
+    "share": "How will you share it?",
+    "assign": "Assign",
+    "assignDesc": "Students play any time before a deadline.",
+    "deadline": "Deadline",
+    "live": "Play now in class",
+    "liveDesc": "Live: students join with a code.",
+    "try": "Try it yourself",
+    "generate": "Generate adventure",
+    "pastDeadline": "Pick a deadline in the future."
+  },
+  "preview": {
+    "label": "Live preview",
+    "untitled": "Untitled adventure",
+    "heroHint": "Tap the hero to see another one. Students pick their own hero when they play."
+  }
+}

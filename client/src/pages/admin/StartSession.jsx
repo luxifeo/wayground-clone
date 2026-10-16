@@ -6,12 +6,13 @@ import { get, post } from '../../lib/api.js';
 import { DEFAULT_SETTINGS } from '../../lib/constants.js';
 import { Segmented, Spinner, Toggle, useToast } from '../../components/ui.jsx';
 
-// title / desc come from start:modes.<key>
+// title / desc come from start:modes.<key>; modes with `page` open their own create page (texts from <key>:mode / modeDesc)
 const MODES = [
   { key: 'classic', cls: 'from-[#8a1c6c] to-[#5b0f4a]', big: true },
   { key: 'mastery', cls: 'from-slate-300 to-slate-400', disabled: true, big: true },
   { key: 'playground', cls: 'from-slate-400 to-slate-500', disabled: true, big: true },
   { key: 'test', cls: 'from-[#1f4f8a] to-[#173a6b]' },
+  { key: 'adventure', cls: 'from-[#7c3aed] to-[#4c1d95]', page: 'adventure', emoji: '🗺️' },
   { key: 'team', cls: 'from-[#b23a55] to-[#8c2a40]', disabled: true },
 ];
 
@@ -74,10 +75,11 @@ export default function StartSession() {
               </button>
             ))}
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-3">
             {MODES.filter((m) => !m.big).map((m) => (
-              <button key={m.key} disabled={m.disabled} onClick={() => setMode(m.key)} className={`flex h-24 flex-col items-center justify-center rounded-2xl bg-gradient-to-r ${m.cls} text-white shadow-lg transition ${m.disabled ? 'cursor-not-allowed opacity-70' : 'hover:-translate-y-1'}`}>
-                <span className="text-2xl font-extrabold">{t(`modes.${m.key}.title`)}</span><span className="text-xs text-white/80">{t(`modes.${m.key}.desc`)}</span>
+              <button key={m.key} disabled={m.disabled} onClick={() => (m.page ? nav(`/admin/quiz/${id}/${m.page}`) : setMode(m.key))} className={`flex min-h-24 flex-col items-center justify-center rounded-2xl bg-gradient-to-r ${m.cls} px-4 py-3 text-center text-white shadow-lg transition ${m.disabled ? 'cursor-not-allowed opacity-70' : 'hover:-translate-y-1'}`}>
+                <span className="text-2xl font-extrabold">{m.emoji && <span className="mr-1.5" aria-hidden="true">{m.emoji}</span>}{m.page ? t(`${m.key}:mode`) : t(`modes.${m.key}.title`)}</span>
+                <span className="text-xs text-white/80">{m.page ? t(`${m.key}:modeDesc`) : t(`modes.${m.key}.desc`)}</span>
               </button>
             ))}
           </div>

@@ -1,0 +1,77 @@
+{
+  "entry": "Tạo cuộc phiêu lưu",
+  "eyebrow": "Học một chút, phiêu lưu thật xa.",
+  "title": "Tạo cuộc phiêu lưu",
+  "subtitle": "Biến bài quiz thành một thế giới trò chơi với các trạm, rương báu và một boss thân thiện. Chỉ ba bước nhanh là sẵn sàng chia sẻ.",
+  "backToQuiz": "Quay lại bài quiz",
+  "notFound": "Không mở được bài quiz này.",
+  "toLibrary": "Đến thư viện",
+  "steps": {
+    "aria": "Các bước",
+    "questions": "Câu hỏi",
+    "world": "Chọn thế giới",
+    "review": "Xem lại và chia sẻ"
+  },
+  "back": "Quay lại",
+  "minutes": "khoảng {{min}}–{{max}} phút",
+  "questions": {
+    "fromQuiz": "Câu hỏi từ bài quiz của bạn",
+    "ready": "{{questions}} sẵn sàng để chơi",
+    "readyDesc": "Mỗi câu hỏi trở thành một trạm trên bản đồ phiêu lưu.",
+    "empty": "Bài quiz này chưa có câu hỏi nào. Hãy thêm vài câu hỏi rồi quay lại tạo cuộc phiêu lưu.",
+    "editQuiz": "Sửa bài quiz",
+    "found": "Những gì chúng tôi tìm thấy",
+    "foundSub": "kiểm tra câu hỏi và đáp án",
+    "noText": "Câu hỏi chưa có nội dung",
+    "count": "Số câu hỏi",
+    "all": "Tất cả",
+    "plays": "Chơi trong {{time}}",
+    "random": "Khi tạo cuộc phiêu lưu, {{questions}} sẽ được chọn ngẫu nhiên từ bài quiz.",
+    "next": "Chọn thế giới"
+  },
+  "world": {
+    "gameTitle": "Tên trò chơi",
+    "gameTitlePlaceholder": "Đặt tên cho cuộc phiêu lưu",
+    "age": "Độ tuổi của trẻ",
+    "years": "tuổi",
+    "changes": "Điều này thay đổi gì trong trò chơi:",
+    "world": "Thế giới",
+    "boss": "Boss: {{boss}}",
+    "bossMini": "Boss: {{boss}} · boss nhỏ: {{mini}}",
+    "change": "Đổi thế giới",
+    "advanced": "Cài đặt nâng cao",
+    "advancedSub": "Độ khó, đường chạy phiêu lưu và số lần làm",
+    "difficulty": "Độ khó",
+    "runs": "Số đường chạy phiêu lưu",
+    "runsAuto": "Tự động ({{n}})",
+    "runsHelp": "Số màn chạy phiêu lưu sẽ chơi. Để trống = cứ 5 câu hỏi có 1 màn",
+    "attempts": "Số lần làm của mỗi học sinh",
+    "unlimited": "Không giới hạn",
+    "next": "Xem lại và chia sẻ"
+  },
+  "picker": {
+    "title": "Chọn thế giới",
+    "subtitle": "Cuộc phiêu lưu sẽ diễn ra ở đâu? Mỗi thế giới có phong cảnh, boss và boss nhỏ riêng.",
+    "use": "Dùng thế giới này"
+  },
+  "review": {
+    "age": "Độ tuổi của trẻ",
+    "ageValue": "{{age}} tuổi · {{label}}",
+    "difficulty": "Độ khó",
+    "attempts": "Số lần làm",
+    "share": "Bạn muốn chia sẻ thế nào?",
+    "assign": "Giao bài",
+    "assignDesc": "Học sinh chơi bất cứ lúc nào trước hạn chót.",
+    "deadline": "Hạn chót",
+    "live": "Chơi ngay trên lớp",
+    "liveDesc": "Trực tiếp: học sinh tham gia bằng mã.",
+    "try": "Tự chơi thử",
+    "generate": "Tạo cuộc phiêu lưu",
+    "pastDeadline": "Hãy chọn hạn chót ở tương lai."
+  },
+  "preview": {
+    "label": "Xem trước trực tiếp",
+    "untitled": "Cuộc phiêu lưu chưa có tên",
+    "heroHint": "Chạm vào nhân vật để xem nhân vật khác. Học sinh sẽ tự chọn nhân vật khi chơi."
+  }
+}

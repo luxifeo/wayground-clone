@@ -54,7 +54,8 @@
     "teacherLed": "Giáo viên dẫn",
     "studentPaced": "Học sinh tự làm",
     "classic": "Cổ điển",
-    "test": "Chế độ kiểm tra"
+    "test": "Chế độ kiểm tra",
+    "adventure": "Phiêu lưu"
   },
   "result": {
     "correct": "Đúng",

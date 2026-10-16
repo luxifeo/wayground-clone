@@ -54,7 +54,8 @@
     "teacherLed": "Teacher led",
     "studentPaced": "Student paced",
     "classic": "Classic",
-    "test": "Test mode"
+    "test": "Test mode",
+    "adventure": "Adventure"
   },
   "result": {
     "correct": "Correct",

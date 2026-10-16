@@ -1,0 +1,26 @@
+{
+  "run": {
+    "title": "Chạy phiêu lưu: {{world}}",
+    "intro": "Nhặt thật nhiều xu, nhảy lên đầu quái vật để hạ chúng (nhưng đừng đụng vào bạn có gai nhé!), nhún thật cao trên lò xo. Đến cuối đường, nhảy lên chạm vào ô có đáp án đúng.",
+    "introNoSpiky": "Nhặt thật nhiều xu, nhảy lên đầu quái vật để hạ chúng và nhún thật cao trên lò xo. Đến cuối đường, nhảy lên chạm vào ô có đáp án đúng.",
+    "questionLabel": "Câu hỏi",
+    "controlsKeys": "Phím mũi tên hoặc A / D để chạy · Phím cách hoặc ↑ để nhảy",
+    "controlsTouch": "Giữ ◀ ▶ để chạy · chạm ⤒ để nhảy",
+    "go": "Xuất phát!",
+    "quizCard": "Trả lời bằng thẻ câu hỏi",
+    "pause": "Tạm dừng",
+    "paused": "Nghỉ một chút nhé",
+    "keepPlaying": "Chơi tiếp",
+    "startOver": "Chơi lại từ đầu",
+    "left": "Sang trái",
+    "right": "Sang phải",
+    "jump": "Nhảy",
+    "toast": {
+      "fell": "Ối! Quay lại chỗ an toàn nhé.",
+      "spiky": "Ui da! Bạn này có gai đấy, nhảy qua thôi!",
+      "side": "Ối! Nhảy lên đầu mới hạ được nhé.",
+      "tried": "Ô này thử rồi, chọn ô khác nhé!",
+      "finish": "Nhảy lên chạm vào đáp án đúng nào!"
+    }
+  }
+}

@@ -9,6 +9,7 @@ import { UNGRADED } from '../../lib/constants.js';
 import { Avatar, LogoMark, Spinner } from '../../components/ui.jsx';
 import QuestionPlayer from '../../components/play/QuestionPlayer.jsx';
 import Summary from './Summary.jsx';
+import AdventureGame from '../../components/adventure/AdventureGame.jsx';
 import LanguageSwitcher from '../../components/LanguageSwitcher.jsx';
 import { fmtDate } from '../../i18n/index.js';
 
@@ -158,6 +159,11 @@ export default function Game() {
   if (kicked) return <Center>{kicked === 'disconnected' ? t('game.disconnected') : t('game.removed')}<button onClick={() => nav('/join')} className="mt-4 rounded-xl bg-white px-5 py-2 font-bold text-slate-800">{t('game.joinAnother')}</button></Center>;
   if (err) return <Center>{err}<button onClick={() => nav('/join')} className="mt-4 rounded-xl bg-white px-5 py-2 font-bold text-slate-800">{t('common:actions.back')}</button></Center>;
   if (!data || !state) return <Center><Spinner className="h-10 w-10" /></Center>;
+
+  // adventures have their own screens (hero, map, battles, finish) while the game is running
+  if (session.gameType === 'adventure' && state.status === 'running') {
+    return <AdventureGame key={token} token={token} data={data} onAgain={(tk) => nav(`/play/${tk}`, { replace: true })} />;
+  }
 
   const ended = state.status === 'ended';
   if (finished || (ended && !isTeacher) || (ended && isTeacher)) {
