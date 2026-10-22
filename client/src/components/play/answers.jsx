@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, X, ArrowUp, ArrowDown, GripVertical, Eraser, Trash2, Mic, Video, Square, RotateCcw, Send, Delete } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { splitBlanks } from '../../lib/constants.js';
+import { cwNormalize } from '../../lib/crossword.js';
 import Graph from '../Graph.jsx';
 import { Avatar, Spinner } from '../ui.jsx';
 
@@ -445,6 +446,200 @@ export function TableFillAnswer({ q, onSubmit, result, locked }) {
         </table>
       </div>
       {!result && <SubmitBar onClick={() => onSubmit(ans)} disabled={locked || blanks.some((b) => !String(ans[b.id] || '').trim())} />}
+    </div>
+  );
+}
+
+// ------------------------------------------------------------ crossword
+const NO_LAYOUT = { rows: 0, cols: 0, entries: [] };
+const cwCell = (e, k) => `${e.row + (e.dir === 'down' ? k : 0)},${e.col + (e.dir === 'across' ? k : 0)}`;
+const SENTINEL = ' '; // kept in the hidden input so mobile keyboards always have something to delete
+
+export function CrosswordAnswer({ q, onSubmit, result, locked }) {
+  const { t } = useTranslation('play');
+  const { rows, cols, entries } = q.layout || NO_LAYOUT;
+  const cells = useMemo(() => {
+    const m = new Map(); // "r,c" -> { r, c, num, across: entryId, down: entryId }
+    entries.forEach((e) => {
+      for (let k = 0; k < e.len; k++) {
+        const key = cwCell(e, k);
+        const [r, c] = key.split(',').map(Number);
+        const cell = m.get(key) || { r, c };
+        cell[e.dir] = e.id;
+        if (k === 0) cell.num = e.num;
+        m.set(key, cell);
+      }
+    });
+    return m;
+  }, [entries]);
+  const byId = useMemo(() => new Map(entries.map((e) => [e.id, e])), [entries]);
+  const clues = useMemo(() => new Map((q.clues || []).map((c) => [c.id, c.clue])), [q.clues]);
+  const [letters, setLetters] = useState(() => {
+    const prev = result?.answer && typeof result.answer === 'object' ? result.answer : {};
+    const L = {};
+    entries.forEach((e) => Array.from(String(prev[e.id] || '')).slice(0, e.len).forEach((ch, k) => { if (/[\p{L}\p{N}]/u.test(ch)) L[cwCell(e, k)] = ch.toUpperCase(); }));
+    return L;
+  });
+  const [cur, setCur] = useState(entries[0] ? { id: entries[0].id, k: 0 } : null);
+  const [ime, setIme] = useState(''); // text an IME (e.g. Vietnamese Telex) is still composing, shown as a preview
+  const [width, setWidth] = useState(0); // measured width of the widget
+  const wrapRef = useRef(null);
+  const inputRef = useRef(null);
+  const reveal = result?.reveal?.entries;
+  const ce = cur && byId.get(cur.id);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(([x]) => setWidth(x.contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.value = SENTINEL;
+    if (!locked && window.matchMedia?.('(pointer: fine)').matches) inputRef.current?.focus({ preventScroll: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const word = (e) => Array.from({ length: e.len }, (_, k) => letters[cwCell(e, k)] || '_').join('');
+  const solution = useMemo(() => {
+    if (!reveal) return null;
+    const m = new Map();
+    entries.forEach((e) => Array.from(reveal[e.id] || '').forEach((ch, k) => m.set(cwCell(e, k), ch)));
+    return m;
+  }, [reveal, entries]);
+  const okIds = reveal ? new Set(entries.filter((e) => reveal[e.id] && cwNormalize(word(e)) === reveal[e.id]).map((e) => e.id)) : null;
+
+  const focus = () => inputRef.current?.focus({ preventScroll: true });
+  const pick = (cell, dir) => {
+    const id = cell[dir] || cell.across || cell.down;
+    const e = byId.get(id);
+    setCur({ id, k: e.dir === 'across' ? cell.c - e.col : cell.r - e.row });
+  };
+  const clickCell = (cell) => {
+    if (locked) return;
+    const here = ce && cwCell(ce, cur.k) === `${cell.r},${cell.c}`;
+    const dir = ce?.dir || 'across';
+    pick(cell, here && cell.across && cell.down ? (dir === 'across' ? 'down' : 'across') : dir);
+    focus();
+  };
+  const selectEntry = (e) => { if (locked) return; setCur({ id: e.id, k: 0 }); focus(); };
+  const typeText = (text) => {
+    const chars = Array.from(cwNormalize(text));
+    if (!ce || locked || !chars.length) return;
+    const next = { ...letters };
+    let k = cur.k;
+    for (let i = 0; i < chars.length; i++) {
+      next[cwCell(ce, k)] = chars[i];
+      if (k === ce.len - 1) break;
+      k++;
+    }
+    setLetters(next);
+    setCur({ id: ce.id, k });
+  };
+  const back = () => {
+    if (!ce || locked) return;
+    const here = cwCell(ce, cur.k);
+    if (letters[here]) { setLetters({ ...letters, [here]: '' }); return; }
+    if (cur.k > 0) { setLetters({ ...letters, [cwCell(ce, cur.k - 1)]: '' }); setCur({ id: ce.id, k: cur.k - 1 }); }
+  };
+  const move = (dr, dc) => {
+    const [r, c] = cwCell(ce, cur.k).split(',').map(Number);
+    const cell = cells.get(`${r + dr},${c + dc}`);
+    if (cell) pick(cell, dc ? 'across' : 'down');
+  };
+  const jump = (d) => {
+    const i = entries.findIndex((e) => e.id === cur.id);
+    setCur({ id: entries[(i + d + entries.length) % entries.length].id, k: 0 });
+  };
+  const onKeyDown = (ev) => {
+    if (!ce || locked || ev.nativeEvent.isComposing || ev.keyCode === 229) return;
+    const arrows = { ArrowLeft: [0, -1], ArrowRight: [0, 1], ArrowUp: [-1, 0], ArrowDown: [1, 0] };
+    if (ev.key === 'Backspace' || ev.key === 'Delete') { ev.preventDefault(); back(); }
+    else if (arrows[ev.key]) { ev.preventDefault(); move(...arrows[ev.key]); }
+    else if (ev.key === 'Tab' || ev.key === 'Enter') { ev.preventDefault(); jump(ev.shiftKey ? -1 : 1); }
+    else if (ev.key.length === 1 && !ev.ctrlKey && !ev.metaKey && !ev.altKey) { ev.preventDefault(); typeText(ev.key); }
+  };
+  // mobile keyboards and IMEs: read whatever landed in the hidden input, then reset it
+  const onInput = (ev) => {
+    const el = ev.target;
+    if (ev.nativeEvent.isComposing) { setIme(cwNormalize(el.value)); return; }
+    if (el.value.length < SENTINEL.length) back(); else typeText(el.value);
+    el.value = SENTINEL;
+  };
+  const onCompositionEnd = (ev) => { setIme(''); typeText(ev.target.value); ev.target.value = SENTINEL; };
+
+  const active = new Set(ce && !reveal ? Array.from({ length: ce.len }, (_, k) => cwCell(ce, k)) : []);
+  const curKey = ce && !reveal && !locked ? cwCell(ce, cur.k) : null;
+  const preview = new Map(ce && ime ? Array.from(ime).slice(0, ce.len - cur.k).map((ch, i) => [cwCell(ce, cur.k + i), ch]) : []);
+  // clues beside the board when the widget is wide enough (not the viewport: it also lives in narrow cards)
+  const side = width >= 760;
+  const size = width ? Math.max(24, Math.min(42, Math.floor((width - (side ? 336 : 0) - cols - 1) / Math.max(cols, 1)))) : 36;
+  const small = { fontSize: Math.max(8, Math.round(size * 0.27)) };
+  const [cr, cc] = curKey ? curKey.split(',').map(Number) : [0, 0];
+  const anyLetter = Object.values(letters).some(Boolean);
+  const answer = () => Object.fromEntries(entries.filter((e) => /[^_]/.test(word(e))).map((e) => [e.id, word(e)]));
+
+  return (
+    <div ref={wrapRef} className="mx-auto max-w-6xl">
+      {ce && !reveal && !side && <div className="mb-3 rounded-xl bg-white px-3 py-2 font-game text-sm font-bold text-violet-800">{ce.num} {t(`answers.crossword.${ce.dir}`)} · {clues.get(ce.id)}</div>}
+      <div className={`flex gap-4 ${side ? 'flex-row items-start' : 'flex-col'}`}>
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <div className="relative mx-auto w-max">
+            <div className="grid gap-px p-px" style={{ gridTemplateColumns: `repeat(${cols}, ${size}px)`, gridAutoRows: `${size}px` }}>
+              {Array.from({ length: rows * cols }, (_, i) => {
+                const key = `${Math.floor(i / cols)},${i % cols}`;
+                const cell = cells.get(key);
+                if (!cell) return <div key={key} />;
+                const ch = letters[key] || '';
+                const want = solution?.get(key);
+                const ok = okIds && ((cell.across && okIds.has(cell.across)) || (cell.down && okIds.has(cell.down)));
+                const bg = solution ? (ok ? 'bg-emerald-300' : 'bg-red-300') : key === curKey ? 'bg-amber-300' : active.has(key) ? 'bg-sky-100' : 'bg-white';
+                return (
+                  <button
+                    key={key} type="button" tabIndex={-1} onMouseDown={(e) => e.preventDefault()} onClick={() => clickCell(cell)}
+                    className={`relative grid place-items-center rounded-[3px] font-game font-bold uppercase text-slate-900 ring-1 ring-slate-500 ${bg} ${locked ? 'cursor-default' : ''}`}
+                    style={{ fontSize: Math.round(size * 0.55) }}
+                  >
+                    {cell.num && <span className="absolute left-0.5 top-0 leading-tight text-slate-600" style={small}>{cell.num}</span>}
+                    {solution ? want : ch || <span className="text-slate-400">{preview.get(key)}</span>}
+                    {solution && ch && ch !== want && <span className="absolute bottom-0 right-0.5 leading-tight text-red-700 line-through" style={small}>{ch}</span>}
+                  </button>
+                );
+              })}
+            </div>
+            <input
+              ref={inputRef} type="text" inputMode="text" autoCapitalize="characters" autoComplete="off" autoCorrect="off" spellCheck={false}
+              aria-label={ce ? clues.get(ce.id) : ''} disabled={locked}
+              onKeyDown={onKeyDown} onInput={onInput} onCompositionEnd={onCompositionEnd}
+              className="pointer-events-none absolute h-px w-px border-0 bg-transparent p-0 opacity-0 outline-none"
+              style={{ left: cc * (size + 1), top: cr * (size + 1), fontSize: 16 }}
+            />
+          </div>
+        </div>
+        <div className={`grid gap-3 ${side ? 'w-80 shrink-0' : 'sm:grid-cols-2'}`}>
+          {['across', 'down'].map((d) => {
+            const list = entries.filter((e) => e.dir === d);
+            return list.length > 0 && (
+              <div key={d} className="rounded-2xl bg-black/25 p-3">
+                <div className="mb-1.5 px-2 font-game text-sm font-bold uppercase tracking-wide text-white/70">{t(`answers.crossword.${d}`)}</div>
+                <ol className="max-h-72 space-y-0.5 overflow-auto scrollbar-thin">
+                  {list.map((e) => (
+                    <li key={e.id}>
+                      <button type="button" onMouseDown={(ev) => ev.preventDefault()} onClick={() => selectEntry(e)} className={`flex w-full items-start gap-2 rounded-lg px-2 py-1.5 text-left text-sm font-semibold ${cur?.id === e.id && !reveal ? 'bg-white text-violet-800' : 'text-white hover:bg-white/10'}`}>
+                        <span className="w-5 shrink-0 text-right font-game font-bold">{e.num}</span>
+                        <span className="flex-1 break-words">{clues.get(e.id)} <span className="opacity-60">({e.len})</span></span>
+                        {okIds && (okIds.has(e.id) ? <Check className="h-4 w-4 shrink-0 text-emerald-400" /> : <X className="h-4 w-4 shrink-0 text-red-400" />)}
+                      </button>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {!locked && <div className="mt-2 text-center text-xs font-semibold text-white/60">{t('answers.crossword.hint')}</div>}
+      {!result && <SubmitBar onClick={() => onSubmit(answer())} disabled={locked || !anyLetter} />}
     </div>
   );
 }

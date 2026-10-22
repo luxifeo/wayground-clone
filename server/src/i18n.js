@@ -5,6 +5,8 @@ const VI = {
   'Add a question first': 'Hãy thêm một câu hỏi trước',
   'Add at least one question': 'Thêm ít nhất một câu hỏi',
   'Answer the question first': 'Hãy trả lời câu hỏi trước',
+  'Upload at least one image': 'Hãy tải lên ít nhất một ảnh',
+  'Job not found': 'Không tìm thấy tác vụ',
   'Already answered': 'Bạn đã trả lời câu này rồi',
   'An account with this email already exists': 'Email này đã có tài khoản',
   'Choose a language': 'Hãy chọn một ngôn ngữ',
@@ -64,6 +66,8 @@ const PROBLEMS = {
   'needs at least one blank cell': 'cần ít nhất một ô trống',
   'needs at least one blank': 'cần ít nhất một chỗ trống',
   'needs the correct points': 'cần có các điểm đúng',
+  'needs at least 2 words': 'cần ít nhất 2 từ',
+  'needs a clue for every word': 'cần gợi ý cho mọi từ',
 };
 
 /** Messages with variable parts: [pattern, replacement]. */

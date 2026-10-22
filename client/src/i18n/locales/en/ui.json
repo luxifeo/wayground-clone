@@ -2,5 +2,8 @@
   "logoTagline": "clone · formerly Quizizz",
   "select": {
     "placeholder": "Select…"
+  },
+  "lightbox": {
+    "zoom": "Click to enlarge"
   }
 }

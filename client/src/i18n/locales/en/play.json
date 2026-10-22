@@ -148,6 +148,11 @@
     "board": {
       "noPosts": "No posts yet.",
       "noResponses": "No responses yet."
+    },
+    "crossword": {
+      "hint": "Tap a square or a clue, then type.",
+      "across": "Across",
+      "down": "Down"
     }
   }
 }

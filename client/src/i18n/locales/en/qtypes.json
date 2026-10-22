@@ -26,6 +26,7 @@
   "match": { "label": "Match", "desc": "Students match the correct items from two sets." },
   "hottext": { "label": "Hot text", "desc": "Students highlight the correct words or sentences in a text." },
   "matchgrid": { "label": "Match Table Grid", "desc": "Students match each row to one or more columns in a grid." },
+  "crossword": { "label": "Crossword", "desc": "Students fill a crossword grid from the clues." },
   "labeling": { "label": "Labeling", "desc": "Students drag labels to their correct positions on an image." },
   "hotspot": { "label": "Hotspot", "desc": "Students answer by clicking specific areas on an image." },
   "graphing": { "label": "Graphing", "desc": "Students plot points or a line on a coordinate plane." },

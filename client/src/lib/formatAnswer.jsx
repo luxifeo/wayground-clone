@@ -42,6 +42,13 @@ export function FormatAnswer({ q, answer, dark = false }) {
       const cols = q.columns || q.extra?.columns || [];
       return <span>{rows.map((r) => `${r.text}: ${(answer[r.id] || []).map((c) => cols.find((x) => x.id === c)?.text).join('/') || '–'}`).join('; ')}</span>;
     }
+    case 'crossword': {
+      // per word: "3 Across: SPAN_SH" (blanks are sent as _)
+      const entries = (q.layout || q.extra?.layout)?.entries || [];
+      const a = typeof answer === 'object' && !Array.isArray(answer) ? answer : {};
+      if (!entries.length) return <span>{Object.values(a).join(', ')}</span>;
+      return <span>{entries.map((e) => `${e.num} ${t(`crossword.${e.dir}`)}: ${a[e.id] || '–'}`).join('; ')}</span>;
+    }
     case 'hotspot':
       return <span>{t('areasSelected', { count: (answer || []).length })}</span>;
     case 'graphing':

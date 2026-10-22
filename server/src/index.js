@@ -12,6 +12,7 @@ import { quizRouter } from './routes/quizzes.js';
 import { sessionRouter } from './routes/sessions.js';
 import { aiRouter } from './routes/ai.js';
 import { imageRouter } from './routes/images.js';
+import { readingRouter } from './routes/reading.js';
 import { initRealtime } from './realtime.js';
 import { i18nErrors } from './i18n.js';
 
@@ -26,7 +27,7 @@ app.use(express.json({ limit: '15mb' }));
 app.use('/api', i18nErrors);
 
 // async error safety for express 4
-for (const r of [authRouter, quizRouter, sessionRouter, aiRouter, imageRouter]) {
+for (const r of [authRouter, quizRouter, sessionRouter, aiRouter, imageRouter, readingRouter]) {
   r.stack.forEach((layer) => layer.route?.stack.forEach((s) => {
     const h = s.handle;
     if (h.length <= 3) s.handle = (req, res, next) => Promise.resolve(h(req, res, next)).catch(next);
@@ -39,6 +40,7 @@ app.use('/api', quizRouter);
 app.use('/api', sessionRouter);
 app.use('/api', aiRouter);
 app.use('/api', imageRouter);
+app.use('/api', readingRouter);
 
 const imageUpload = multer({
   storage: multer.diskStorage({

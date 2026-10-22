@@ -1,6 +1,6 @@
 import {
   SquareCheck, ListChecks, CircleCheck, PenLine, AlignLeft, ChartBar, ArrowDownUp, Link2, Brush, Table, FileText, Hand,
-  SquareChevronDown, Columns3, Highlighter, Grid3x3, Tag, Crosshair, ChartLine, Sigma, Video, Mic, Cloud, MessagesSquare,
+  SquareChevronDown, Columns3, Highlighter, Grid3x3, Tag, Crosshair, ChartLine, Sigma, Video, Mic, Cloud, MessagesSquare, Grid2x2Check,
 } from 'lucide-react';
 import i18n, { qtypeText } from '../i18n/index.js';
 
@@ -51,6 +51,7 @@ export const QTYPES = {
   match: { label: 'Match', icon: Link2, group: I, ...green, desc: 'Students match the correct items from two sets.', graded: 'Partial grading' },
   hottext: { label: 'Hot text', icon: Highlighter, group: I, ...green, desc: 'Students highlight the correct words or sentences in a text.', graded: 'Partial grading' },
   matchgrid: { label: 'Match Table Grid', icon: Grid3x3, group: I, ...green, desc: 'Students match each row to one or more columns in a grid.', graded: 'Partial grading', isNew: true },
+  crossword: { label: 'Crossword', icon: Grid2x2Check, group: I, ...green, desc: 'Students fill a crossword grid from the clues.', graded: 'Partial grading', isNew: true },
   labeling: { label: 'Labeling', icon: Tag, group: V, ...red, desc: 'Students drag labels to their correct positions on an image.', graded: 'Partial grading' },
   hotspot: { label: 'Hotspot', icon: Crosshair, group: V, ...red, desc: 'Students answer by clicking specific areas on an image.', graded: 'Partial grading' },
   graphing: { label: 'Graphing', icon: ChartLine, group: M, ...orange, desc: 'Students plot points or a line on a coordinate plane.', graded: 'Auto graded' },
@@ -131,6 +132,7 @@ export function blankQuestion(type) {
       extra: { table: { cols: ['', ''], rows: [[{ t: 'text', v: '' }, { t: 'blank', id: rid(), accepted: [''] }], [{ t: 'text', v: '' }, { t: 'blank', id: rid(), accepted: [''] }]] } },
       time_limit: 90,
     };
+    case 'crossword': return { ...base, options: [0, 1, 2, 3].map(() => ({ id: rid(), answer: '', clue: '' })), time_limit: 120 };
     case 'labeling': return { ...base, extra: { distractors: [] }, time_limit: 60 };
     case 'hotspot': return { ...base, answer: [], time_limit: 45 };
     case 'graphing': return { ...base, extra: { xmin: -10, xmax: 10, ymin: -10, ymax: 10, mode: 'points' }, answer: { points: [] }, time_limit: 90 };

@@ -3,9 +3,10 @@ import { Flag, Lightbulb, Send, Volume2, RotateCcw, ChevronRight, Undo2 } from '
 import { useTranslation } from 'react-i18next';
 import {
   TextAnswer, ReorderAnswer, MatchAnswer, DropdownAnswer, DragDropAnswer, CategorizeAnswer, HotTextAnswer,
-  MatchGridAnswer, TableFillAnswer, LabelingAnswer, HotspotAnswer, GraphingAnswer, DrawAnswer, RecordAnswer,
+  MatchGridAnswer, TableFillAnswer, LabelingAnswer, HotspotAnswer, GraphingAnswer, DrawAnswer, RecordAnswer, CrosswordAnswer,
 } from '../play/answers.jsx';
 import { Spinner } from '../ui.jsx';
+import { ZoomImage } from '../Passage.jsx';
 import { CHEST_STREAK } from './data.js';
 import { Chip, CoinIcon, Confetti, HeroSprite, Sunburst } from './fx.jsx';
 
@@ -14,7 +15,7 @@ const WIDGETS = {
   fill: TextAnswer, math: TextAnswer, open: TextAnswer, wordcloud: TextAnswer, discussion: TextAnswer,
   reorder: ReorderAnswer, match: MatchAnswer, dropdown: DropdownAnswer, dragdrop: DragDropAnswer, categorize: CategorizeAnswer,
   hottext: HotTextAnswer, matchgrid: MatchGridAnswer, tablefill: TableFillAnswer, labeling: LabelingAnswer, hotspot: HotspotAnswer,
-  graphing: GraphingAnswer, draw: DrawAnswer, audio: RecordAnswer, video: RecordAnswer,
+  graphing: GraphingAnswer, draw: DrawAnswer, audio: RecordAnswer, video: RecordAnswer, crossword: CrosswordAnswer,
 };
 export const CHOICE = ['mcq', 'msq', 'tf', 'poll'];
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -83,7 +84,13 @@ export function QuizCard({ q, label, hidden, busy, onAnswer, onHint, hintState, 
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-slate-900/35 p-3 backdrop-blur-[2px]">
       <div className="adv-card relative max-h-[94vh] w-full max-w-2xl overflow-auto p-5 pt-8 animate-pop sm:p-7 sm:pt-9">
         <span className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-1.5 rounded-xl bg-amber-400 px-3 py-1 font-adv text-sm font-bold text-slate-900 shadow-[0_3px_0_#b45309]"><Flag className="h-4 w-4" />{label}</span>
-        {q.passage && <div className="mb-3 mt-3 max-h-48 overflow-auto whitespace-pre-wrap rounded-2xl bg-amber-50 p-4 text-left text-slate-700 scrollbar-thin">{q.passage}</div>}
+        {(q.passage || q.passageTitle || q.passageImage) && (
+          <div className="mb-3 mt-3 max-h-[45vh] overflow-auto rounded-2xl bg-amber-50 p-4 text-left text-slate-700 scrollbar-thin">
+            {q.passageTitle && <div className="mb-2 break-words font-adv text-lg font-bold leading-snug text-violet-700">{q.passageTitle}</div>}
+            {q.passageImage && <ZoomImage src={q.passageImage} wrapClassName="mx-auto mb-2" className="max-h-56 max-w-full rounded-xl object-contain" />}
+            {q.passage && <div className="whitespace-pre-wrap break-words">{q.passage}</div>}
+          </div>
+        )}
         <h2 className="mt-3 whitespace-pre-wrap break-words text-center font-adv text-2xl font-bold text-slate-900 sm:text-3xl">{q.text.replace(/\[\[[^\]]+\]\]/g, '____')}</h2>
         {q.image && !['labeling', 'hotspot', 'draw'].includes(q.type) && <img src={q.image} alt="" className="mx-auto mt-3 max-h-48 rounded-2xl" />}
         {startsWith && <p className="mt-2 text-center font-adv font-bold text-amber-700">💡 {startsWith}…</p>}

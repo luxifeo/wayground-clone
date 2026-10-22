@@ -32,6 +32,10 @@
   "answer": "Câu trả lời: ",
   "overrideGrade": "Chấm lại:",
   "noAnswer": "Không trả lời",
+  "crossword": {
+    "across": "Ngang",
+    "down": "Dọc"
+  },
   "drawing": "hình vẽ",
   "areasSelected_other": "Đã chọn {{count}} vùng",
   "csvFile": "bao-cao",

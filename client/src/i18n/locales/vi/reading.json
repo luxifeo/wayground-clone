@@ -1,0 +1,101 @@
+{
+  "title": "Tạo bài thi đọc",
+  "titleAppend": "Thêm bài thi đọc",
+  "subtitle": "Tải lên ảnh phiếu bài tập hoặc bất kỳ bức ảnh nào. AI sẽ biến nó thành các bài đọc kèm câu hỏi.",
+  "appendTo": "Câu hỏi mới sẽ được thêm vào “{{title}}”",
+  "upload": {
+    "heading": "Trang sách hoặc ảnh",
+    "count": "{{n}} / {{max}} ảnh",
+    "drop": "Kéo thả ảnh vào đây, hoặc <b>chọn từ máy</b>",
+    "dropActive": "Thả ảnh vào đây",
+    "full": "Đã đạt số ảnh tối đa",
+    "paste": "Hoặc dán ảnh chụp màn hình bằng Ctrl+V",
+    "formats": "JPG, PNG hoặc WebP · tối đa {{size}} MB mỗi ảnh · tối đa {{max}} ảnh",
+    "remove": "Xoá ảnh",
+    "addMore": "Thêm ảnh",
+    "tip": "Ảnh phiếu bài tập sẽ thành bài thi giống hệt; ảnh thường sẽ thành một câu chuyện kèm câu hỏi.",
+    "tooMany": "Bạn chỉ có thể thêm tối đa {{max}} ảnh",
+    "badType": "{{name}} không phải ảnh JPG, PNG hoặc WebP",
+    "tooBig": "{{name}} lớn hơn {{size}} MB"
+  },
+  "prefs": {
+    "heading": "Tuỳ chọn",
+    "detect": "Nhận diện",
+    "modes": {
+      "auto": "Tự động",
+      "worksheet": "Phiếu bài tập",
+      "photo": "Ảnh thường"
+    },
+    "modeHelp": {
+      "auto": "AI tự xác định mỗi ảnh là phiếu bài tập hay ảnh thường",
+      "worksheet": "Dựng lại các bài tập trên trang thành bài thi giống hệt",
+      "photo": "Viết một bài đọc mới về bức ảnh, rồi tạo câu hỏi cho bài đọc đó"
+    },
+    "language": "Ngôn ngữ đầu ra",
+    "grade": "Lớp",
+    "subject": "Môn học",
+    "any": "Bất kỳ",
+    "optional": "Không bắt buộc",
+    "photoGroup": "Khi là ảnh thường",
+    "genre": "Thể loại",
+    "genres": {
+      "nonfiction": "Văn bản thông tin",
+      "fiction": "Truyện",
+      "poem": "Thơ",
+      "dialogue": "Hội thoại",
+      "news": "Bản tin",
+      "letter": "Thư hoặc email"
+    },
+    "paragraphs": "Số đoạn văn",
+    "questions": "Số câu hỏi mỗi bài đọc",
+    "types": "Loại câu hỏi",
+    "words": "Bắt buộc dùng các từ",
+    "wordsHelp": "Phân tách các từ bằng dấu phẩy",
+    "wordsPlaceholder": "ví dụ: habitat, migrate, survive",
+    "crossword": "Thêm ô chữ từ vựng",
+    "crosswordHelp": "Tạo từ các từ khoá trong bài đọc",
+    "topic": "Hướng dẫn thêm",
+    "topicPlaceholder": "ví dụ: Tập trung vào các con vật trong ảnh, viết câu ngắn",
+    "advanced": "Nâng cao",
+    "cropRounds": "Số lượt soát ảnh cắt",
+    "cropRoundsHelp": "Sau khi cắt một hình từ trang, AI kiểm tra lại ảnh cắt và sửa, tối đa bấy nhiêu lần",
+    "off": "Tắt"
+  },
+  "generate": "Tạo bài thi đọc ✨",
+  "needFiles": "Thêm ít nhất một ảnh để bắt đầu",
+  "progress": {
+    "running": "Đang tạo bài thi đọc…",
+    "done": "Bài thi đọc đã sẵn sàng",
+    "failed": "Không tạo được bài thi đọc",
+    "elapsed": "Thời gian đã chạy",
+    "images_other": "{{count}} ảnh",
+    "kind": {
+      "worksheet": "Nhận diện: phiếu bài tập",
+      "photo": "Nhận diện: ảnh thường"
+    },
+    "steps": {
+      "upload": "Tải ảnh lên",
+      "detect": "Đọc nội dung trang",
+      "crop": "Cắt hình",
+      "write": "Viết bài đọc",
+      "questions": "Tạo câu hỏi",
+      "save": "Lưu bài thi"
+    },
+    "skipped": "Bỏ qua",
+    "yourImages": "Ảnh của bạn",
+    "figures": "Hình",
+    "figuresWaiting": "Các hình cắt từ trang sẽ hiện ở đây",
+    "figuresNone": "Không cắt được hình nào từ trang",
+    "cropping": "Đang cắt ảnh…",
+    "page": "Trang {{n}}",
+    "rounds_other": "{{count}} lượt soát",
+    "round": "Lượt {{n}}",
+    "final": "bản cuối",
+    "lost": "Không theo dõi được tiến trình này nữa. Hãy kiểm tra thư viện hoặc thử lại."
+  },
+  "success": {
+    "created_other": "Đã tạo {{count}} câu hỏi",
+    "open": "Mở trong trình soạn",
+    "preview": "Xem trước như học sinh"
+  }
+}

@@ -6,6 +6,7 @@
   "class": "Class",
   "date": "Date",
   "question": "QUESTION {{n}}",
+  "reading": "READING {{n}}",
   "pts_one": "{{count}} pt",
   "pts_other": "{{count}} pts"
 }

@@ -7,7 +7,7 @@ import { GRADES, LANGUAGES, QTYPES } from '../lib/constants.js';
 import { Modal, Select, Toggle, useToast } from './ui.jsx';
 import { gradeLabel, languageLabel } from '../i18n/index.js';
 
-const AI_TYPES = ['mcq', 'msq', 'tf', 'fill', 'open', 'reorder', 'match', 'dropdown', 'dragdrop', 'categorize', 'math', 'poll'];
+const AI_TYPES = ['mcq', 'msq', 'tf', 'fill', 'open', 'reorder', 'match', 'dropdown', 'dragdrop', 'categorize', 'math', 'crossword', 'poll'];
 const LOADING_TIPS = ['reading', 'concepts', 'writing', 'distractors', 'checking']; // ai:tips.<key>
 
 /**

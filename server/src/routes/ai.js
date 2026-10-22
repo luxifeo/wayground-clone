@@ -16,7 +16,8 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 
 
 const MAX_TEXT = 30000;
 
-const QUESTION_SCHEMA = `Each question is a JSON object using ONE of these shapes:
+/** Question shapes the model may answer with (shared with the reading test generator). */
+export const BASE_SCHEMA = `Each question is a JSON object using ONE of these shapes:
 {"type":"mcq","text":"question","options":["A","B","C","D"],"correct":[index of the right option],"explanation":"why","time_limit":30}
 {"type":"msq","text":"question (more than one answer)","options":["A","B","C","D"],"correct":[indexes of ALL right options],"explanation":"why","time_limit":45}
 {"type":"tf","text":"statement","correct":true,"explanation":"why","time_limit":20}
@@ -29,18 +30,22 @@ const QUESTION_SCHEMA = `Each question is a JSON object using ONE of these shape
 {"type":"dragdrop","text":"Sentence where each gap is written as [[1]], [[2]] ...","blanks":["word for gap 1","word for gap 2"],"distractors":["extra wrong word"],"time_limit":60}
 {"type":"categorize","text":"Sort the items into the right group","categories":["Group A","Group B"],"items":[{"text":"item","category":0}],"time_limit":60}
 {"type":"math","text":"Simplify 2(x+3)","accepted":["2x+6"],"explanation":"why","time_limit":60}
-Indexes in "correct" are 0-based. Options must be short, plausible and only one correct for mcq.
+{"type":"crossword","text":"instruction","words":[{"answer":"word to write in the grid","clue":"clue shown to the student"}]}
+Indexes in "correct" are 0-based. Options must be short, plausible and only one correct for mcq.`;
+
+const QUESTION_SCHEMA = `${BASE_SCHEMA}
 Every question also has "illustration": a picture that shows the situation of the question, described as
 {"object":"main concrete thing (noun)","action":"what it is doing (verb-ing) or null","setting":"where, or null","avoid":["ENGLISH words of the correct answer"],"queries":["most specific","more general","most general"]}
 "queries" are 1-4 ENGLISH words each (nouns, adjectives, -ing verbs; no articles, no question words, no abstract words), built from object + action + setting; add "diagram" or "map" only when that fits better than a photo. The picture must NEVER show or name the correct answer (for "Which animal changes colour?" use "rainforest branch", not "chameleon"). Use "illustration": null when no real picture would help (pure arithmetic, grammar rules, abstract definitions).
 Example: "Nam đang đá bóng ở đâu?" (answer "sân trường") -> "illustration":{"object":"boy","action":"kicking football","setting":null,"avoid":["school","yard"],"queries":["boy kicking football","children playing football","football"]}`;
 
-const SYSTEM = 'You are an expert teacher who writes high quality assessment questions. You always answer with valid JSON only, no markdown, no commentary.';
+export const SYSTEM = 'You are an expert teacher who writes high quality assessment questions. You always answer with valid JSON only, no markdown, no commentary.';
 
 const TYPE_NAMES = {
   mcq: 'multiple choice', msq: 'multi-select', tf: 'true/false', fill: 'fill in the blank',
   open: 'open ended', poll: 'poll', reorder: 'reorder', match: 'match',
   dropdown: 'dropdown blanks', dragdrop: 'drag and drop blanks', categorize: 'categorize', math: 'math response',
+  crossword: 'crossword',
 };
 
 function rid() { return Math.random().toString(36).slice(2, 8); }
@@ -114,6 +119,10 @@ export function fromAI(raw) {
   if (type === 'match') {
     return { ...base, options: (raw.pairs || []).map((p) => ({ id: rid(), left: String(p.left ?? ''), right: String(p.right ?? '') })) };
   }
+  if (type === 'crossword') {
+    const list = Array.isArray(raw.words) ? raw.words : Array.isArray(raw.entries) ? raw.entries : [];
+    return { ...base, options: list.map((w) => ({ id: rid(), answer: String(w.answer ?? w.word ?? ''), clue: String(w.clue ?? '') })) };
+  }
   return base;
 }
 
@@ -129,6 +138,7 @@ function toAI(q) {
   if (q.type === 'open') out.sample = q.answer?.sample || '';
   if (q.type === 'reorder') out.items = q.options.map((o) => o.text);
   if (q.type === 'match') out.pairs = q.options.map((p) => ({ left: p.left, right: p.right }));
+  if (q.type === 'crossword') out.words = (q.options || []).map((w) => ({ answer: w.answer, clue: w.clue }));
   if (q.type === 'math') out.accepted = q.answer?.accepted || [];
   if (q.type === 'dropdown') out.blanks = q.options.map((b) => ({ options: b.choices.map((c) => c.text), correct: b.choices.findIndex((c) => c.id === b.correct) }));
   if (q.type === 'dragdrop') { out.blanks = q.options.map((b) => b.answer); out.distractors = q.extra?.distractors || []; }
@@ -142,7 +152,7 @@ function toAI(q) {
   return out;
 }
 
-const valid = (q) => { const n = normalizeQuestion(q); return n.text.trim() && questionProblems(n).length === 0; };
+export const valid = (q) => { const n = normalizeQuestion(q); return n.text.trim() && questionProblems(n).length === 0; };
 
 async function extractSources(files = [], url) {
   const texts = []; const images = [];

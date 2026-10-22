@@ -19,6 +19,15 @@
     "hideExplanation": "Hide answer explanation",
     "passage": "Passage",
     "passagePlaceholder": "Paste the reading passage here…",
+    "passageTitle": "Passage title",
+    "passageTitlePlaceholder": "Passage title, e.g. 1. Read the email and answer the questions.",
+    "addPassageImage": "Add image",
+    "replacePassageImage": "Replace image",
+    "removePassageImage": "Remove image",
+    "passageShared_one": "This passage is shared with {{count}} other question of the same reading. Changes are copied to it when you save.",
+    "passageShared_other": "This passage is shared with {{count}} other questions of the same reading. Changes are copied to them when you save.",
+    "savedShared_one": "Question saved · passage updated in {{count}} other question",
+    "savedShared_other": "Question saved · passage updated in {{count}} other questions",
     "uploadImage": "Upload image",
     "searchFreeImages": "Search free images",
     "searchImages": "Search images",
@@ -54,7 +63,10 @@
       "image": "Upload an image",
       "labels": "Add at least 2 named labels",
       "hotspot": "Draw at least one correct area",
-      "graphing": "Plot the correct answer"
+      "graphing": "Plot the correct answer",
+      "crosswordWords": "Add at least 2 words with 2 or more letters",
+      "crosswordClues": "Give every word a clue",
+      "crosswordEmpty": "Type the word for every clue or delete the row"
     }
   },
   "picker": {
@@ -205,6 +217,18 @@
       "hintPoints": "Click the grid to place the correct points. Correct answer: {{answer}}",
       "hintLine": "Click the grid to place the correct two points of the line. Correct answer: {{answer}}",
       "none": "none yet"
+    },
+    "crossword": {
+      "note": "Type each answer and its clue. The grid is built automatically; spaces, hyphens and punctuation are ignored.",
+      "answer": "Answer",
+      "clue": "Clue",
+      "deleteWord": "Delete word",
+      "addWord": "Add word",
+      "preview": "Grid preview",
+      "across": "Across",
+      "down": "Down",
+      "empty": "Type at least 2 words to see the grid.",
+      "skipped": "Not in the grid (need 2+ letters): {{list}}"
     }
   },
   "card": {

@@ -4,6 +4,8 @@ import { Hand as HandIcon } from 'lucide-react';
 import { QTYPES, QTYPE_GROUPS } from '../../lib/constants.js';
 import { qgroupLabel } from '../../i18n/index.js';
 
+const CW_NUMS = { 0: 1, 2: 2, 12: 3 }; // clue numbers of the crossword illustration (CAT across, TOP down, PEN across)
+
 /** Tiny illustrations shown in the hover preview. */
 function Illustration({ type }) {
   const { t } = useTranslation('editor');
@@ -25,6 +27,8 @@ function Illustration({ type }) {
       return <div className="grid w-full grid-cols-4 gap-1">{['1/2', '7/10', '1', '3/4'].map((t, i) => <div key={t} className={`edit-${i} grid h-10 place-items-center rounded text-[10px] font-bold text-white`}>{t}</div>)}</div>;
     case 'match': case 'matchgrid':
       return <div className="grid w-full grid-cols-2 gap-1">{[t('picker.demo.rightAngle'), '∟', t('picker.demo.acute'), '∠'].map((t, i) => <div key={i} className={`edit-${i % 2 ? 2 : 0} grid h-8 place-items-center rounded text-[10px] font-bold text-white`}>{t}</div>)}</div>;
+    case 'crossword':
+      return <div className="grid grid-cols-5 gap-px">{[...'CAT    O    PEN'].map((ch, i) => (ch === ' ' ? <span key={i} className="h-5 w-5" /> : <span key={i} className="relative grid h-5 w-5 place-items-center bg-white text-[10px] font-bold text-slate-700 ring-1 ring-slate-400">{CW_NUMS[i] && <span className="absolute left-px top-0 text-[6px] leading-none text-slate-400">{CW_NUMS[i]}</span>}{ch}</span>))}</div>;
     case 'hottext':
       return <div className="rounded bg-white/90 p-1.5 text-[9px] leading-tight text-slate-700"><Trans ns="editor" i18nKey="picker.demo.hottext" components={{ m: <mark className="bg-yellow-300" /> }} /></div>;
     case 'tablefill':

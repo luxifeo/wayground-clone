@@ -140,6 +140,11 @@
     "board": {
       "noPosts": "Chưa có bài đăng nào.",
       "noResponses": "Chưa có câu trả lời nào."
+    },
+    "crossword": {
+      "hint": "Chạm vào một ô hoặc một gợi ý rồi gõ chữ.",
+      "across": "Hàng ngang",
+      "down": "Hàng dọc"
     }
   }
 }

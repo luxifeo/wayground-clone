@@ -26,6 +26,7 @@
   "match": { "label": "Ghép cặp", "desc": "Học sinh ghép các mục tương ứng của hai cột." },
   "hottext": { "label": "Chọn từ trong văn bản", "desc": "Học sinh đánh dấu các từ hoặc câu đúng trong văn bản." },
   "matchgrid": { "label": "Ghép bảng lưới", "desc": "Học sinh ghép mỗi hàng với một hoặc nhiều cột trong bảng." },
+  "crossword": { "label": "Ô chữ", "desc": "Học sinh điền ô chữ dựa vào các gợi ý." },
   "labeling": { "label": "Gắn nhãn", "desc": "Học sinh kéo nhãn vào đúng vị trí trên ảnh." },
   "hotspot": { "label": "Điểm nóng", "desc": "Học sinh trả lời bằng cách bấm vào vùng trên ảnh." },
   "graphing": { "label": "Vẽ đồ thị", "desc": "Học sinh chấm điểm hoặc vẽ đường thẳng trên hệ trục toạ độ." },

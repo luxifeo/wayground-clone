@@ -2,9 +2,10 @@ import { useCallback, useState } from 'react';
 import { FileText } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ImageCredit } from '../ImageSearchModal.jsx';
+import { ZoomImage } from '../Passage.jsx';
 import {
   ChoiceAnswer, TextAnswer, ReorderAnswer, MatchAnswer, DropdownAnswer, DragDropAnswer, CategorizeAnswer, HotTextAnswer,
-  MatchGridAnswer, TableFillAnswer, LabelingAnswer, HotspotAnswer, GraphingAnswer, DrawAnswer, RecordAnswer, Board,
+  MatchGridAnswer, TableFillAnswer, LabelingAnswer, HotspotAnswer, GraphingAnswer, DrawAnswer, RecordAnswer, Board, CrosswordAnswer,
 } from './answers.jsx';
 
 const ANSWERS = {
@@ -12,7 +13,7 @@ const ANSWERS = {
   fill: TextAnswer, math: TextAnswer, open: TextAnswer, wordcloud: TextAnswer, discussion: TextAnswer,
   reorder: ReorderAnswer, match: MatchAnswer, dropdown: DropdownAnswer, dragdrop: DragDropAnswer, categorize: CategorizeAnswer,
   hottext: HotTextAnswer, matchgrid: MatchGridAnswer, tablefill: TableFillAnswer, labeling: LabelingAnswer, hotspot: HotspotAnswer,
-  graphing: GraphingAnswer, draw: DrawAnswer, audio: RecordAnswer, video: RecordAnswer,
+  graphing: GraphingAnswer, draw: DrawAnswer, audio: RecordAnswer, video: RecordAnswer, crossword: CrosswordAnswer,
 };
 
 const INLINE_TEXT = ['dropdown', 'dragdrop'];
@@ -66,11 +67,22 @@ export default function QuestionPlayer({ question: q, onSubmit, result, locked =
   return (
     <div className="mx-auto w-full max-w-6xl px-3 pb-6 pt-2 sm:px-6">
       {header}
-      {q.passage ? (
+      {q.passageTitle && !q.passage && !q.passageImage ? (
+        // only an instruction (e.g. a worksheet exercise whose text is in the question): a slim banner, no side panel
+        <>
+          <div className="mx-auto mb-3 flex max-w-5xl items-start gap-2 rounded-2xl bg-white/95 px-4 py-2.5 font-bold leading-snug text-violet-700 shadow">
+            <FileText className="mt-0.5 h-4 w-4 shrink-0" /><span className="min-w-0 break-words">{q.passageTitle}</span>
+          </div>
+          {body}
+        </>
+      ) : q.passage || q.passageTitle || q.passageImage ? (
         <div className="grid gap-4 lg:grid-cols-[1fr_1.3fr]">
           <div className="max-h-[70vh] overflow-auto rounded-2xl bg-white p-5 scrollbar-thin">
-            <div className="mb-2 flex items-center gap-2 text-sm font-bold text-violet-700"><FileText className="h-4 w-4" />{t('player.passage')}</div>
-            <div className="whitespace-pre-wrap leading-relaxed text-slate-800">{q.passage}</div>
+            <div className={`mb-3 flex items-start gap-2 font-bold text-violet-700 ${q.passageTitle ? 'text-base leading-snug' : 'text-sm'}`}>
+              <FileText className={`h-4 w-4 shrink-0 ${q.passageTitle ? 'mt-0.5' : ''}`} /><span className="min-w-0 break-words">{q.passageTitle || t('player.passage')}</span>
+            </div>
+            {q.passageImage && <ZoomImage src={q.passageImage} wrapClassName="mx-auto mb-3" className="max-h-72 max-w-full rounded-xl border border-slate-200 object-contain" />}
+            {q.passage && <div className="whitespace-pre-wrap break-words leading-relaxed text-slate-800">{q.passage}</div>}
           </div>
           {body}
         </div>

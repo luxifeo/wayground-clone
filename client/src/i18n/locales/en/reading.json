@@ -1,0 +1,104 @@
+{
+  "title": "Create a reading test",
+  "titleAppend": "Add a reading test",
+  "subtitle": "Upload a worksheet page or any photo. AI turns it into passages with questions.",
+  "appendTo": "New questions will be added to “{{title}}”",
+  "upload": {
+    "heading": "Pages or photos",
+    "count": "{{n}} / {{max}} images",
+    "drop": "Drag & drop images here, or <b>browse</b>",
+    "dropActive": "Drop the images here",
+    "full": "Maximum number of images reached",
+    "paste": "Or paste a screenshot with Ctrl+V",
+    "formats": "JPG, PNG or WebP · up to {{size}} MB each · up to {{max}} images",
+    "remove": "Remove image",
+    "addMore": "Add more",
+    "tip": "A worksheet page becomes the same test; a normal photo becomes a story with questions.",
+    "tooMany": "You can add up to {{max}} images",
+    "badType": "{{name}} is not a JPG, PNG or WebP image",
+    "tooBig": "{{name}} is larger than {{size}} MB"
+  },
+  "prefs": {
+    "heading": "Preferences",
+    "detect": "Detect",
+    "modes": {
+      "auto": "Auto",
+      "worksheet": "Worksheet",
+      "photo": "Photo"
+    },
+    "modeHelp": {
+      "auto": "AI decides whether each image is a worksheet or a normal photo",
+      "worksheet": "Rebuild the exercises on the page as the same test",
+      "photo": "Write a new passage about the picture, then questions on it"
+    },
+    "language": "Output language",
+    "grade": "Grade",
+    "subject": "Subject",
+    "any": "Any",
+    "optional": "Optional",
+    "photoGroup": "When it is a photo",
+    "genre": "Genre",
+    "genres": {
+      "nonfiction": "Non-fiction",
+      "fiction": "Story",
+      "poem": "Poem",
+      "dialogue": "Dialogue",
+      "news": "News article",
+      "letter": "Letter or email"
+    },
+    "paragraphs": "Number of paragraphs",
+    "questions": "Questions per passage",
+    "types": "Question types",
+    "words": "Ensure usage of specific words",
+    "wordsHelp": "Separate words with commas",
+    "wordsPlaceholder": "e.g. habitat, migrate, survive",
+    "crossword": "Add a vocabulary crossword",
+    "crosswordHelp": "Built from key words of the passage",
+    "topic": "Extra instructions",
+    "topicPlaceholder": "e.g. Focus on the animals in the picture and keep sentences short",
+    "advanced": "Advanced",
+    "cropRounds": "Crop review rounds",
+    "cropRoundsHelp": "After cropping a picture from the page, the AI checks the crop and fixes it, up to this many times",
+    "off": "Off"
+  },
+  "generate": "Generate reading test ✨",
+  "needFiles": "Add at least one image to start",
+  "progress": {
+    "running": "Building your reading test…",
+    "done": "Your reading test is ready",
+    "failed": "We couldn't build the reading test",
+    "elapsed": "Elapsed time",
+    "images_one": "{{count}} image",
+    "images_other": "{{count}} images",
+    "kind": {
+      "worksheet": "Worksheet detected",
+      "photo": "Photo detected"
+    },
+    "steps": {
+      "upload": "Uploading images",
+      "detect": "Reading the page",
+      "crop": "Cropping figures",
+      "write": "Writing the passage",
+      "questions": "Creating questions",
+      "save": "Saving the test"
+    },
+    "skipped": "Skipped",
+    "yourImages": "Your images",
+    "figures": "Figures",
+    "figuresWaiting": "Pictures cut from the page will appear here",
+    "figuresNone": "No pictures were cut from the page",
+    "cropping": "Cropping…",
+    "page": "Page {{n}}",
+    "rounds_one": "{{count}} review round",
+    "rounds_other": "{{count}} review rounds",
+    "round": "Round {{n}}",
+    "final": "final",
+    "lost": "Lost track of this job. Check your library, or try again."
+  },
+  "success": {
+    "created_one": "{{count}} question created",
+    "created_other": "{{count}} questions created",
+    "open": "Open in editor",
+    "preview": "Preview as student"
+  }
+}

@@ -6,5 +6,6 @@
   "class": "Lớp",
   "date": "Ngày",
   "question": "CÂU {{n}}",
+  "reading": "BÀI ĐỌC {{n}}",
   "pts_other": "{{count}} điểm"
 }

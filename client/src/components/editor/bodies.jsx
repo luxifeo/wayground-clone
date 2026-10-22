@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import {
   Trash2, Image as ImageIcon, Check, Plus, ArrowUp, ArrowDown, X, ArrowRight, Info, Upload,
@@ -7,6 +7,8 @@ import { uploadFile } from '../../lib/api.js';
 import { rid, splitBlanks } from '../../lib/constants.js';
 import { Toggle, useToast, Spinner } from '../ui.jsx';
 import Graph from '../Graph.jsx';
+import { CrosswordMini } from '../QuestionCard.jsx';
+import { buildLayout, cwNormalize } from '../../lib/crossword.js';
 
 export function useUpload() {
   const toast = useToast();
@@ -607,6 +609,53 @@ export function GraphingBody({ q, set }) {
           ))}
         </div>
         <Info2>{t(ex.mode === 'line' ? 'bodies.graphing.hintLine' : 'bodies.graphing.hintPoints', { answer: pts.map((p) => `(${p[0]}, ${p[1]})`).join(', ') || t('bodies.graphing.none') })}</Info2>
+      </div>
+    </div>
+  );
+}
+
+// ------------------------------------------------------------ crossword
+export function CrosswordBody({ q, set }) {
+  const { t } = useTranslation('editor');
+  const words = q.options || [];
+  const setWord = (id, patch) => set({ options: words.map((w) => (w.id === id ? { ...w, ...patch } : w)) });
+  // same layout the server will compute on save
+  const layout = useMemo(() => buildLayout((q.options || []).filter((w) => String(w.answer || '').trim())), [q.options]);
+  const byId = new Map(words.map((w) => [w.id, w]));
+  const letters = Object.fromEntries(words.map((w) => [w.id, cwNormalize(w.answer)]));
+  const skipped = layout.unplaced.map((id) => byId.get(id)?.answer).filter(Boolean);
+  return (
+    <div className="space-y-3">
+      <Info2>{t('bodies.crossword.note')}</Info2>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="space-y-2">
+          {words.map((w, i) => (
+            <div key={w.id} className="flex items-center gap-2">
+              <span className="w-5 shrink-0 text-right text-xs font-bold text-white/60">{i + 1}</span>
+              <input value={w.answer} onChange={(e) => setWord(w.id, { answer: e.target.value })} placeholder={t('bodies.crossword.answer')} maxLength={40} className={`${darkInput} !w-32 shrink-0 font-bold uppercase sm:!w-40`} />
+              <input value={w.clue} onChange={(e) => setWord(w.id, { clue: e.target.value })} placeholder={t('bodies.crossword.clue')} maxLength={300} className={`${darkInput} min-w-0 flex-1`} />
+              {words.length > 2 && <button title={t('bodies.crossword.deleteWord')} onClick={() => set({ options: words.filter((x) => x.id !== w.id) })} className="shrink-0 rounded bg-white/15 p-1.5 text-white hover:bg-white/25"><Trash2 className="h-3.5 w-3.5" /></button>}
+            </div>
+          ))}
+          {words.length < 30 && <button onClick={() => set({ options: [...words, { id: rid(), answer: '', clue: '' }] })} className={addBtn}><Plus className="h-3.5 w-3.5" />{t('bodies.crossword.addWord')}</button>}
+        </div>
+        <div className="min-w-0 rounded-lg bg-black/20 p-3">
+          <div className="mb-2 text-xs font-bold uppercase tracking-wide text-white/70">{t('bodies.crossword.preview')}</div>
+          {layout.entries.length >= 2 ? (
+            <>
+              <div className="overflow-x-auto"><CrosswordMini layout={layout} words={letters} size={22} /></div>
+              <div className="mt-3 grid gap-3 text-xs text-white/85 sm:grid-cols-2">
+                {['across', 'down'].map((d) => (
+                  <div key={d}>
+                    <div className="mb-1 font-bold text-white">{t(`bodies.crossword.${d}`)}</div>
+                    {layout.entries.filter((e) => e.dir === d).map((e) => <div key={e.id}><b>{e.num}.</b> {byId.get(e.id)?.clue || '…'}</div>)}
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : <div className="text-xs text-white/60">{t('bodies.crossword.empty')}</div>}
+          {skipped.length > 0 && <div className="mt-2 text-xs font-semibold text-amber-200">{t('bodies.crossword.skipped', { list: skipped.join(', ') })}</div>}
+        </div>
       </div>
     </div>
   );

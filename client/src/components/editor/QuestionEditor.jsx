@@ -9,8 +9,9 @@ import { QTYPES, TIME_OPTIONS, fmtTime, blankQuestion, CHOICE_TYPES, splitBlanks
 import { Menu, MenuItem, Spinner, useToast } from '../ui.jsx';
 import {
   ChoiceBody, FillBody, OpenBody, ReorderBody, MatchBody, DropdownBody, DragDropBody, BlankText, CategorizeBody,
-  HotTextBody, MatchGridBody, TableFillBody, LabelingBody, HotspotBody, GraphingBody, useUpload,
+  HotTextBody, MatchGridBody, TableFillBody, LabelingBody, HotspotBody, GraphingBody, CrosswordBody, useUpload,
 } from './bodies.jsx';
+import { buildLayout, cwNormalize } from '../../lib/crossword.js';
 import QuestionPlayer from '../play/QuestionPlayer.jsx';
 import ImageSearchModal, { ImageCredit } from '../ImageSearchModal.jsx';
 
@@ -20,7 +21,7 @@ const BODIES = {
   open: OpenBody, draw: OpenBody, video: OpenBody, audio: OpenBody, wordcloud: OpenBody, discussion: OpenBody,
   reorder: ReorderBody, match: MatchBody, dropdown: DropdownBody, dragdrop: DragDropBody, categorize: CategorizeBody,
   hottext: HotTextBody, matchgrid: MatchGridBody, tablefill: TableFillBody, labeling: LabelingBody, hotspot: HotspotBody,
-  graphing: GraphingBody,
+  graphing: GraphingBody, crossword: CrosswordBody,
 };
 
 // types with a specific question-text placeholder (editor:question.placeholders.<type>)
@@ -52,6 +53,12 @@ export function draftProblems(q) {
   if (q.type === 'labeling' && (o.length < 2 || o.some((t) => !t.text.trim()))) p.push(t('labels'));
   if (q.type === 'hotspot' && !(q.answer || []).length) p.push(t('hotspot'));
   if (q.type === 'graphing' && !(q.answer?.points || []).length) p.push(t('graphing'));
+  if (q.type === 'crossword') {
+    const len = (w) => Array.from(cwNormalize(w.answer)).length;
+    if (o.filter((w) => len(w) >= 2).length < 2) p.push(t('crosswordWords'));
+    if (o.some((w) => len(w) >= 2 && !String(w.clue || '').trim())) p.push(t('crosswordClues'));
+    if (o.some((w) => len(w) < 2 && String(w.clue || '').trim())) p.push(t('crosswordEmpty'));
+  }
   return p;
 }
 
@@ -67,16 +74,22 @@ function cleanForSave(q) {
   return out;
 }
 
+// Reading passage fields in extra. passageId groups the questions of one passage and is never edited here.
+const PASSAGE_FIELDS = ['passage', 'passageTitle', 'passageImage'];
+const PASSAGE_KEYS = [...PASSAGE_FIELDS, 'passageId'];
+const pickPassage = (extra) => Object.fromEntries(PASSAGE_KEYS.filter((k) => extra?.[k] !== undefined).map((k) => [k, extra[k]]));
+
 function convertType(q, type) {
   if (CHOICE_TYPES.includes(q.type) && CHOICE_TYPES.includes(type) && q.type !== 'tf' && type !== 'tf') {
     return { ...q, type, answer: type === 'poll' ? null : type === 'mcq' ? (q.answer || []).slice(0, 1) : q.answer || [] };
   }
   const b = blankQuestion(type);
   const keepText = !['dropdown', 'dragdrop'].includes(type) && !['dropdown', 'dragdrop'].includes(q.type);
-  return { ...b, id: q.id, text: keepText ? q.text : b.text, image: q.image, points: q.points, extra: { ...b.extra, ...(q.extra?.passage !== undefined ? { passage: q.extra.passage } : {}) } };
+  return { ...b, id: q.id, text: keepText ? q.text : b.text, image: q.image, points: q.points, extra: { ...b.extra, ...pickPassage(q.extra) } };
 }
 
-export default function QuestionEditor({ quizId, question, position, onClose, onSaved }) {
+/** group: the other questions sharing this question's passageId; passage edits are copied to them on save. */
+export default function QuestionEditor({ quizId, question, position, onClose, onSaved, group = [] }) {
   const { t } = useTranslation('editor');
   const toast = useToast();
   const [q, setQ] = useState(() => JSON.parse(JSON.stringify(question)));
@@ -87,7 +100,14 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
   const [imgSearch, setImgSearch] = useState(false);
   const textRef = useRef(null);
   const { pick, busy: uploading } = useUpload();
+  const passageUpload = useUpload();
   const set = (patch) => setQ((cur) => ({ ...cur, ...patch }));
+  const setPassage = (k, v) => setQ((cur) => {
+    const extra = { ...(cur.extra || {}) };
+    if (v === null) delete extra[k]; else extra[k] = v;
+    return { ...cur, extra };
+  });
+  const uploadPassageImage = async () => { const url = await passageUpload.pick(); if (url) setPassage('passageImage', url); };
   const setImage = (url, credit) => setQ((cur) => {
     const extra = { ...(cur.extra || {}) };
     if (credit) extra.imageCredit = credit; else delete extra.imageCredit;
@@ -121,7 +141,16 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
       const d = q.id
         ? await api(`/questions/${q.id}`, { method: 'PUT', body })
         : await api(`/quizzes/${quizId}/questions`, { method: 'POST', body: { ...body, position } });
-      toast(t('question.saved'), 'success');
+      // one reading passage is shared by its whole group: copy passage edits to the other questions
+      const pid = q.extra?.passageId;
+      const changed = PASSAGE_FIELDS.some((k) => (q.extra?.[k] || null) !== (question.extra?.[k] || null));
+      const others = pid && pid === question.extra?.passageId && changed ? group.filter((g) => g.id !== q.id) : [];
+      await Promise.all(others.map((g) => {
+        const extra = { ...(g.extra || {}) };
+        PASSAGE_FIELDS.forEach((k) => { if (q.extra[k]) extra[k] = q.extra[k]; else delete extra[k]; });
+        return api(`/questions/${g.id}`, { method: 'PUT', body: { extra } });
+      }));
+      toast(others.length ? t('question.savedShared', { count: others.length }) : t('question.saved'), 'success');
       onSaved(d.question);
     } catch (e) { toast(e.message, 'error'); } finally { setSaving(false); }
   }
@@ -136,7 +165,7 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
     } catch (e) { toast(e.message, 'error'); } finally { setAiBusy(false); }
   };
 
-  const hasPassage = q.extra?.passage !== undefined;
+  const hasPassage = q.extra?.passage !== undefined || !!q.extra?.passageTitle || !!q.extra?.passageImage;
 
   return (
     <div className="fixed inset-0 z-40 flex flex-col bg-slate-200/80 backdrop-blur-sm">
@@ -182,7 +211,7 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
           {CHOICE_TYPES.includes(q.type) && <MenuItem onClick={() => enhance('distractors')}>{t('question.ai.distractors')}</MenuItem>}
           <MenuItem onClick={() => enhance('explanation')}>{t('question.ai.explanation')}</MenuItem>
         </Menu>
-        <button className={`btn-ghost btn-sm ${hasPassage ? 'text-violet-700' : ''}`} onClick={() => set({ extra: hasPassage ? Object.fromEntries(Object.entries(q.extra).filter(([k]) => k !== 'passage')) : { ...q.extra, passage: '' } })}>
+        <button className={`btn-ghost btn-sm ${hasPassage ? 'text-violet-700' : ''}`} onClick={() => set({ extra: hasPassage ? Object.fromEntries(Object.entries(q.extra).filter(([k]) => !PASSAGE_KEYS.includes(k))) : { ...q.extra, passage: '' } })}>
           <FileText className="h-3.5 w-3.5" />{hasPassage ? t('question.removePassage') : t('question.addPassage')}
         </button>
         <div className="ml-auto flex items-center gap-2">
@@ -196,9 +225,22 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
         <div className={`mx-auto ${hasPassage ? 'max-w-6xl' : 'max-w-4xl'}`}>
           <div className={`grid gap-3 ${hasPassage ? 'md:grid-cols-[1fr_1.4fr]' : ''}`}>
             {hasPassage && (
-              <div className="rounded-xl bg-white p-4 shadow-card">
-                <div className="mb-2 flex items-center gap-2 text-sm font-bold text-slate-700"><FileText className="h-4 w-4" />{t('question.passage')}</div>
-                <textarea value={q.extra.passage} onChange={(e) => set({ extra: { ...q.extra, passage: e.target.value } })} placeholder={t('question.passagePlaceholder')} className="h-[420px] w-full resize-none rounded-lg border border-slate-200 p-3 text-sm leading-relaxed outline-none focus:border-violet-400" />
+              <div className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-card">
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-700"><FileText className="h-4 w-4" />{t('question.passage')}</div>
+                <input value={q.extra.passageTitle || ''} onChange={(e) => setPassage('passageTitle', e.target.value)} placeholder={t('question.passageTitlePlaceholder')} aria-label={t('question.passageTitle')} className="input font-semibold" />
+                {q.extra.passageImage ? (
+                  <div className="relative self-start">
+                    <img src={q.extra.passageImage} alt="" className="max-h-48 max-w-full rounded-lg border border-slate-200 object-contain" />
+                    <div className="absolute right-1.5 top-1.5 flex gap-1">
+                      <button title={t('question.replacePassageImage')} onClick={uploadPassageImage} disabled={passageUpload.busy} className="rounded-full bg-black/70 p-1 text-white hover:bg-black/85">{passageUpload.busy ? <Spinner className="h-3.5 w-3.5" /> : <ImageIcon className="h-3.5 w-3.5" />}</button>
+                      <button title={t('question.removePassageImage')} onClick={() => setPassage('passageImage', null)} className="rounded-full bg-black/70 p-1 text-white hover:bg-black/85"><X className="h-3.5 w-3.5" /></button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={uploadPassageImage} disabled={passageUpload.busy} className="btn-outline btn-sm self-start">{passageUpload.busy ? <Spinner className="h-3.5 w-3.5" /> : <ImageIcon className="h-3.5 w-3.5" />}{t('question.addPassageImage')}</button>
+                )}
+                <textarea value={q.extra.passage ?? ''} onChange={(e) => setPassage('passage', e.target.value)} placeholder={t('question.passagePlaceholder')} className={`${q.extra.passageImage ? 'h-[300px]' : 'h-[380px]'} w-full resize-none rounded-lg border border-slate-200 p-3 text-sm leading-relaxed outline-none focus:border-violet-400`} />
+                {q.extra.passageId && group.length > 0 && <div className="rounded-lg bg-violet-50 px-2.5 py-2 text-xs text-violet-800">{t('question.passageShared', { count: group.length })}</div>}
               </div>
             )}
             <div className="rounded-2xl bg-[#461a42] p-3 shadow-xl">
@@ -259,7 +301,7 @@ export default function QuestionEditor({ quizId, question, position, onClose, on
 /** Local equivalent of the server's sanitize, for the in-editor preview. */
 function previewSanitize(q) {
   const shuffle = (a) => [...a].sort(() => Math.random() - 0.5);
-  const base = { id: q.id || 0, type: q.type, text: q.text, image: q.image, points: q.points, time_limit: q.time_limit, passage: q.extra?.passage || null, imageCredit: q.extra?.imageCredit || null };
+  const base = { id: q.id || 0, type: q.type, text: q.text, image: q.image, points: q.points, time_limit: q.time_limit, passage: q.extra?.passage || null, passageTitle: q.extra?.passageTitle || null, passageImage: q.extra?.passageImage || null, passageId: q.extra?.passageId || null, imageCredit: q.extra?.imageCredit || null };
   const o = q.options || [];
   switch (q.type) {
     case 'mcq': case 'msq': case 'tf': case 'poll': return { ...base, options: o, multi: q.type === 'msq', correctCount: (q.answer || []).length };
@@ -274,6 +316,11 @@ function previewSanitize(q) {
     case 'labeling': return { ...base, targets: o.map((t) => ({ id: t.id, x: t.x, y: t.y })), labels: shuffle([...o.map((t) => t.text), ...(q.extra?.distractors || [])].filter(Boolean)) };
     case 'hotspot': return { ...base, regions: o, selectCount: (q.answer || []).length };
     case 'graphing': return { ...base, graph: { ...q.extra }, expected: q.extra?.mode === 'line' ? 2 : (q.answer?.points || []).length };
+    case 'crossword': {
+      const words = o.filter((w) => Array.from(cwNormalize(w.answer)).length >= 2);
+      const { rows, cols, entries } = buildLayout(words);
+      return { ...base, layout: { rows, cols, entries }, clues: words.map((w) => ({ id: w.id, clue: w.clue })) };
+    }
     default: return base;
   }
 }

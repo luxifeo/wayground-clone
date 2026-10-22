@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   ArrowLeft, Settings, Play, Rocket, Plus, Sparkles, Copy, Trash2, Pencil, GripVertical, Search, Languages, Lightbulb,
-  ChevronDown, Minimize2, Maximize2, Lock, Globe, ImagePlus, BookOpen, GraduationCap, X,
+  ChevronDown, Minimize2, Maximize2, Lock, Globe, ImagePlus, BookOpen, GraduationCap, X, BookOpenText,
 } from 'lucide-react';
 import { api, get, post, patch, del } from '../../lib/api.js';
 import { QTYPES, QTYPE_UPPER, SUBJECTS, GRADES, LANGUAGES, TIME_OPTIONS, fmtShortTime, fmtTime, blankQuestion, UNGRADED } from '../../lib/constants.js';
@@ -12,6 +12,7 @@ import TypePicker from '../../components/editor/TypePicker.jsx';
 import QuestionEditor from '../../components/editor/QuestionEditor.jsx';
 import { QuestionBody } from '../../components/QuestionCard.jsx';
 import AIGenerateModal from '../../components/AIGenerateModal.jsx';
+import { ZoomImage } from '../../components/Passage.jsx';
 import { useUpload } from '../../components/editor/bodies.jsx';
 import i18n, { subjectLabel, gradeLabel, languageLabel } from '../../i18n/index.js';
 
@@ -90,6 +91,50 @@ export async function openPreview(quizId, name = i18n.t('quiz:preview.teacherNam
   w.location.href = `/play/${d.token}`;
 }
 
+/**
+ * Questions of one reading passage share extra.passageId and sit next to each other.
+ * Returns the first question id of each run -> { n, size, ex: extra holding the passage }.
+ */
+function readingGroups(qs) {
+  const groups = new Map();
+  let cur = null;
+  qs.forEach((q, i) => {
+    const pid = q.extra?.passageId;
+    if (!pid) { cur = null; return; }
+    if (!cur || qs[i - 1]?.extra?.passageId !== pid) { cur = { n: groups.size + 1, pid, size: 0, ex: null }; groups.set(q.id, cur); }
+    cur.size += 1;
+    if (!cur.ex && (q.extra.passage || q.extra.passageTitle || q.extra.passageImage)) cur.ex = q.extra;
+  });
+  return groups;
+}
+
+function ReadingHeader({ r, open, onToggle, onEdit, t }) {
+  const ex = r.ex || {};
+  return (
+    <div className="rounded-xl border border-violet-200 bg-violet-50/60 p-3 sm:p-4">
+      <div className="flex items-start gap-3">
+        {ex.passageImage && <ZoomImage src={ex.passageImage} hint={false} className="h-14 w-20 shrink-0 rounded-lg border border-violet-100 bg-white object-cover" />}
+        <div className="min-w-0 flex-1">
+          <div className="text-sm leading-snug">
+            <span className="inline-flex items-center gap-1 font-bold text-violet-700"><BookOpenText className="h-4 w-4" />{t('editor.readingN', { n: r.n })}</span>
+            {ex.passageTitle && <span className="font-semibold text-slate-800"> · {ex.passageTitle}</span>}
+          </div>
+          <div className="mt-0.5 text-xs text-slate-500">{t('common:count.questions', { count: r.size })}</div>
+          {ex.passage && <div className={`mt-1.5 whitespace-pre-wrap break-words text-sm text-slate-600 ${open ? '' : 'line-clamp-2'}`}>{ex.passage}</div>}
+        </div>
+        <div className="flex shrink-0 items-center gap-0.5">
+          {ex.passage && (
+            <button onClick={onToggle} aria-expanded={open} title={open ? t('editor.hidePassage') : t('editor.showPassage')} className="rounded p-1.5 text-slate-600 hover:bg-white">
+              <ChevronDown className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+          <button onClick={onEdit} title={t('editor.editPassage')} className="flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold hover:bg-white"><Pencil className="h-3.5 w-3.5" /><span className="hidden sm:inline">{t('editor.editPassage')}</span></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function QuizEditor() {
   const { id } = useParams();
   const [params, setParams] = useSearchParams();
@@ -110,6 +155,7 @@ export default function QuizEditor() {
   const [search, setSearch] = useState('');
   const [found, setFound] = useState(null);
   const [dragId, setDragId] = useState(null);
+  const [openReadings, setOpenReadings] = useState({}); // passageId -> passage text expanded
 
   const load = useCallback(() => get(`/quizzes/${id}`).then((d) => setQuiz(d.quiz)).catch((e) => toast(e.message, 'error')), [id, toast]);
   useEffect(() => { load(); }, [load]);
@@ -119,6 +165,8 @@ export default function QuizEditor() {
   const totalPts = qs.filter((q) => !UNGRADED.includes(q.type)).reduce((a, q) => a + q.points, 0);
   const totalTime = qs.reduce((a, q) => a + q.time_limit, 0);
   const showPicker = qs.length === 0 && !editing;
+  const readings = readingGroups(qs);
+  const editingPid = editing?.question.extra?.passageId;
 
   const startNew = (type, position = qs.length) => {
     setPicker(null);
@@ -208,40 +256,51 @@ export default function QuizEditor() {
                 <button className="chip" disabled={!!aiBusy} onClick={() => runAI('expl', async () => { const d = await api(`/ai/quizzes/${quiz.id}/explanations`, { method: 'POST', body: {} }); setQuiz(d.quiz); toast(t('ai.wroteExplanations', { count: d.updated }), 'success'); })}>{aiBusy === 'expl' && <Spinner className="h-3 w-3" />}<Lightbulb className="h-3 w-3" />{t('ai.explanations')}</button>
                 <button className="chip" disabled={!!aiBusy} onClick={() => setTranslate(true)}><Languages className="h-3 w-3" />{t('ai.translate')}</button>
                 <button className="chip" disabled={!!aiBusy} onClick={() => setAiGen(true)}><Sparkles className="h-3 w-3" />{t('ai.generateMore')}</button>
+                <button className="chip" disabled={!!aiBusy} onClick={() => nav(`/admin/quiz/${quiz.id}/reading`)}><BookOpenText className="h-3 w-3" />{t('ai.reading')}</button>
                 <button className="chip" disabled={!!aiBusy} onClick={() => runAI('images', async () => { const d = await api(`/ai/quizzes/${quiz.id}/images`, { method: 'POST', body: {} }); setQuiz(d.quiz); toast(d.illustrated ? t('ai.addedImages', { count: d.illustrated }) : t('ai.noImages'), d.illustrated ? 'success' : 'info'); })}>{aiBusy === 'images' ? <Spinner className="h-3 w-3" /> : <ImagePlus className="h-3 w-3" />}{t('ai.images')}</button>
               </div>
 
               <div className="space-y-3">
                 {qs.map((q, i) => {
                   const T = QTYPES[q.type] || QTYPES.mcq;
+                  const pid = q.extra?.passageId;
+                  const r = readings.get(q.id);
                   return (
-                    <div
-                      key={q.id} className={`card group relative p-4 ${dragId === q.id ? 'opacity-50' : ''}`}
-                      draggable onDragStart={() => setDragId(q.id)} onDragEnd={() => setDragId(null)}
-                      onDragOver={(e) => e.preventDefault()} onDrop={() => { reorder(dragId, q.id); setDragId(null); }}
-                    >
-                      <GripVertical className="absolute left-1/2 top-0 h-4 w-4 -translate-x-1/2 rotate-90 cursor-grab text-slate-300" />
-                      <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
-                        <span className="font-bold text-slate-700">{String(i + 1).padStart(2, '0')}</span>
-                        <T.icon className={`h-3.5 w-3.5 ${T.color}`} />
-                        <span className="font-semibold">{QTYPE_UPPER[q.type]}</span>•
-                        <Menu align="left" trigger={<button className="hover:text-slate-800">{fmtShortTime(q.time_limit)} ▾</button>}>
-                          <div className="max-h-60 overflow-auto">{TIME_OPTIONS.map((s) => <MenuItem key={s} onClick={async () => { await api(`/questions/${q.id}`, { method: 'PUT', body: { time_limit: s } }); load(); }}>{fmtTime(s)}</MenuItem>)}</div>
-                        </Menu>•
-                        {UNGRADED.includes(q.type) ? <span>{t('common:result.ungraded')}</span> : (
-                          <Menu align="left" trigger={<button className="hover:text-slate-800">{t('editor.pt', { count: q.points })} ▾</button>}>
-                            <div className="max-h-60 overflow-auto">{Array.from({ length: 20 }, (_, k) => k + 1).map((p) => <MenuItem key={p} onClick={async () => { await api(`/questions/${q.id}`, { method: 'PUT', body: { points: p } }); load(); }}>{t('common:count.points', { count: p })}</MenuItem>)}</div>
-                          </Menu>
-                        )}
-                        <div className="ml-auto flex items-center gap-0.5">
-                          <button title={t('common:actions.duplicate')} onClick={async () => { await post(`/questions/${q.id}/duplicate`); load(); }} className="rounded p-1.5 hover:bg-slate-100"><Copy className="h-4 w-4" /></button>
-                          <button title={t('common:actions.delete')} onClick={async () => { if (confirm(t('editor.confirmDeleteQuestion'))) { await del(`/questions/${q.id}`); load(); } }} className="rounded p-1.5 hover:bg-slate-100"><Trash2 className="h-4 w-4" /></button>
-                          <button title={t('ai.similarTooltip')} disabled={!!aiBusy} onClick={() => runAI(`q${q.id}`, async () => { const d = await api(`/ai/quizzes/${quiz.id}/similar`, { method: 'POST', body: { questionIds: [q.id], count: 2 } }); setQuiz(d.quiz); toast(t('ai.addedSimilar', { count: d.added }), 'success'); })} className="rounded p-1.5 hover:bg-slate-100">{aiBusy === `q${q.id}` ? <Spinner className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}</button>
-                          <button onClick={() => setEditing({ question: q })} className="ml-1 flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold hover:bg-slate-100"><Pencil className="h-3.5 w-3.5" />{t('common:actions.edit')}</button>
+                    <Fragment key={q.id}>
+                      {r && (
+                        <ReadingHeader
+                          r={r} t={t} open={!!openReadings[r.pid]} onEdit={() => setEditing({ question: q })}
+                          onToggle={() => setOpenReadings((o) => ({ ...o, [r.pid]: !o[r.pid] }))}
+                        />
+                      )}
+                      <div
+                        className={`card group relative p-4 ${pid ? 'ml-3 border-l-4 border-l-violet-300 sm:ml-6' : ''} ${dragId === q.id ? 'opacity-50' : ''}`}
+                        draggable onDragStart={() => setDragId(q.id)} onDragEnd={() => setDragId(null)}
+                        onDragOver={(e) => e.preventDefault()} onDrop={() => { reorder(dragId, q.id); setDragId(null); }}
+                      >
+                        <GripVertical className="absolute left-1/2 top-0 h-4 w-4 -translate-x-1/2 rotate-90 cursor-grab text-slate-300" />
+                        <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
+                          <span className="font-bold text-slate-700">{String(i + 1).padStart(2, '0')}</span>
+                          <T.icon className={`h-3.5 w-3.5 ${T.color}`} />
+                          <span className="font-semibold">{QTYPE_UPPER[q.type]}</span>•
+                          <Menu align="left" trigger={<button className="hover:text-slate-800">{fmtShortTime(q.time_limit)} ▾</button>}>
+                            <div className="max-h-60 overflow-auto">{TIME_OPTIONS.map((s) => <MenuItem key={s} onClick={async () => { await api(`/questions/${q.id}`, { method: 'PUT', body: { time_limit: s } }); load(); }}>{fmtTime(s)}</MenuItem>)}</div>
+                          </Menu>•
+                          {UNGRADED.includes(q.type) ? <span>{t('common:result.ungraded')}</span> : (
+                            <Menu align="left" trigger={<button className="hover:text-slate-800">{t('editor.pt', { count: q.points })} ▾</button>}>
+                              <div className="max-h-60 overflow-auto">{Array.from({ length: 20 }, (_, k) => k + 1).map((p) => <MenuItem key={p} onClick={async () => { await api(`/questions/${q.id}`, { method: 'PUT', body: { points: p } }); load(); }}>{t('common:count.points', { count: p })}</MenuItem>)}</div>
+                            </Menu>
+                          )}
+                          <div className="ml-auto flex items-center gap-0.5">
+                            <button title={t('common:actions.duplicate')} onClick={async () => { await post(`/questions/${q.id}/duplicate`); load(); }} className="rounded p-1.5 hover:bg-slate-100"><Copy className="h-4 w-4" /></button>
+                            <button title={t('common:actions.delete')} onClick={async () => { if (confirm(t('editor.confirmDeleteQuestion'))) { await del(`/questions/${q.id}`); load(); } }} className="rounded p-1.5 hover:bg-slate-100"><Trash2 className="h-4 w-4" /></button>
+                            <button title={t('ai.similarTooltip')} disabled={!!aiBusy} onClick={() => runAI(`q${q.id}`, async () => { const d = await api(`/ai/quizzes/${quiz.id}/similar`, { method: 'POST', body: { questionIds: [q.id], count: 2 } }); setQuiz(d.quiz); toast(t('ai.addedSimilar', { count: d.added }), 'success'); })} className="rounded p-1.5 hover:bg-slate-100">{aiBusy === `q${q.id}` ? <Spinner className="h-4 w-4" /> : <Sparkles className="h-4 w-4" />}</button>
+                            <button onClick={() => setEditing({ question: q })} className="ml-1 flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-semibold hover:bg-slate-100"><Pencil className="h-3.5 w-3.5" />{t('common:actions.edit')}</button>
+                          </div>
                         </div>
+                        <QuestionBody q={q} showPassage={!pid} />
                       </div>
-                      <QuestionBody q={q} />
-                    </div>
+                    </Fragment>
                   );
                 })}
               </div>
@@ -299,6 +358,7 @@ export default function QuizEditor() {
       {editing && (
         <QuestionEditor
           quizId={quiz.id} question={editing.question} position={editing.position}
+          group={editingPid ? qs.filter((x) => x.id !== editing.question.id && x.extra?.passageId === editingPid) : []}
           onClose={() => setEditing(null)}
           onSaved={() => { setEditing(null); load(); }}
         />

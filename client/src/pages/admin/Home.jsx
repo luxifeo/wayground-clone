@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Pencil, Search, Upload, ClipboardCheck, Presentation, Clapperboard, FileText, Layers, Play, Gamepad2 } from 'lucide-react';
+import { Pencil, Search, Upload, ClipboardCheck, Presentation, Clapperboard, BookOpenText, Layers, Play, Gamepad2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import AdminLayout from '../../components/AdminLayout.jsx';
 import AIGenerateModal from '../../components/AIGenerateModal.jsx';
@@ -14,7 +14,7 @@ const RESOURCES = [
   { key: 'assessment', icon: ClipboardCheck, color: 'bg-green-600', to: '/admin/assessment/new' },
   { key: 'presentation', icon: Presentation, color: 'bg-orange-500' },
   { key: 'video', icon: Clapperboard, color: 'bg-rose-600' },
-  { key: 'passage', icon: FileText, color: 'bg-sky-600' },
+  { key: 'passage', icon: BookOpenText, color: 'bg-sky-600', to: '/admin/reading/new' },
   { key: 'flashcards', icon: Layers, color: 'bg-violet-600' },
 ];
 

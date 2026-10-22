@@ -2,5 +2,8 @@
   "logoTagline": "bản sao · trước đây là Quizizz",
   "select": {
     "placeholder": "Chọn…"
+  },
+  "lightbox": {
+    "zoom": "Bấm để phóng to"
   }
 }

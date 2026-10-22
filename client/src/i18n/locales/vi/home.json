@@ -15,7 +15,7 @@
     "assessment": { "title": "Bài đánh giá", "sub": "Câu hỏi nhanh & tương tác" },
     "presentation": { "title": "Bài trình chiếu", "sub": "Trang chiếu kèm câu hỏi và bảng trắng" },
     "video": { "title": "Video", "sub": "Câu hỏi tại các thời điểm quan trọng trong video" },
-    "passage": { "title": "Bài đọc", "sub": "Câu hỏi dựa trên một bài đọc" },
+    "passage": { "title": "Bài thi đọc", "sub": "Biến ảnh phiếu bài tập hoặc bất kỳ bức ảnh nào thành bài thi đọc" },
     "flashcards": { "title": "Thẻ ghi nhớ", "sub": "Câu hỏi ở mặt trước, đáp án ở mặt sau" }
   },
   "comingSoon": "Sắp ra mắt",

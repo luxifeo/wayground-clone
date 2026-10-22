@@ -15,7 +15,7 @@
     "assessment": { "title": "Assessment", "sub": "Quick & interactive questions" },
     "presentation": { "title": "Presentation", "sub": "Slides with questions and whiteboard" },
     "video": { "title": "Video", "sub": "Questions at key points in the video" },
-    "passage": { "title": "Passage", "sub": "Questions based on a passage" },
+    "passage": { "title": "Reading test", "sub": "Turn a worksheet photo or any picture into a reading test" },
     "flashcards": { "title": "Flashcards", "sub": "Questions on front, answers on back" }
   },
   "comingSoon": "Coming soon",

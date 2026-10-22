@@ -39,6 +39,15 @@ LLM_TEMPERATURE=0
 
 hoặc `LLM_BASE_URL`, `LLM_MODEL`, `LLM_API_KEY` (ưu tiên hơn). Kiểm tra kết nối: `GET /api/ai/status`.
 
+### Bài thi đọc từ ảnh
+
+Trang chủ → **Bài thi đọc** (`/admin/reading/new`): tải lên 1–6 ảnh. Model (cần hỗ trợ ảnh) xác định từng ảnh là phiếu bài tập hay ảnh thường:
+
+- **Phiếu bài tập**: mỗi bài tập thành một bài đọc với cùng dạng câu hỏi (điền chỗ trống → kéo thả, viết câu → điền, ô chữ → câu ô chữ mới do code tự xếp từ các cặp từ/gợi ý), AI tự giải đáp án. Hình trên trang được model trả toạ độ (thang 0–1000, quy đổi theo độ phân giải gốc), cắt bằng `sharp`, rồi model soát lại từng cạnh của ảnh cắt trên ảnh ngữ cảnh có khung đỏ, chỉnh bằng tìm kiếm nhị phân.
+- **Ảnh thường**: model viết một bài đọc về bức ảnh (thể loại, số đoạn, ngôn ngữ, khối lớp tuỳ chọn) rồi tạo câu hỏi, có thể kèm ô chữ từ vựng.
+
+Số lượt soát mặc định cho mỗi hình: `CROP_REVIEW_ROUNDS=3` trong `.env` (0–5, giáo viên chỉnh được trên trang).
+
 ### Ảnh minh hoạ
 
 Khi AI tạo câu hỏi, model đề xuất từ khoá ảnh cho từng câu; server tìm ảnh miễn phí, cho Gemma chọn ảnh khớp nhất theo tiêu đề, tải về `server/uploads` và lưu ghi công (license) hiển thị dưới ảnh. Trong editor có nút **Search images**, trong quiz có AI action **Add images**.

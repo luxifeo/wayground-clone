@@ -35,6 +35,10 @@
   "answer": "Answer: ",
   "overrideGrade": "Override grade:",
   "noAnswer": "No answer",
+  "crossword": {
+    "across": "Across",
+    "down": "Down"
+  },
   "drawing": "drawing",
   "areasSelected_one": "{{count}} area selected",
   "areasSelected_other": "{{count}} areas selected",

@@ -1,4 +1,5 @@
 import { equivalent } from './mathEval.js';
+import { buildLayout, cwNormalize } from './crossword.js';
 
 // Question formats (options / answer / extra are JSONB)
 //   mcq        options [{id,text,image}]               answer [id]
@@ -20,11 +21,13 @@ import { equivalent } from './mathEval.js';
 //   labeling   image + options targets [{id,text,x,y}] (percent); extra.distractors       player {targetId: text}
 //   hotspot    image + options regions [{id,x,y,w,h}] ; answer [ids]                     player [ids]
 //   graphing   extra {xmin,xmax,ymin,ymax,mode:'points'|'line'}; answer {points:[[x,y]]} player {points}
+//   crossword  options words [{id,answer,clue}]; extra.layout {rows,cols,entries:[{id,row,col,dir,len,num}]} (server built)  player {wordId: letters}
 // Any question may carry extra.passage (shown next to the question).
 
 export const QUESTION_TYPES = [
   'mcq', 'msq', 'tf', 'fill', 'open', 'poll', 'reorder', 'match', 'draw', 'dropdown', 'dragdrop', 'categorize',
   'hottext', 'matchgrid', 'tablefill', 'labeling', 'hotspot', 'graphing', 'math', 'wordcloud', 'audio', 'video', 'discussion',
+  'crossword',
 ];
 export const UNGRADED_TYPES = ['open', 'poll', 'draw', 'wordcloud', 'audio', 'video', 'discussion'];
 
@@ -174,6 +177,12 @@ export function grade(q, answer) {
       const key = new Set(want.map((p) => `${p[0]},${p[1]}`));
       return setScore([...key], got.map((p) => `${p[0]},${p[1]}`));
     }
+    case 'crossword': {
+      const got = typeof answer === 'object' && !Array.isArray(answer) ? answer : {};
+      let hit = 0;
+      opts.forEach((w) => { const want = cwNormalize(w.answer); if (want && cwNormalize(got[w.id]) === want) hit++; });
+      return result(hit, opts.length);
+    }
     default:
       return { status: 'ungraded', fraction: 0 };
   }
@@ -207,6 +216,7 @@ export function sanitizeQuestion(q, { shuffleAnswers = false, seed = 0 } = {}) {
   const base = {
     id: q.id, type: q.type, text: q.text, image: q.image, points: q.points, time_limit: q.time_limit,
     passage: ex.passage || null,
+    passageTitle: ex.passageTitle || null, passageImage: ex.passageImage || null, passageId: ex.passageId || null,
     imageCredit: q.image ? ex.imageCredit || null : null,
   };
   const opts = q.options || [];
@@ -261,6 +271,14 @@ export function sanitizeQuestion(q, { shuffleAnswers = false, seed = 0 } = {}) {
         graph: { xmin: ex.xmin ?? -10, xmax: ex.xmax ?? 10, ymin: ex.ymin ?? -10, ymax: ex.ymax ?? 10, mode: ex.mode || 'points' },
         expected: ex.mode === 'line' ? 2 : (q.answer?.points || []).length,
       };
+    case 'crossword': {
+      const lay = Array.isArray(ex.layout?.entries) ? ex.layout : buildLayout(opts);
+      return {
+        ...base,
+        layout: { rows: lay.rows, cols: lay.cols, entries: lay.entries.map(({ id, row, col, dir, len, num }) => ({ id, row, col, dir, len, num })) },
+        clues: opts.map((o) => ({ id: o.id, clue: o.clue })),
+      };
+    }
     default:
       return base;
   }
@@ -282,6 +300,7 @@ export function revealFor(q) {
     case 'matchgrid': return { grid: q.answer || {} };
     case 'tablefill': return { cells: Object.fromEntries((q.extra?.table?.rows || []).flat().filter((c) => c?.t === 'blank').map((c) => [c.id, c.accepted || []])) };
     case 'graphing': return { points: q.answer?.points || [] };
+    case 'crossword': return { entries: Object.fromEntries(opts.map((o) => [o.id, cwNormalize(o.answer)])) };
     default: return {};
   }
 }
@@ -404,6 +423,21 @@ export function normalizeQuestion(input) {
       if (extra.mode === 'line') answer.points = answer.points.slice(0, 2);
       options = [];
       break;
+    case 'crossword': {
+      // layout is always rebuilt here from the words, never taken from the input
+      const seen = new Set();
+      if (!options.length && Array.isArray(input.words)) options = input.words;
+      options = options.filter((o) => o && typeof o === 'object').map((o) => {
+        let id = str(o.id || rid());
+        if (seen.has(id)) id = rid();
+        seen.add(id);
+        return { id, answer: str(o.answer ?? o.word).trim(), clue: str(o.clue).trim() };
+      }).filter((o) => Array.from(cwNormalize(o.answer)).length >= 2).slice(0, 30);
+      const { rows, cols, entries } = buildLayout(options);
+      extra.layout = { rows, cols, entries };
+      answer = null;
+      break;
+    }
     default:
       options = []; answer = null;
   }
@@ -436,6 +470,10 @@ export function questionProblems(q) {
     case 'hottext': case 'hotspot': if (!(q.answer || []).length) p.push('needs a correct selection'); break;
     case 'tablefill': if (!(q.extra?.table?.rows || []).flat().some((c) => c?.t === 'blank')) p.push('needs at least one blank cell'); break;
     case 'graphing': if (!(q.answer?.points || []).length) p.push('needs the correct points'); break;
+    case 'crossword':
+      if (opts.length < 2) p.push('needs at least 2 words');
+      if (opts.some((o) => !String(o.clue || '').trim())) p.push('needs a clue for every word');
+      break;
     default:
   }
   if (['labeling', 'hotspot'].includes(q.type) && !q.image) p.push('needs an image');

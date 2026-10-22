@@ -19,6 +19,13 @@
     "hideExplanation": "Ẩn giải thích đáp án",
     "passage": "Bài đọc",
     "passagePlaceholder": "Dán bài đọc vào đây…",
+    "passageTitle": "Tiêu đề bài đọc",
+    "passageTitlePlaceholder": "Tiêu đề bài đọc, ví dụ: 1. Đọc email và trả lời câu hỏi.",
+    "addPassageImage": "Thêm ảnh",
+    "replacePassageImage": "Thay ảnh",
+    "removePassageImage": "Xoá ảnh",
+    "passageShared_other": "Bài đọc này dùng chung với {{count}} câu hỏi khác của cùng bài đọc. Khi lưu, thay đổi sẽ được chép sang các câu đó.",
+    "savedShared_other": "Đã lưu câu hỏi · cập nhật bài đọc cho {{count}} câu hỏi khác",
     "uploadImage": "Tải ảnh lên",
     "searchFreeImages": "Tìm ảnh miễn phí",
     "searchImages": "Tìm ảnh",
@@ -54,7 +61,10 @@
       "image": "Tải lên một ảnh",
       "labels": "Thêm ít nhất 2 nhãn có tên",
       "hotspot": "Vẽ ít nhất một vùng đúng",
-      "graphing": "Vẽ đáp án đúng"
+      "graphing": "Vẽ đáp án đúng",
+      "crosswordWords": "Thêm ít nhất 2 từ, mỗi từ từ 2 chữ cái trở lên",
+      "crosswordClues": "Thêm gợi ý cho mọi từ",
+      "crosswordEmpty": "Nhập từ cho mọi gợi ý hoặc xoá dòng đó"
     }
   },
   "picker": {
@@ -205,6 +215,18 @@
       "hintPoints": "Bấm vào lưới để đặt các điểm đúng. Đáp án đúng: {{answer}}",
       "hintLine": "Bấm vào lưới để đặt hai điểm đúng của đường thẳng. Đáp án đúng: {{answer}}",
       "none": "chưa có"
+    },
+    "crossword": {
+      "note": "Nhập từng đáp án và gợi ý của nó. Ô chữ được tạo tự động; khoảng trắng, dấu gạch nối và dấu câu được bỏ qua.",
+      "answer": "Đáp án",
+      "clue": "Gợi ý",
+      "deleteWord": "Xoá từ",
+      "addWord": "Thêm từ",
+      "preview": "Xem trước ô chữ",
+      "across": "Hàng ngang",
+      "down": "Hàng dọc",
+      "empty": "Nhập ít nhất 2 từ để xem ô chữ.",
+      "skipped": "Chưa có trong ô chữ (cần từ 2 chữ cái): {{list}}"
     }
   },
   "card": {
