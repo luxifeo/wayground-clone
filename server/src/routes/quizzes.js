@@ -36,6 +36,15 @@ async function ownQuestion(req, res) {
 
 const touch = (quizId) => query('UPDATE quizzes SET updated_at=now() WHERE id=$1', [quizId]);
 
+/** Folder id sent by the client: null for the library root, false when it is not one of the user's folders. */
+export async function folderTarget(userId, raw) {
+  if (raw === null || raw === undefined || raw === '' || raw === 'root') return null;
+  const f = await one('SELECT id FROM folders WHERE id=$1 AND owner_id=$2', [parseInt(raw, 10) || 0, userId]);
+  return f ? f.id : false;
+}
+
+const folderName = (s) => String(s ?? '').trim().slice(0, 80);
+
 export async function insertQuestions(client, quizId, questions, startPos = null) {
   let pos = startPos;
   if (pos === null) {
@@ -60,15 +69,20 @@ export async function insertQuestions(client, quizId, questions, startPos = null
 quizRouter.get('/quizzes', requireAuth, async (req, res) => {
   const status = req.query.status;
   const params = [req.user.id];
-  let where = 'q.owner_id=$1';
+  // folder=root: top level only, folder=<id>: that folder, none: the whole library (Home, search)
+  let inFolder = 'true';
+  if (req.query.folder === 'root') inFolder = 'q.folder_id IS NULL';
+  else if (req.query.folder) { params.push(parseInt(req.query.folder, 10) || 0); inFolder = `q.folder_id=$${params.length}`; }
+  const counts = await one(
+    `SELECT count(*) FILTER (WHERE ${inFolder} AND status='published')::int AS published,
+            count(*) FILTER (WHERE ${inFolder} AND status='draft')::int AS draft,
+            count(*) FILTER (WHERE ${inFolder} AND status='archived')::int AS archived,
+            count(*) FILTER (WHERE status<>'archived')::int AS total
+     FROM quizzes q WHERE owner_id=$1`, [...params]);
+  let where = `q.owner_id=$1 AND ${inFolder}`;
   if (status) { params.push(status); where += ` AND q.status=$${params.length}`; } else where += " AND q.status<>'archived'";
   if (req.query.q) { params.push(`%${req.query.q}%`); where += ` AND q.title ILIKE $${params.length}`; }
   const rows = await many(`${QUIZ_LIST_SQL} WHERE ${where} ORDER BY q.updated_at DESC`, params);
-  const counts = await one(
-    `SELECT count(*) FILTER (WHERE status='published')::int AS published,
-            count(*) FILTER (WHERE status='draft')::int AS draft,
-            count(*) FILTER (WHERE status='archived')::int AS archived
-     FROM quizzes WHERE owner_id=$1`, [req.user.id]);
   res.json({ quizzes: rows, counts });
 });
 
@@ -104,13 +118,80 @@ quizRouter.get('/questions/search', requireAuth, async (req, res) => {
   res.json({ questions: rows });
 });
 
+// ---------- folders ----------
+quizRouter.get('/folders', requireAuth, async (req, res) => {
+  const folders = await many(
+    `SELECT f.*, (SELECT count(*)::int FROM quizzes q WHERE q.folder_id=f.id) AS quiz_count
+     FROM folders f WHERE f.owner_id=$1 ORDER BY lower(f.name), f.id`, [req.user.id]);
+  res.json({ folders });
+});
+
+quizRouter.post('/folders', requireAuth, async (req, res) => {
+  const name = folderName(req.body?.name);
+  if (!name) return res.status(400).json({ error: 'Enter a folder name' });
+  const parent = await folderTarget(req.user.id, req.body.parent_id);
+  if (parent === false) return res.status(404).json({ error: 'Folder not found' });
+  const folder = await one('INSERT INTO folders(owner_id,parent_id,name) VALUES($1,$2,$3) RETURNING *', [req.user.id, parent, name]);
+  log.info('folder.create', { folder: folder.id, name, parent }, req);
+  res.json({ folder });
+});
+
+quizRouter.patch('/folders/:id', requireAuth, async (req, res) => {
+  const name = folderName(req.body?.name);
+  if (!name) return res.status(400).json({ error: 'Enter a folder name' });
+  const folder = await one('UPDATE folders SET name=$3 WHERE id=$1 AND owner_id=$2 RETURNING *', [req.params.id, req.user.id, name]);
+  if (!folder) return res.status(404).json({ error: 'Folder not found' });
+  log.info('folder.rename', { folder: folder.id, name }, req);
+  res.json({ folder });
+});
+
+quizRouter.delete('/folders/:id', requireAuth, async (req, res) => {
+  const folder = await one('SELECT * FROM folders WHERE id=$1 AND owner_id=$2', [req.params.id, req.user.id]);
+  if (!folder) return res.status(404).json({ error: 'Folder not found' });
+  // nothing inside is deleted: subfolders and activities move up one level
+  await tx(async (c) => {
+    await c.query('UPDATE folders SET parent_id=$2 WHERE parent_id=$1', [folder.id, folder.parent_id]);
+    await c.query('UPDATE quizzes SET folder_id=$2 WHERE folder_id=$1', [folder.id, folder.parent_id]);
+    await c.query('DELETE FROM folders WHERE id=$1', [folder.id]);
+  });
+  log.info('folder.delete', { folder: folder.id, name: folder.name }, req);
+  res.json({ ok: true });
+});
+
+/** Move activities and folders into a folder (to: null = library root). */
+quizRouter.post('/library/move', requireAuth, async (req, res) => {
+  const b = req.body || {};
+  const ids = (list) => (Array.isArray(list) ? list.map(Number).filter(Number.isInteger) : []);
+  const quizIds = ids(b.quizzes);
+  const folderIds = ids(b.folders);
+  const to = await folderTarget(req.user.id, b.to);
+  if (to === false) return res.status(404).json({ error: 'Folder not found' });
+  if (to !== null && folderIds.length) {
+    // a folder cannot go inside itself or one of its own subfolders
+    const loop = await one(
+      `WITH RECURSIVE up AS (
+         SELECT id, parent_id FROM folders WHERE id=$1
+         UNION SELECT f.id, f.parent_id FROM folders f JOIN up ON f.id=up.parent_id)
+       SELECT 1 FROM up WHERE id = ANY($2::int[]) LIMIT 1`, [to, folderIds]);
+    if (loop) return res.status(400).json({ error: 'A folder cannot be moved into itself' });
+  }
+  const moved = await tx(async (c) => {
+    const q = await c.query('UPDATE quizzes SET folder_id=$3 WHERE owner_id=$1 AND id = ANY($2::int[])', [req.user.id, quizIds, to]);
+    const f = await c.query('UPDATE folders SET parent_id=$3 WHERE owner_id=$1 AND id = ANY($2::int[])', [req.user.id, folderIds, to]);
+    return { quizzes: q.rowCount, folders: f.rowCount };
+  });
+  log.info('library.move', { to, quizzes: quizIds, folders: folderIds }, req);
+  res.json(moved);
+});
+
 // ---------- quiz CRUD ----------
 quizRouter.post('/quizzes', requireAuth, async (req, res) => {
   const b = req.body || {};
+  const folderId = (await folderTarget(req.user.id, b.folder_id)) || null;
   const quiz = await tx(async (c) => {
     const r = await c.query(
-      `INSERT INTO quizzes(owner_id,title,subject,grade,language,source) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,
-      [req.user.id, b.title || 'Untitled Quiz', b.subject || null, b.grade || null, b.language || 'English', b.source || 'scratch'],
+      `INSERT INTO quizzes(owner_id,title,subject,grade,language,source,folder_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [req.user.id, b.title || 'Untitled Quiz', b.subject || null, b.grade || null, b.language || 'English', b.source || 'scratch', folderId],
     );
     const qz = r.rows[0];
     if (Array.isArray(b.questions) && b.questions.length) await insertQuestions(c, qz.id, b.questions, 0);
@@ -168,10 +249,10 @@ quizRouter.post('/quizzes/:id/duplicate', requireAuth, async (req, res) => {
   }
   const copy = await tx(async (c) => {
     const r = await c.query(
-      `INSERT INTO quizzes(owner_id,title,subject,grade,language,visibility,cover_image,teaching_goal,source,status)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,'copy','draft') RETURNING *`,
+      `INSERT INTO quizzes(owner_id,title,subject,grade,language,visibility,cover_image,teaching_goal,source,status,folder_id)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,'copy','draft',$9) RETURNING *`,
       [req.user.id, src.owner_id === req.user.id ? `${src.title} (copy)` : src.title, src.subject, src.grade,
-        src.language, src.visibility, src.cover_image, src.teaching_goal],
+        src.language, src.visibility, src.cover_image, src.teaching_goal, src.owner_id === req.user.id ? src.folder_id : null],
     );
     await insertQuestions(c, r.rows[0].id, src.questions, 0);
     return r.rows[0];

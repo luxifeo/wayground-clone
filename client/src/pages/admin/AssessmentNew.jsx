@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { X, Upload, Link2, FileSpreadsheet, Download, Sparkles, ChevronRight, PenLine, Search } from 'lucide-react';
 import { useTranslation, Trans } from 'react-i18next';
 import AIGenerateModal from '../../components/AIGenerateModal.jsx';
@@ -11,6 +11,8 @@ export default function AssessmentNew() {
   const { t } = useTranslation('assessment');
   const nav = useNavigate();
   const toast = useToast();
+  // opened from a library folder: new quizzes go into it
+  const folderId = useSearchParams()[0].get('folder') || undefined;
   const [ai, setAi] = useState(null);
   const [topic, setTopic] = useState('');
   const [link, setLink] = useState('');
@@ -20,7 +22,7 @@ export default function AssessmentNew() {
 
   const scratch = async () => {
     // stored English sentinel: the editor shows it as an empty title and publish asks for a real name
-    const { quiz } = await post('/quizzes', { title: 'Untitled Quiz', source: 'scratch' });
+    const { quiz } = await post('/quizzes', { title: 'Untitled Quiz', source: 'scratch', folder_id: folderId });
     nav(`/admin/quiz/${quiz.id}/edit?new=1`);
   };
 
@@ -34,7 +36,7 @@ export default function AssessmentNew() {
     try {
       const questions = csvToQuestions(await file.text());
       if (!questions.length) throw new Error(t('noQuestions'));
-      const { quiz } = await post('/quizzes', { title: file.name.replace(/\.[^.]+$/, ''), source: 'import', questions });
+      const { quiz } = await post('/quizzes', { title: file.name.replace(/\.[^.]+$/, ''), source: 'import', questions, folder_id: folderId });
       toast(t('imported', { count: questions.length }), 'success');
       nav(`/admin/quiz/${quiz.id}/edit`);
     } catch (e) { toast(e.message, 'error'); }
@@ -110,7 +112,7 @@ export default function AssessmentNew() {
       <AIGenerateModal
         open={!!ai} onClose={() => setAi(null)} initialMode={ai?.mode} initialTopic={ai?.topic || ''} initialFiles={ai?.files}
         key={ai ? `${ai.mode}-${ai.url || ''}` : 'none'}
-        initialUrl={ai?.url}
+        initialUrl={ai?.url} folderId={folderId}
       />
     </div>
   );

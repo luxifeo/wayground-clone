@@ -22,6 +22,35 @@
     "title": "Chưa có gì ở đây",
     "text": "Tạo một bài đánh giá để thấy nó trong thư viện của bạn."
   },
+  "emptyFolder": {
+    "title": "Thư mục này đang trống",
+    "text": "Kéo hoạt động vào đây, hoặc chọn “Chuyển đến…” trong menu của hoạt động."
+  },
+  "folders": "Thư mục",
+  "noFolders": "Chưa có thư mục nào",
+  "newFolder": "Thư mục mới",
+  "folder": {
+    "renameTitle": "Đổi tên thư mục",
+    "namePlaceholder": "Tên thư mục",
+    "actions": "Thao tác với thư mục",
+    "subfolders_other": "{{count}} thư mục",
+    "activities_other": "{{count}} hoạt động",
+    "empty": "Trống",
+    "confirmDelete": "Xoá thư mục \"{{name}}\"? Hoạt động và thư mục con bên trong sẽ được chuyển lên một cấp, không bị xoá."
+  },
+  "move": {
+    "action": "Chuyển đến…",
+    "title_other": "Chuyển {{count}} mục",
+    "root": "Do tôi tạo (cấp ngoài cùng)",
+    "here": "Chuyển vào đây",
+    "done": "Đã chuyển"
+  },
+  "select": "Chọn",
+  "selectAll": "Chọn tất cả",
+  "selected_other": "Đã chọn {{count}}",
+  "clearSelection": "Bỏ chọn",
+  "searchResults": "Kết quả cho “{{q}}”",
+  "clearSearch": "Xoá tìm kiếm",
   "draftBadge": "NHÁP",
   "shareWithStudents": "Chia sẻ với học sinh",
   "duplicated": "Đã nhân bản",

@@ -13,8 +13,9 @@ const LOADING_TIPS = ['reading', 'concepts', 'writing', 'distractors', 'checking
 /**
  * mode: 'prompt' | 'upload' | 'link'
  * quizId: when set, questions are appended to that quiz and onDone(quiz) is called.
+ * folderId: library folder for a new quiz.
  */
-export default function AIGenerateModal({ open, onClose, initialMode = 'prompt', initialTopic = '', initialFiles = null, initialUrl = "", quizId, onDone }) {
+export default function AIGenerateModal({ open, onClose, initialMode = 'prompt', initialTopic = '', initialFiles = null, initialUrl = "", quizId, folderId, onDone }) {
   const nav = useNavigate();
   const toast = useToast();
   const { t } = useTranslation('ai');
@@ -59,6 +60,7 @@ export default function AIGenerateModal({ open, onClose, initialMode = 'prompt',
     form.append('images', withImages ? 'true' : 'false');
     if (grade) form.append('grade', grade);
     if (quizId) form.append('quizId', quizId);
+    else if (folderId) form.append('folderId', folderId);
     if (mode === 'upload') files.forEach((f) => form.append('files', f));
     if (mode === 'link' && url) form.append('url', url);
     setBusy(true);

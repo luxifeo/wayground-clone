@@ -5,7 +5,7 @@ import pdf from 'pdf-parse/lib/pdf-parse.js';
 import { one, many, tx } from '../db.js';
 import { requireAuth } from '../auth.js';
 import { chatJson, llmStatus, LLMError } from '../llm.js';
-import { loadQuiz, insertQuestions } from './quizzes.js';
+import { loadQuiz, insertQuestions, folderTarget } from './quizzes.js';
 import { applyGrade } from './sessions.js';
 import { computeScore, normalizeQuestion, questionProblems } from '../grading.js';
 import { broadcast } from '../realtime.js';
@@ -246,11 +246,12 @@ aiRouter.post('/ai/generate', requireAuth, keepContext(upload.array('files', 10)
     done(quiz.id);
     return res.json({ quiz: await loadQuiz(quiz.id), added: list.length, illustrated });
   }
+  const folderId = (await folderTarget(req.user.id, b.folderId)) || null;
   const quizId = await tx(async (c) => {
     const r = await c.query(
-      'INSERT INTO quizzes(owner_id,title,subject,grade,language,source) VALUES($1,$2,$3,$4,$5,$6) RETURNING id',
+      'INSERT INTO quizzes(owner_id,title,subject,grade,language,source,folder_id) VALUES($1,$2,$3,$4,$5,$6,$7) RETURNING id',
       [req.user.id, String(out.title || topic || 'AI generated quiz').slice(0, 64), out.subject || null,
-        b.grade || out.grade || null, language, (req.files?.length || b.url) ? 'ai-upload' : 'ai-prompt']);
+        b.grade || out.grade || null, language, (req.files?.length || b.url) ? 'ai-upload' : 'ai-prompt', folderId]);
     await insertQuestions(c, r.rows[0].id, list, 0);
     return r.rows[0].id;
   });

@@ -22,6 +22,39 @@
     "title": "Nothing here yet",
     "text": "Create an assessment to see it in your library."
   },
+  "emptyFolder": {
+    "title": "This folder is empty",
+    "text": "Drag activities here, or use “Move to…” in an activity's menu."
+  },
+  "folders": "Folders",
+  "noFolders": "No folders yet",
+  "newFolder": "New folder",
+  "folder": {
+    "renameTitle": "Rename folder",
+    "namePlaceholder": "Folder name",
+    "actions": "Folder actions",
+    "subfolders_one": "{{count}} folder",
+    "subfolders_other": "{{count}} folders",
+    "activities_one": "{{count}} activity",
+    "activities_other": "{{count}} activities",
+    "empty": "Empty",
+    "confirmDelete": "Delete the folder \"{{name}}\"? Activities and folders inside it move up one level, nothing is deleted."
+  },
+  "move": {
+    "action": "Move to…",
+    "title_one": "Move {{count}} item",
+    "title_other": "Move {{count}} items",
+    "root": "Created by me (top level)",
+    "here": "Move here",
+    "done": "Moved"
+  },
+  "select": "Select",
+  "selectAll": "Select all",
+  "selected_one": "{{count}} selected",
+  "selected_other": "{{count}} selected",
+  "clearSelection": "Clear",
+  "searchResults": "Results for “{{q}}”",
+  "clearSearch": "Clear search",
   "draftBadge": "DRAFT",
   "shareWithStudents": "Share with students",
   "duplicated": "Duplicated",

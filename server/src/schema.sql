@@ -27,6 +27,19 @@ CREATE TABLE IF NOT EXISTS quizzes (
 );
 CREATE INDEX IF NOT EXISTS quizzes_owner_idx ON quizzes(owner_id);
 
+-- library folders, nested through parent_id (NULL = top level)
+CREATE TABLE IF NOT EXISTS folders (
+  id         SERIAL PRIMARY KEY,
+  owner_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  parent_id  INTEGER REFERENCES folders(id) ON DELETE CASCADE,
+  name       TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS folders_owner_idx ON folders(owner_id, parent_id);
+-- NULL = library root
+ALTER TABLE quizzes ADD COLUMN IF NOT EXISTS folder_id INTEGER REFERENCES folders(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS quizzes_folder_idx ON quizzes(folder_id);
+
 CREATE TABLE IF NOT EXISTS questions (
   id          SERIAL PRIMARY KEY,
   quiz_id     INTEGER NOT NULL REFERENCES quizzes(id) ON DELETE CASCADE,
