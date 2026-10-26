@@ -4,6 +4,7 @@ import sharp from 'sharp';
 import { one, tx } from '../db.js';
 import { requireAuth } from '../auth.js';
 import { translate } from '../i18n.js';
+import { keepContext, log } from '../log.js';
 import { insertQuestions, loadQuiz } from './quizzes.js';
 import { BASE_SCHEMA, fromAI, valid } from './ai.js';
 import {
@@ -40,7 +41,7 @@ readingRouter.get('/ai/reading/config', requireAuth, (_req, res) => {
   res.json({ cropRounds: CROP_ROUNDS, maxCropRounds: MAX_CROP_ROUNDS, maxFiles: MAX_FILES });
 });
 
-readingRouter.post('/ai/reading', requireAuth, upload.array('files', MAX_FILES), async (req, res) => {
+readingRouter.post('/ai/reading', requireAuth, keepContext(upload.array('files', MAX_FILES)), async (req, res) => {
   const files = req.files || [];
   if (!files.length) return res.status(400).json({ error: 'Upload at least one image' });
   const b = req.body || {};
@@ -66,8 +67,14 @@ readingRouter.post('/ai/reading', requireAuth, upload.array('files', MAX_FILES),
   };
   const lang = /^vi\b/i.test(String(req.headers['accept-language'] || '')) ? 'vi' : 'en';
   const job = createJob(req.user.id, lang, opts.mode);
-  run(job, files.map((f) => f.buffer), opts, req.user.id).catch((e) => {
-    console.error('reading job failed', e);
+  const t0 = Date.now();
+  log.info('ai.reading.start', {
+    job: job.id, mode: opts.mode, quiz: opts.quizId, files: files.map((f) => ({ name: f.originalname.slice(0, 120), type: f.mimetype, size: f.size })),
+  }, req);
+  run(job, files.map((f) => f.buffer), opts, req.user.id).then(() => {
+    log.info('ai.reading.done', { job: job.id, kind: job.kind, ...job.result, figures: job.figures.map((f) => f.url), ms: Date.now() - t0 }, req);
+  }, (e) => {
+    log.error('ai.reading.failed', { job: job.id, ms: Date.now() - t0, err: e }, req);
     job.status = 'error';
     job.error = e.message || 'AI request failed';
     job.steps.forEach((s) => { if (s.status === 'running') s.status = 'error'; });

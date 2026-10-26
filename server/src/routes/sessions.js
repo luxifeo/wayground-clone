@@ -8,6 +8,7 @@ import { grade, computeScore, sanitizeQuestion, revealFor, shuffle, UNGRADED_TYP
 import {
   broadcast, hostState, playerState, loadSession, leaderboard, setQuestionTimer, clearQuestionTimer, dropPlayer, getIO, anonymize,
 } from '../realtime.js';
+import { log, tokenTag } from '../log.js';
 
 export const sessionRouter = Router();
 
@@ -101,6 +102,7 @@ sessionRouter.post('/sessions', requireAuth, async (req, res) => {
       JSON.stringify(snapshot), autoRun ? 'running' : 'lobby', autoRun ? new Date() : null, b.deadline || null],
   );
   if (kind !== 'preview') await query('UPDATE quizzes SET plays=plays+1 WHERE id=$1', [quiz.id]);
+  log.info('session.create', { session: s.id, code: s.code, quiz: quiz.id, kind, pace, gameType }, req);
   res.json({ session: s });
 });
 
@@ -142,6 +144,7 @@ sessionRouter.patch('/sessions/:id', requireAuth, async (req, res) => {
 sessionRouter.delete('/sessions/:id', requireAuth, async (req, res) => {
   const s = await ownSession(req, res); if (!s) return;
   await query('DELETE FROM sessions WHERE id=$1', [s.id]);
+  log.info('session.delete', { session: s.id, code: s.code, quiz: s.quiz_id }, req);
   res.json({ ok: true });
 });
 
@@ -218,7 +221,10 @@ sessionRouter.post('/sessions/:id/reopen', requireAuth, async (req, res) => {
 sessionRouter.post('/sessions/:id/kick', requireAuth, async (req, res) => {
   const s = await ownSession(req, res); if (!s) return;
   const r = await query('UPDATE participants SET kicked=true WHERE id=$1 AND session_id=$2', [req.body.participantId, s.id]);
-  if (r.rowCount) dropPlayer(req.body.participantId);
+  if (r.rowCount) {
+    dropPlayer(req.body.participantId);
+    log.info('player.kick', { session: s.id, player: req.body.participantId }, req);
+  }
   broadcast(s.id);
   res.json(await hostState(s.id));
 });
@@ -231,6 +237,7 @@ sessionRouter.post('/sessions/:id/participants/:pid/disconnect', requireAuth, as
     [req.params.pid, s.id]);
   if (!p) return res.status(404).json({ error: 'Participant not found' });
   dropPlayer(p.id, { disconnected: true });
+  log.info('player.disconnect', { session: s.id, player: p.id }, req);
   broadcast(s.id, { players: true });
   res.json(await hostState(s.id));
 });
@@ -238,9 +245,10 @@ sessionRouter.post('/sessions/:id/participants/:pid/disconnect', requireAuth, as
 /** Remove a player and all their answers from the session. */
 sessionRouter.delete('/sessions/:id/participants/:pid', requireAuth, async (req, res) => {
   const s = await ownSession(req, res); if (!s) return;
-  const p = await one('DELETE FROM participants WHERE id=$1 AND session_id=$2 RETURNING id', [req.params.pid, s.id]);
+  const p = await one('DELETE FROM participants WHERE id=$1 AND session_id=$2 RETURNING id, name', [req.params.pid, s.id]);
   if (!p) return res.status(404).json({ error: 'Participant not found' });
   dropPlayer(p.id);
+  log.info('player.delete', { session: s.id, player: p.id, name: p.name }, req);
   broadcast(s.id, { players: true });
   res.json(await hostState(s.id));
 });
@@ -315,7 +323,11 @@ sessionRouter.post('/join/:code', async (req, res) => {
   let name = cleanName(req.body.name);
   if (!name) return res.status(400).json({ error: 'Please enter your name' });
   const deviceId = cleanDeviceId(req.body.deviceId);
-  const reply = (p, resumed = false) => res.json({ token: p.token, participant: { id: p.id, name: p.name, avatar: p.avatar }, session: sessionPublic(s), resumed });
+  const reply = (p, resumed = false) => {
+    // tok = tokenTag(token), the id this player has in the /api/play/~<tok>/... access log lines
+    log.info('session.join', { session: s.id, code: s.code, player: p.id, name: p.name, attempt: p.attempt, resumed, tok: tokenTag(p.token) }, req);
+    res.json({ token: p.token, participant: { id: p.id, name: p.name, avatar: p.avatar }, session: sessionPublic(s), resumed });
+  };
   let attempt = 1;
   if (s.pace === 'student') {
     // same name or same device = same student: rejoining starts their next attempt

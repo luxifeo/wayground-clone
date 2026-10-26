@@ -78,6 +78,7 @@ async function contextView(page, box) {
 /** Is the page a worksheet or an ordinary photo, and where are its figures? */
 export async function detectPage(page) {
   const out = await chatJson({
+    purpose: 'reading.detect',
     system: 'You analyse images of school material. You always answer with valid JSON only.',
     temperature: 0,
     maxTokens: 1500,
@@ -125,6 +126,7 @@ export async function cropFigure(page, fig, rounds, onRound = () => {}) {
     let v;
     try {
       v = await chatJson({
+        purpose: 'reading.crop',
         system: 'You inspect image crops. You always answer with valid JSON only.',
         temperature: 0,
         maxTokens: 400,
@@ -179,6 +181,7 @@ export async function convertWorksheet(page, figures, { language, grade, subject
     ? figures.map((f) => `- ${f.id}: ${f.what}${f.exercise ? ` (exercise ${f.exercise})` : ''}`).join('\n')
     : '(none)';
   return chatJson({
+    purpose: 'reading.worksheet',
     system: READING_SYSTEM,
     temperature: 0.2,
     maxTokens: 8192,
@@ -201,6 +204,7 @@ const GENRES = { nonfiction: 'non-fiction informational text', fiction: 'short s
 export async function writeFromPhoto(page, opts) {
   const { language = 'English', grade, subject, genre = 'nonfiction', paragraphs = 4, questions = 6, types = ['mcq', 'tf', 'fill'], words = [], crossword = false, topic = '', schema } = opts;
   return chatJson({
+    purpose: 'reading.photo',
     system: READING_SYSTEM,
     temperature: 0.5,
     maxTokens: 8192,

@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { Router } from 'express';
 import { one } from './db.js';
+import { log } from './log.js';
 
 const SECRET = process.env.JWT_SECRET || 'dev-secret';
 
@@ -44,6 +45,7 @@ authRouter.post('/signup', async (req, res) => {
     'INSERT INTO users(email,password_hash,name) VALUES($1,$2,$3) RETURNING *',
     [String(email).trim(), hash, String(name).trim()],
   );
+  log.info('auth.signup', { user: user.id, email: user.email }, req);
   res.json({ token: sign(user), user: publicUser(user) });
 });
 
@@ -51,8 +53,10 @@ authRouter.post('/login', async (req, res) => {
   const { email, password } = req.body || {};
   const user = await one('SELECT * FROM users WHERE lower(email)=lower($1)', [email || '']);
   if (!user || !(await bcrypt.compare(password || '', user.password_hash))) {
+    log.warn('auth.login.failed', { email: String(email || '').slice(0, 120) }, req);
     return res.status(401).json({ error: 'Invalid email or password' });
   }
+  log.info('auth.login', { user: user.id }, req);
   res.json({ token: sign(user), user: publicUser(user) });
 });
 

@@ -9,7 +9,8 @@ import { loadQuiz, insertQuestions } from './quizzes.js';
 import { applyGrade } from './sessions.js';
 import { computeScore, normalizeQuestion, questionProblems } from '../grading.js';
 import { broadcast } from '../realtime.js';
-import { searchImages, downloadImage, pool } from '../images.js';
+import { searchImages, downloadImage, pool, imageRef } from '../images.js';
+import { keepContext, log, redact } from '../log.js';
 
 export const aiRouter = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024, files: 10 } });
@@ -189,8 +190,11 @@ async function extractSources(files = [], url) {
 function wrap(fn) {
   return async (req, res) => {
     try { await fn(req, res); } catch (e) {
-      if (e instanceof LLMError) return res.status(502).json({ error: e.message });
-      console.error(e);
+      if (e instanceof LLMError) {
+        log.warn('ai.failed', { url: redact(req.originalUrl), err: e.message }, req);
+        return res.status(502).json({ error: e.message });
+      }
+      log.error('ai.failed', { url: redact(req.originalUrl), err: e }, req);
       res.status(500).json({ error: e.message || 'AI request failed' });
     }
   };
@@ -199,7 +203,7 @@ function wrap(fn) {
 aiRouter.get('/ai/status', requireAuth, async (_req, res) => res.json(await llmStatus()));
 
 /** Generate a brand new quiz (or append to quizId) from a topic, pasted text, files, url. */
-aiRouter.post('/ai/generate', requireAuth, upload.array('files', 10), wrap(async (req, res) => {
+aiRouter.post('/ai/generate', requireAuth, keepContext(upload.array('files', 10)), wrap(async (req, res) => {
   const b = req.body || {};
   const count = Math.min(30, Math.max(1, parseInt(b.count, 10) || 10));
   let types = b.types;
@@ -223,18 +227,23 @@ aiRouter.post('/ai/generate', requireAuth, upload.array('files', 10), wrap(async
     'Respond with JSON: {"title":"short quiz title","subject":"one of Mathematics, English, Science, Social Studies, History, Geography, Computers, World Languages, Arts, Physics, Chemistry, Biology, Other","grade":"grade if known","questions":[...]}',
   ].filter(Boolean).join('\n\n');
 
-  const out = await chatJson({ system: SYSTEM, prompt, images });
+  const out = await chatJson({ purpose: 'generate', system: SYSTEM, prompt, images });
   let list = (Array.isArray(out) ? out : out.questions || []).map(fromAI).filter(valid);
   // keep only the requested types when the model strays (mcq may become msq)
   const wanted = list.filter((q) => types.includes(q.type) || (q.type === 'msq' && types.includes('mcq')));
   if (wanted.length) list = wanted;
   if (!list.length) return res.status(502).json({ error: 'The AI did not return any usable questions. Try again.' });
-  const illustrated = b.images === 'false' ? 0 : await attachImages(list, { subject: out.subject, topic });
+  const illustrated = b.images === 'false' ? 0 : await attachImages(list, { subject: out.subject, topic, req });
+  const done = (quizId) => log.info('ai.generate', {
+    quiz: quizId, added: list.length, illustrated, topic: topic.slice(0, 200) || undefined,
+    files: (req.files || []).map((f) => f.originalname.slice(0, 120)), url: b.url || undefined,
+  }, req);
 
   if (b.quizId) {
     const quiz = await one('SELECT * FROM quizzes WHERE id=$1 AND owner_id=$2', [b.quizId, req.user.id]);
     if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
     await tx((c) => insertQuestions(c, quiz.id, list));
+    done(quiz.id);
     return res.json({ quiz: await loadQuiz(quiz.id), added: list.length, illustrated });
   }
   const quizId = await tx(async (c) => {
@@ -245,6 +254,7 @@ aiRouter.post('/ai/generate', requireAuth, upload.array('files', 10), wrap(async
     await insertQuestions(c, r.rows[0].id, list, 0);
     return r.rows[0].id;
   });
+  done(quizId);
   res.json({ quiz: await loadQuiz(quizId), added: list.length, illustrated });
 }));
 
@@ -315,6 +325,7 @@ async function planImageQueries(targets, { subject, topic } = {}) {
   await pool(starts, 2, async (start) => {
     const batch = targets.slice(start, start + PLAN_BATCH).map((q, k) => brief(q, start + k));
     const out = await chatJson({
+      purpose: 'image.plan',
       system: IMAGE_SYSTEM,
       temperature: 0.2,
       prompt: [
@@ -381,6 +392,7 @@ async function attachImages(list, ctx = {}) {
   let picks = targets.map(() => 0);
   try {
     const out = await chatJson({
+      purpose: 'image.pick',
       system: SYSTEM,
       prompt: [
         'Pick the best illustration for each quiz question from the candidate image titles. Choose the image whose title best matches "looking_for" and the question. It must not show or name the answer. Use -1 when no candidate fits.',
@@ -408,6 +420,11 @@ async function attachImages(list, ctx = {}) {
   targets.forEach((q, i) => {
     const f = found[i];
     if (f) { q.image = f.url; q.extra = { ...(q.extra || {}), imageCredit: f.credit }; n++; }
+    const c = (cands[i] || [])[picks[i]];
+    log.info('image.auto', {
+      question: String(q.text).slice(0, 120), queries: plans[i].queries, candidates: (cands[i] || []).map((x) => x.title),
+      pick: picks[i], chosen: c ? imageRef(c) : null, file: f?.url || null,
+    }, ctx.req);
   });
   return n;
 }
@@ -432,7 +449,7 @@ aiRouter.post('/ai/quizzes/:id/similar', requireAuth, wrap(async (req, res) => {
     QUESTION_SCHEMA,
     'Respond with JSON: {"questions":[...]}',
   ].join('\n\n');
-  const out = await chatJson({ system: SYSTEM, prompt });
+  const out = await chatJson({ purpose: 'similar', system: SYSTEM, prompt });
   const list = (Array.isArray(out) ? out : out.questions || []).map(fromAI).filter(valid);
   if (!list.length) return res.status(502).json({ error: 'The AI did not return any usable questions. Try again.' });
   let pos = null;
@@ -455,7 +472,7 @@ aiRouter.post('/ai/quizzes/:id/explanations', requireAuth, wrap(async (req, res)
     JSON.stringify(targets.map((q) => ({ id: q.id, ...toAI(q) }))),
     'Respond with JSON: {"explanations":[{"id":<question id>,"explanation":"..."}]}',
   ].join('\n\n');
-  const out = await chatJson({ system: SYSTEM, prompt });
+  const out = await chatJson({ purpose: 'explanations', system: SYSTEM, prompt });
   let n = 0;
   for (const e of out.explanations || []) {
     if (targets.some((q) => q.id === Number(e.id)) && e.explanation) {
@@ -476,7 +493,7 @@ aiRouter.post('/ai/quizzes/:id/translate', requireAuth, wrap(async (req, res) =>
     JSON.stringify({ title: quiz.title, questions: quiz.questions.map(toAI) }),
     'Respond with JSON: {"title":"...","questions":[...]}',
   ].join('\n\n');
-  const out = await chatJson({ system: SYSTEM, prompt });
+  const out = await chatJson({ purpose: 'translate', system: SYSTEM, prompt });
   const translated = (out.questions || []).map(fromAI);
   // keep media / points / timers from the source
   const list = quiz.questions.map((q, i) => ({ ...(translated[i] || {}), image: q.image, points: q.points, time_limit: q.time_limit }))
@@ -513,7 +530,7 @@ aiRouter.post('/ai/questions/:qid/enhance', requireAuth, wrap(async (req, res) =
     QUESTION_SCHEMA,
     'Respond with JSON: {"question":{...}}',
   ].join('\n\n');
-  const out = await chatJson({ system: SYSTEM, prompt });
+  const out = await chatJson({ purpose: 'enhance', system: SYSTEM, prompt });
   const nq = fromAI(out.question || out);
   if (!valid(nq)) return res.status(502).json({ error: 'The AI returned an unusable question. Try again.' });
   res.json({ question: { ...nq, image: draft.image || null, points: draft.points, time_limit: draft.time_limit } });
@@ -542,7 +559,7 @@ aiRouter.post('/ai/sessions/:id/grade', requireAuth, wrap(async (req, res) => {
       JSON.stringify(rs.map((r) => ({ id: r.id, answer: typeof r.answer === 'string' ? r.answer : JSON.stringify(r.answer) }))),
       'Respond with JSON: {"grades":[{"id":<response id>,"score":0..1,"feedback":"..."}]}',
     ].join('\n\n');
-    const out = await chatJson({ system: SYSTEM, prompt });
+    const out = await chatJson({ purpose: 'grade', system: SYSTEM, prompt });
     for (const g of out.grades || []) {
       const r = rs.find((x) => x.id === Number(g.id));
       if (!r) continue;
@@ -564,9 +581,10 @@ aiRouter.post('/ai/quizzes/:id/images', requireAuth, wrap(async (req, res) => {
   if (!targets.length) return res.json({ quiz, illustrated: 0 });
   // copies, so attachImages can set image / extra in place
   const items = targets.map((q) => ({ ...q, extra: { ...(q.extra || {}) } }));
-  const n = await attachImages(items, { subject: quiz.subject, topic: quiz.title });
+  const n = await attachImages(items, { subject: quiz.subject, topic: quiz.title, req });
   for (const it of items.filter((x) => x.image)) {
     await one('UPDATE questions SET image=$2, extra=$3 WHERE id=$1 RETURNING id', [it.id, it.image, JSON.stringify(it.extra)]);
+    log.info('question.image', { quiz: quiz.id, question: it.id, from: null, to: it.image, credit: it.extra.imageCredit }, req);
   }
   res.json({ quiz: await loadQuiz(quiz.id), illustrated: n });
 }));

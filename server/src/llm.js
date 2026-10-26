@@ -1,5 +1,7 @@
 // Minimal client for an OpenAI-compatible chat completions endpoint
 // (Ollama / LM Studio / llama.cpp / vLLM serving a multimodal Gemma model).
+import crypto from 'node:crypto';
+import { log, logLlmCall } from './log.js';
 
 // LLM_* names win; FPT_* names (project root .env) are accepted as well
 const env = (...names) => names.map((n) => process.env[n]).find((v) => v !== undefined && v !== '');
@@ -37,8 +39,13 @@ export async function llmStatus() {
  * @param {string} o.system
  * @param {string} o.prompt
  * @param {string[]} [o.images] data URLs
+ * @param {string} [o.purpose] what the call is for, shown in the logs (generate, image.pick, reading.crop ...)
  */
-export async function chat({ system, prompt, images = [], temperature = 0.4, maxTokens = 8192 }) {
+export async function chat(o) {
+  return (await call(o)).text;
+}
+
+async function call({ system, prompt, images = [], temperature = 0.4, maxTokens = 8192, purpose = null, attempt = 1 }) {
   const { baseUrl, model, timeoutMs, temperature: envTemp } = cfg();
   if (envTemp !== null && !Number.isNaN(envTemp)) temperature = envTemp;
   const content = images.length
@@ -50,24 +57,38 @@ export async function chat({ system, prompt, images = [], temperature = 0.4, max
     max_tokens: maxTokens,
     messages: [...(system ? [{ role: 'system', content: system }] : []), { role: 'user', content }],
   };
+  // the server log gets sizes and timings; the full call goes to the llm log, joined by this id
+  const id = crypto.randomBytes(5).toString('hex');
+  const t0 = Date.now();
+  const stats = () => ({ llm: id, purpose, attempt, model, ms: Date.now() - t0, images: images.length, promptChars: prompt.length });
+  const record = (extra) => logLlmCall({ llm: id, purpose, attempt, model, temperature, maxTokens, ms: Date.now() - t0, system, prompt, images, ...extra });
+  const failed = (extra, detail = extra.err) => { log.warn('llm.chat.failed', { ...stats(), ...extra }); record({ error: detail, status: extra.status }); };
   let r;
   try {
     r = await fetch(`${baseUrl}/chat/completions`, {
       method: 'POST', headers: headers(), body: JSON.stringify(body), signal: AbortSignal.timeout(timeoutMs),
     });
   } catch (e) {
+    failed({ err: e.message });
     throw new LLMError(`Cannot reach the AI model at ${baseUrl} (${e.message}). Check LLM_BASE_URL in server/.env.`);
   }
   if (!r.ok) {
     const t = await r.text().catch(() => '');
+    failed({ status: r.status, err: t.slice(0, 300) }, t);
     throw new LLMError(`AI model error HTTP ${r.status}: ${t.slice(0, 300)}`);
   }
-  const data = await r.json();
-  const msg = data.choices?.[0]?.message || {};
-  let text = typeof msg.content === 'string' ? msg.content : Array.isArray(msg.content) ? msg.content.map((c) => c.text || '').join('') : '';
+  let data;
+  try { data = await r.json(); } catch (e) { failed({ status: r.status, err: e.message }); throw e; }
+  const choice = data.choices?.[0] || {};
+  const msg = choice.message || {};
+  const raw = typeof msg.content === 'string' ? msg.content : Array.isArray(msg.content) ? msg.content.map((c) => c.text || '').join('') : '';
   // drop any visible thinking blocks
-  text = text.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\|channel\>thought[\s\S]*?<channel\|>/g, '').trim();
-  return text;
+  const text = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\|channel\>thought[\s\S]*?<channel\|>/g, '').trim();
+  log.info('llm.chat', {
+    ...stats(), replyChars: text.length, tokensIn: data.usage?.prompt_tokens, tokensOut: data.usage?.completion_tokens, finish: choice.finish_reason,
+  });
+  record({ reply: raw, ...(msg.reasoning_content && { reasoning: msg.reasoning_content }), usage: data.usage, finish: choice.finish_reason });
+  return { id, text };
 }
 
 export function extractJson(text) {
@@ -106,8 +127,11 @@ export function extractJson(text) {
 export async function chatJson(opts, retries = 1) {
   let lastErr;
   for (let i = 0; i <= retries; i++) {
-    const text = await chat(opts);
-    try { return extractJson(text); } catch (e) { lastErr = e; }
+    const { id, text } = await call({ ...opts, attempt: i + 1 });
+    try { return extractJson(text); } catch (e) {
+      lastErr = e;
+      log.warn('llm.json.failed', { llm: id, purpose: opts.purpose, attempt: i + 1, err: e.message });
+    }
   }
   throw lastErr;
 }

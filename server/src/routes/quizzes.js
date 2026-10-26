@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { one, many, query, tx } from '../db.js';
 import { requireAuth, optionalAuth } from '../auth.js';
 import { normalizeQuestion, questionProblems } from '../grading.js';
+import { log } from '../log.js';
 
 export const quizRouter = Router();
 
@@ -138,6 +139,8 @@ quizRouter.patch('/quizzes/:id', requireAuth, async (req, res) => {
   if (sets.length) {
     params.push(quiz.id);
     await query(`UPDATE quizzes SET ${sets.join(',')}, updated_at=now() WHERE id=$${params.length}`, params);
+    const changes = Object.fromEntries(fields.filter((f) => f in req.body && req.body[f] !== quiz[f]).map((f) => [f, req.body[f]]));
+    if (Object.keys(changes).length) log.info('quiz.update', { quiz: quiz.id, changes }, req);
   }
   res.json({ quiz: await loadQuiz(quiz.id) });
 });
@@ -153,6 +156,7 @@ quizRouter.post('/quizzes/:id/publish', requireAuth, async (req, res) => {
   full.questions.forEach((q, i) => questionProblems(q).forEach((m) => problems.push(`Question ${i + 1} ${m}`)));
   if (problems.length) return res.status(400).json({ error: problems[0], problems });
   await query("UPDATE quizzes SET status='published', updated_at=now() WHERE id=$1", [quiz.id]);
+  log.info('quiz.publish', { quiz: quiz.id, title: full.title }, req);
   res.json({ quiz: await loadQuiz(quiz.id) });
 });
 
@@ -178,6 +182,7 @@ quizRouter.post('/quizzes/:id/duplicate', requireAuth, async (req, res) => {
 quizRouter.delete('/quizzes/:id', requireAuth, async (req, res) => {
   const quiz = await ownQuiz(req, res); if (!quiz) return;
   await query('DELETE FROM quizzes WHERE id=$1', [quiz.id]);
+  log.info('quiz.delete', { quiz: quiz.id, title: quiz.title }, req);
   res.json({ ok: true });
 });
 
@@ -193,6 +198,9 @@ quizRouter.post('/quizzes/:id/questions', requireAuth, async (req, res) => {
     }
     return insertQuestions(c, quiz.id, list, pos);
   });
+  for (const x of created.filter((q) => q.image)) {
+    log.info('question.image', { quiz: quiz.id, question: x.id, from: null, to: x.image, credit: x.extra?.imageCredit }, req);
+  }
   await touch(quiz.id);
   res.json({ questions: created, question: created[0] });
 });
@@ -206,6 +214,9 @@ quizRouter.put('/questions/:qid', requireAuth, async (req, res) => {
     [cur.id, q.type, q.text, q.image, JSON.stringify(q.options), JSON.stringify(q.answer), q.points, q.time_limit,
       q.explanation, JSON.stringify(q.extra)],
   );
+  if ((cur.image || null) !== (row.image || null)) {
+    log.info('question.image', { quiz: cur.quiz_id, question: cur.id, from: cur.image, to: row.image, credit: row.extra?.imageCredit }, req);
+  }
   await touch(cur.quiz_id);
   res.json({ question: row });
 });
@@ -222,6 +233,7 @@ quizRouter.patch('/quizzes/:id/questions-bulk', requireAuth, async (req, res) =>
 quizRouter.delete('/questions/:qid', requireAuth, async (req, res) => {
   const cur = await ownQuestion(req, res); if (!cur) return;
   await query('DELETE FROM questions WHERE id=$1', [cur.id]);
+  log.info('question.delete', { quiz: cur.quiz_id, question: cur.id, image: cur.image || undefined }, req);
   await touch(cur.quiz_id);
   res.json({ ok: true });
 });

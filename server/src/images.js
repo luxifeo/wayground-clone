@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { log } from './log.js';
 
 export const UPLOAD_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'uploads');
 const UA = 'WaygroundClone/1.0 (educational quiz app; image search)';
@@ -82,7 +83,10 @@ export async function searchImages(query, { limit = 18, providers = imageProvide
   const q = String(query || '').trim().slice(0, 100);
   if (!q) return [];
   const per = Math.max(4, Math.ceil(limit / Math.max(1, providers.length)) + 2);
-  const lists = await Promise.all(providers.map((p) => PROVIDERS[p](q, per).catch(() => [])));
+  const lists = await Promise.all(providers.map((p) => PROVIDERS[p](q, per).catch((e) => {
+    log.warn('image.provider.failed', { provider: p, q, err: e.message });
+    return [];
+  })));
   const out = []; const seen = new Set();
   for (let i = 0; out.length < limit && lists.some((l) => l && l[i]); i++) {
     for (const l of lists) {
@@ -92,6 +96,9 @@ export async function searchImages(query, { limit = 18, providers = imageProvide
   }
   return out;
 }
+
+/** A search result as written to the logs: enough to find the picture and its page again. */
+export const imageRef = (r) => ({ source: r.source, title: String(r.title || '').slice(0, 120), url: r.url, landing: r.landing });
 
 const EXT = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
 

@@ -17,6 +17,7 @@
     "app:restart": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/app.ps1 restart",
     "app:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/app.ps1 status",
     "app:logs": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/app.ps1 logs",
+    "logs": "node scripts/logs.mjs",
     "autostart:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autostart.ps1 install",
     "autostart:uninstall": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autostart.ps1 uninstall",
     "autostart:status": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/autostart.ps1 status"

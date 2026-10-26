@@ -7,3 +7,4 @@ database/Data/
 server/.env
 *.log
 database/App/
+logs/

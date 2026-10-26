@@ -3,6 +3,7 @@ import { one, many } from './db.js';
 import { verify } from './auth.js';
 import { sanitizeQuestion, revealFor } from './grading.js';
 import { suspectFlags } from './identity.js';
+import { log } from './log.js';
 
 let io = null;
 const pending = new Map(); // sessionId -> timeout (debounce)
@@ -156,7 +157,7 @@ export function broadcast(sessionId, { players = false } = {}) {
     try {
       io.to(`host:${sessionId}`).emit('session:host', await hostState(sessionId));
       if (players) io.to(`play:${sessionId}`).emit('session:state', await playerState(sessionId));
-    } catch (e) { console.error('broadcast failed', e); }
+    } catch (e) { log.error('realtime.broadcast.failed', { session: sessionId, err: e }); }
   }, players ? 30 : 250));
 }
 

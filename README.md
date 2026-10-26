@@ -86,6 +86,7 @@ server/src/        API Express + Socket.IO
   grading.js       định dạng, chấm điểm, ẩn đáp án cho mọi loại câu hỏi
   mathEval.js      so sánh biểu thức toán tương đương
   realtime.js      trạng thái host / người chơi qua Socket.IO
+  log.js           log JSON theo ngày ở logs/: request, sự kiện, các lần gọi LLM (xem RUNBOOK.md, mục Log)
   routes/          auth, quizzes, sessions (host + player), ai
 client/src/        React app
   pages/admin      Home, Library, Explore, Reports, quiz editor/detail/start, worksheet
