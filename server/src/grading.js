@@ -116,9 +116,12 @@ export function grade(q, answer) {
       return { status: ok ? 'correct' : 'incorrect', fraction: ok ? 1 : 0 };
     }
     case 'reorder': {
+      // compare by content, so identical items (e.g. two "the") are interchangeable
+      const key = (o) => o && `${norm(o.text, true)}|${o.image || ''}`;
+      const byId = new Map(opts.map((o) => [o.id, o]));
       const picked = Array.isArray(answer) ? answer : [];
       let hit = 0;
-      opts.forEach((o, i) => { if (picked[i] === o.id) hit++; });
+      opts.forEach((o, i) => { if (key(byId.get(picked[i])) === key(o)) hit++; });
       return result(hit, opts.length);
     }
     case 'match': {
@@ -230,7 +233,7 @@ export function sanitizeQuestion(q, { shuffleAnswers = false, seed = 0 } = {}) {
       };
     case 'reorder': {
       let o = sh(opts);
-      if (o.length > 1 && o.every((x, i) => x.id === opts[i].id)) o = [...o.slice(1), o[0]];
+      if (o.length > 1 && o.every((x, i) => x.text === opts[i].text && x.image === opts[i].image)) o = [...o.slice(1), o[0]];
       return { ...base, options: o.map((x) => ({ id: x.id, text: x.text, image: x.image })) };
     }
     case 'match':

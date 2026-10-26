@@ -109,7 +109,9 @@ export function TextAnswer({ q, onSubmit, result, locked }) {
 export function ReorderAnswer({ q, onSubmit, result, locked }) {
   const [items, setItems] = useState(q.options);
   const [dragI, setDragI] = useState(null);
-  const order = result?.reveal?.order;
+  // compare by content, so identical items (e.g. two "the") are interchangeable
+  const want = result?.reveal?.options;
+  const key = (o) => `${String(o?.text ?? '').trim()}|${o?.image || ''}`;
   const move = (i, j) => {
     if (locked || j < 0 || j >= items.length) return;
     const a = [...items]; const [x] = a.splice(i, 1); a.splice(j, 0, x); setItems(a);
@@ -117,17 +119,17 @@ export function ReorderAnswer({ q, onSubmit, result, locked }) {
   return (
     <div className="mx-auto max-w-xl space-y-2">
       {items.map((o, i) => {
-        const ok = order && order[i] === o.id;
+        const ok = want && want[i] && key(want[i]) === key(o);
         return (
           <div
             key={o.id} draggable={!locked}
             onDragStart={() => setDragI(i)} onDragOver={(e) => e.preventDefault()} onDrop={() => { move(dragI, i); setDragI(null); }}
-            className={`opt-${i % 5} flex items-center gap-3 rounded-xl px-3 py-3 font-game text-lg font-bold text-white shadow ${order ? (ok ? okRing : badRing) : ''} ${!locked ? 'cursor-grab' : ''}`}
+            className={`opt-${i % 5} flex items-center gap-3 rounded-xl px-3 py-3 font-game text-lg font-bold text-white shadow ${want ? (ok ? okRing : badRing) : ''} ${!locked ? 'cursor-grab' : ''}`}
           >
             <GripVertical className="h-5 w-5 opacity-70" />
             <span className="grid h-7 w-7 place-items-center rounded-full bg-black/25 text-sm">{i + 1}</span>
             <span className="flex-1">{o.text}</span>
-            {order && !ok && <span className="rounded bg-black/30 px-2 text-xs">→ #{order.indexOf(o.id) + 1}</span>}
+            {want && !ok && <span className="rounded bg-black/30 px-2 text-xs">→ #{want.findIndex((w, k) => key(w) === key(o) && key(items[k]) !== key(w)) + 1}</span>}
             {!locked && (
               <span className="flex gap-1">
                 <button onClick={() => move(i, i - 1)} className="rounded bg-black/20 p-1"><ArrowUp className="h-4 w-4" /></button>

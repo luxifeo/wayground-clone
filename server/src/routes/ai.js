@@ -25,6 +25,7 @@ export const BASE_SCHEMA = `Each question is a JSON object using ONE of these sh
 {"type":"fill","text":"sentence with a blank shown as ____","accepted":["answer","alternative spelling"],"explanation":"why","time_limit":45}
 {"type":"open","text":"open question","sample":"a model answer","time_limit":120}
 {"type":"poll","text":"opinion question","options":["A","B","C"],"time_limit":20}
+{"type":"reorder","text":"Put the words in the correct order to make a sentence.","sentence":"the correct sentence (3-8 words)","explanation":"why","time_limit":60}
 {"type":"reorder","text":"put these in the right order","items":["first","second","third","fourth"],"explanation":"why","time_limit":60}
 {"type":"match","text":"match the pairs","pairs":[{"left":"term","right":"definition"}],"explanation":"why","time_limit":60}
 {"type":"dropdown","text":"Sentence where each gap is written as [[1]], [[2]] ...","blanks":[{"options":["right word","wrong","wrong"],"correct":0}],"time_limit":60}
@@ -32,7 +33,8 @@ export const BASE_SCHEMA = `Each question is a JSON object using ONE of these sh
 {"type":"categorize","text":"Sort the items into the right group","categories":["Group A","Group B"],"items":[{"text":"item","category":0}],"time_limit":60}
 {"type":"math","text":"Simplify 2(x+3)","accepted":["2x+6"],"explanation":"why","time_limit":60}
 {"type":"crossword","text":"instruction","words":[{"answer":"word to write in the grid","clue":"clue shown to the student"}]}
-Indexes in "correct" are 0-based. Options must be short, plausible and only one correct for mcq.`;
+Indexes in "correct" are 0-based. Options must be short, plausible and only one correct for mcq.
+For word order give ONLY "sentence" (the correct sentence; we split and shuffle it). Use "items" only to order things that are not one sentence (steps, events, numbers), listed in the CORRECT order.`;
 
 const QUESTION_SCHEMA = `${BASE_SCHEMA}
 Every question also has "illustration": a picture that shows the situation of the question, described as
@@ -50,6 +52,9 @@ const TYPE_NAMES = {
 };
 
 function rid() { return Math.random().toString(36).slice(2, 8); }
+
+/** "You should clean your room." -> words; the final punctuation is dropped, it would give the last word away. */
+export const splitSentence = (s) => String(s).trim().replace(/[.!?…]+$/, '').split(/\s+/).filter(Boolean);
 
 /** Convert the compact AI shape into our question format. */
 export function fromAI(raw) {
@@ -116,7 +121,12 @@ export function fromAI(raw) {
     return { ...base, answer: { accepted: (Array.isArray(acc) ? acc : [acc]).map(String) } };
   }
   if (type === 'open') return { ...base, answer: { sample: raw.sample || null } };
-  if (type === 'reorder') return { ...base, options: (raw.items || raw.options || []).map((t) => ({ id: rid(), text: String(t) })) };
+  if (type === 'reorder') {
+    // word order comes as the correct sentence: models tend to scramble "items" themselves
+    const words = typeof raw.sentence === 'string' ? splitSentence(raw.sentence) : [];
+    const items = words.length >= 2 ? words : (raw.items || raw.options || []);
+    return { ...base, options: items.map((t) => ({ id: rid(), text: String(t) })) };
+  }
   if (type === 'match') {
     return { ...base, options: (raw.pairs || []).map((p) => ({ id: rid(), left: String(p.left ?? ''), right: String(p.right ?? '') })) };
   }

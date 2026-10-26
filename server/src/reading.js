@@ -172,6 +172,7 @@ const GAP_RULES = `How to turn exercise types into questions (always solve the e
 - A list of separate sentences to complete -> one "fill" question per sentence (the sentence with ____ for the gap, "accepted" = all correct spellings/variants), or "dropdown" when choices are printed.
 - Prompts to turn into full sentences/questions/dialogue lines -> one "fill" per prompt with every acceptable full answer in "accepted" (with and without contractions), or "open" with a "sample" when many answers are possible.
 - Multiple choice / true-false / matching / ordering tasks -> "mcq", "tf", "match", "reorder".
+- Word-order tasks ("put the words in order") -> one "reorder" per sentence with "sentence" = the correct sentence (solve it; never copy the scrambled words).
 - A crossword -> ONE "crossword" question: "words" = every answer word with its printed clue (read the Across and Down clue lists; the answer is what the student must write, e.g. clue "Spain" -> answer "SPANISH" when the task asks for nationalities). Do not copy the printed grid; we build a new one.
 - A reading text with comprehension questions -> the passage "text" is the full reading text, then the questions about it.`;
 
